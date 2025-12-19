@@ -10,3 +10,4 @@ Potential features and capabilities to propose for Seaswim.
 - [ ] **CLI tool** - Command-line interface for checking conditions
 - [ ] **Wearable API** - API Platform endpoints for devices
 - [ ] **Calculation Engine** - Processing and computing swim condition metrics
+- [ ] **Project setup** - Project setup and CI
