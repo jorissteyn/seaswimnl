@@ -1,0 +1,58 @@
+# Project Context
+
+## Purpose
+Seaswim is a web application that provides water condition data for sea swimming locations in the Netherlands. It helps swimmers make informed decisions about when and where to swim by displaying relevant environmental data.
+
+**Key features:**
+- Dashboard for selecting swim locations and viewing water conditions
+- CLI tool for accessing the same information from the command line
+- APIs for wearable devices (smartwatches, fitness trackers)
+
+## Tech Stack
+- **Backend:** PHP 8.x with Symfony framework
+- **Frontend:** Vue.js (dashboard)
+- **API:** API Platform (for wearable device integration)
+- **Database:** [Specify: MySQL/PostgreSQL/SQLite]
+- **Package Manager:** Composer (PHP), npm/yarn (frontend)
+
+## Project Conventions
+
+### Code Style
+- Follow PSR-12 coding standard for PHP
+- Use PHP CS Fixer or PHP_CodeSniffer for enforcement
+- Vue.js: Follow Vue.js style guide (Priority A and B rules)
+- Use strict typing in PHP (`declare(strict_types=1)`)
+
+### Architecture Patterns
+- Symfony best practices (services, dependency injection, events)
+- Domain-driven design where appropriate
+- API Platform resources for RESTful endpoints
+- Vue.js single-file components (.vue) for frontend
+
+### Testing Strategy
+- **Unit tests:** PHPUnit for PHP business logic
+- **Integration tests:** Symfony WebTestCase for API endpoints
+- **Frontend tests:** [Specify: Vitest/Jest for Vue components]
+- Aim for test coverage on critical paths (data retrieval, API endpoints)
+
+### Git Workflow
+- All changes must be committed when finished
+- [Describe your branching strategy: main/develop, feature branches, etc.]
+- [Commit message conventions: Conventional Commits, etc.]
+
+## Domain Context
+- **Swim locations:** Named locations along the Dutch coast/lakes with geographic coordinates
+- **Water conditions:** May include water temperature, wave height, currents, water quality, weather conditions, UV index, tide times
+- **Data sources:** [Specify: Rijkswaterstaat, KNMI, or other Dutch data providers]
+- Target users: Sea swimmers, open water swimming enthusiasts in the Netherlands
+
+## Important Constraints
+- Data freshness requirements (how often should conditions be updated?)
+- Offline support requirements for wearables
+- Privacy considerations for location data
+- [Any rate limits on external data APIs]
+
+## External Dependencies
+- [Water condition data API - specify provider]
+- [Weather data API - specify provider]
+- [Any other external services]
