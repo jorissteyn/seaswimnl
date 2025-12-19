@@ -9,11 +9,27 @@ Seaswim is a web application that provides water condition data for sea swimming
 - APIs for wearable devices (smartwatches, fitness trackers)
 
 ## Tech Stack
-- **Backend:** PHP 8.x with Symfony framework
-- **Frontend:** Vue.js (dashboard)
+- **Backend:** PHP 8.4 with Symfony 7.2
+- **Frontend:** Vue.js 3 (dashboard)
 - **API:** API Platform (for wearable device integration)
-- **Database:** [Specify: MySQL/PostgreSQL/SQLite]
-- **Package Manager:** Composer (PHP), npm/yarn (frontend)
+- **Caching:** Filesystem-based (`var/api-cache/`) - no database
+- **Package Manager:** Composer (PHP), npm (frontend)
+- **Local Development:** DDEV
+- **Build Tools:** Webpack Encore, Makefile
+
+## Local Development
+The project uses DDEV for local development. All common tasks are available via Makefile commands that wrap DDEV:
+
+```bash
+make start    # Start DDEV environment
+make stop     # Stop DDEV environment
+make install  # Install dependencies (composer + npm)
+make test     # Run PHPUnit tests
+make lint     # Run PHP-CS-Fixer
+make analyse  # Run Psalm static analysis
+make build    # Build frontend assets
+make ci       # Run all checks
+```
 
 ## Project Conventions
 
