@@ -24,10 +24,13 @@ Seaswim is a web application that provides water condition data for sea swimming
 - Use strict typing in PHP (`declare(strict_types=1)`)
 
 ### Architecture Patterns
-- Symfony best practices (services, dependency injection, events)
-- Domain-driven design where appropriate
-- API Platform resources for RESTful endpoints
-- Vue.js single-file components (.vue) for frontend
+- **Hexagonal Architecture** (Ports & Adapters)
+  - Domain layer: Core business logic, entities, value objects (no framework dependencies)
+  - Application layer: Use cases, ports (interfaces), DTOs
+  - Infrastructure layer: Adapters for external systems (database, APIs, CLI, web)
+- Symfony as infrastructure: controllers, repositories, and services are adapters
+- API Platform resources as driving adapters for RESTful endpoints
+- Vue.js single-file components (.vue) for frontend adapter
 
 ### Testing Strategy
 - **Unit tests:** PHPUnit for PHP business logic
