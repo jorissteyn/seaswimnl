@@ -22,11 +22,17 @@ services:
             $baseUrl: '%seaswim.apis.rijkswaterstaat.base_url%'
             $timeout: '%seaswim.apis.rijkswaterstaat.timeout%'
 
+    Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClient
+
     Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient:
         arguments:
             $baseUrl: '%seaswim.apis.knmi.base_url%'
             $apiKey: '%seaswim.apis.knmi.api_key%'
             $timeout: '%seaswim.apis.knmi.timeout%'
+
+    Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient
 
     # Adapters
     Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter:

@@ -7,7 +7,7 @@ namespace Seaswim\Infrastructure\ExternalApi\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final readonly class KnmiHttpClient
+final readonly class KnmiHttpClient implements KnmiHttpClientInterface
 {
     public function __construct(
         private HttpClientInterface $httpClient,

@@ -11,12 +11,12 @@ use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WindSpeed;
-use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient;
+use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface;
 
 final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
 {
     public function __construct(
-        private KnmiHttpClient $client,
+        private KnmiHttpClientInterface $client,
         private CacheItemPoolInterface $cache,
         private int $cacheTtl,
     ) {

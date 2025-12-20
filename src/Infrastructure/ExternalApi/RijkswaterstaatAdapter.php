@@ -12,12 +12,12 @@ use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
-use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClient;
+use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
 final readonly class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
 {
     public function __construct(
-        private RwsHttpClient $client,
+        private RwsHttpClientInterface $client,
         private CacheItemPoolInterface $cache,
         private int $cacheTtl,
     ) {

@@ -76,13 +76,43 @@ ddev exec bin/seaswim fetch
 Copy `.env` to `.env.local` and configure:
 
 ```bash
-# Rijkswaterstaat API
-RWS_API_URL=https://waterinfo.rws.nl/api
+# Rijkswaterstaat API (WaterWebservices)
+RWS_API_URL=https://ddapi20-waterwebservices.rijkswaterstaat.nl
 
-# KNMI API
+# KNMI API (Open Data Platform)
 KNMI_API_URL=https://api.dataplatform.knmi.nl/open-data/v1
 KNMI_API_KEY=your-api-key-here
 ```
+
+## API Endpoints Used
+
+### Rijkswaterstaat WaterWebservices
+
+The application fetches water data from the Rijkswaterstaat WaterWebservices API:
+
+- **POST `/METADATASERVICES/OphalenCatalogus`** - Get catalog of locations and measurements
+- **POST `/ONLINEWAARNEMINGENSERVICES/OphalenLaatsteWaarnemingen`** - Get latest observations
+
+Data retrieved:
+- Water temperature (`T` - Compartiment OW)
+- Water height/tide level (`WATHTE` - relative to NAP)
+- Wave height (`Hm0`)
+
+See [RWS.md](RWS.md) for detailed API documentation.
+
+### KNMI Open Data
+
+Weather data is fetched from the KNMI Open Data Platform:
+- Air temperature
+- Wind speed and direction
+- UV index
+
+## Caching
+
+API responses are cached using Symfony Cache (filesystem adapter):
+- Water conditions: 15 minutes TTL
+- Weather conditions: 30 minutes TTL
+- Stale data is served if the API is unavailable
 
 ## Project Structure
 
