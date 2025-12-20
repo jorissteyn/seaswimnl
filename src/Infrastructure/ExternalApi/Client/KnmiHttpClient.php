@@ -40,7 +40,7 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
             $this->logger->error('KNMI API request failed', [
                 'latitude' => $latitude,
                 'longitude' => $longitude,
-                'error' => $e->getMessage(),
+                'exception' => $e,
             ]);
 
             return null;

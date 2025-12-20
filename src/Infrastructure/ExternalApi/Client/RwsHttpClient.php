@@ -73,7 +73,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
         } catch (\Throwable $e) {
             $this->logger->error('RWS API request failed', [
                 'location' => $locationCode,
-                'error' => $e->getMessage(),
+                'exception' => $e,
             ]);
 
             return null;
@@ -123,13 +123,17 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             return $this->normalizeLocations($data);
         } catch (\Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface $e) {
             $response = $e->getResponse();
-            $statusCode = $response->getStatusCode();
-            $body = $response->getContent(false);
-            $this->logger->error("RWS API locations request failed: HTTP {$statusCode} - {$body}");
+            $this->logger->error('RWS API locations request failed', [
+                'status' => $response->getStatusCode(),
+                'response' => $response->getContent(false),
+                'exception' => $e,
+            ]);
 
             return null;
         } catch (\Throwable $e) {
-            $this->logger->error('RWS API locations request failed: '.$e->getMessage());
+            $this->logger->error('RWS API locations request failed', [
+                'exception' => $e,
+            ]);
 
             return null;
         }
