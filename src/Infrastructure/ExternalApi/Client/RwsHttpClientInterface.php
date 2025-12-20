@@ -19,4 +19,11 @@ interface RwsHttpClientInterface
      * @return array<int, array{code: string, name: string, latitude: float, longitude: float}>|null
      */
     public function fetchLocations(): ?array;
+
+    /**
+     * Fetch tidal predictions (astronomical water heights) for a location.
+     *
+     * @return array<int, array{timestamp: string, height: float}>|null Height in cm relative to NAP
+     */
+    public function fetchTidalPredictions(string $locationCode, \DateTimeImmutable $start, \DateTimeImmutable $end): ?array;
 }

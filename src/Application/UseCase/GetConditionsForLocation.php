@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Application\UseCase;
 
 use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\TidalInfoProviderInterface;
 use Seaswim\Application\Port\WaterConditionsProviderInterface;
 use Seaswim\Application\Port\WeatherConditionsProviderInterface;
 use Seaswim\Domain\Entity\CalculatedMetrics;
@@ -13,6 +14,7 @@ use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
 use Seaswim\Domain\Service\SwimTimeRecommender;
+use Seaswim\Domain\ValueObject\TideInfo;
 
 final readonly class GetConditionsForLocation
 {
@@ -20,6 +22,7 @@ final readonly class GetConditionsForLocation
         private LocationRepositoryInterface $locationRepository,
         private WaterConditionsProviderInterface $waterProvider,
         private WeatherConditionsProviderInterface $weatherProvider,
+        private TidalInfoProviderInterface $tidalProvider,
         private SafetyScoreCalculator $safetyCalculator,
         private ComfortIndexCalculator $comfortCalculator,
         private SwimTimeRecommender $recommender,
@@ -27,7 +30,7 @@ final readonly class GetConditionsForLocation
     }
 
     /**
-     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, metrics: CalculatedMetrics}|null
+     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics}|null
      */
     public function execute(string $locationId): ?array
     {
@@ -39,6 +42,7 @@ final readonly class GetConditionsForLocation
 
         $water = $this->waterProvider->getConditions($location);
         $weather = $this->weatherProvider->getConditions($location);
+        $tides = $this->tidalProvider->getTidalInfo($location);
 
         $safetyScore = $this->safetyCalculator->calculate($water, $weather);
         $comfortIndex = $this->comfortCalculator->calculate($water, $weather);
@@ -47,6 +51,7 @@ final readonly class GetConditionsForLocation
         return [
             'water' => $water,
             'weather' => $weather,
+            'tides' => $tides,
             'metrics' => new CalculatedMetrics($safetyScore, $comfortIndex, $recommendation),
         ];
     }

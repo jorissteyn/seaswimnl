@@ -96,6 +96,57 @@ final class ConditionsCommand extends Command
             $io->warning('Weather conditions unavailable');
         }
 
+        $io->title('Tides');
+
+        $tides = $conditions['tides'];
+        if (null !== $tides) {
+            $rows = [];
+
+            $prevTide = $tides->getPreviousTide();
+            if (null !== $prevTide) {
+                $rows[] = [
+                    'Previous '.$prevTide->getType()->getLabel(),
+                    $prevTide->getTime()->format('H:i'),
+                    sprintf('%.0f cm', $prevTide->getHeightCm()),
+                ];
+            }
+
+            $nextTide = $tides->getNextTide();
+            if (null !== $nextTide) {
+                $rows[] = [
+                    'Next '.$nextTide->getType()->getLabel(),
+                    $nextTide->getTime()->format('H:i'),
+                    sprintf('%.0f cm', $nextTide->getHeightCm()),
+                ];
+            }
+
+            $nextHigh = $tides->getNextHighTide();
+            if (null !== $nextHigh && $nextHigh !== $nextTide) {
+                $rows[] = [
+                    'Next High tide',
+                    $nextHigh->getTime()->format('H:i'),
+                    sprintf('%.0f cm', $nextHigh->getHeightCm()),
+                ];
+            }
+
+            $nextLow = $tides->getNextLowTide();
+            if (null !== $nextLow && $nextLow !== $nextTide) {
+                $rows[] = [
+                    'Next Low tide',
+                    $nextLow->getTime()->format('H:i'),
+                    sprintf('%.0f cm', $nextLow->getHeightCm()),
+                ];
+            }
+
+            if ([] !== $rows) {
+                $io->table(['Tide', 'Time', 'Height (NAP)'], $rows);
+            } else {
+                $io->warning('No tide data available');
+            }
+        } else {
+            $io->warning('Tidal information unavailable for this location');
+        }
+
         $io->title('Swim Metrics');
 
         $metrics = $conditions['metrics'];
@@ -140,6 +191,45 @@ final class ConditionsCommand extends Command
                 'uvIndex' => $weather->getUvIndex()->getValue(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
+        }
+
+        $tides = $conditions['tides'];
+        if (null !== $tides) {
+            $result['tides'] = [];
+
+            $prevTide = $tides->getPreviousTide();
+            if (null !== $prevTide) {
+                $result['tides']['previous'] = [
+                    'type' => $prevTide->getType()->value,
+                    'time' => $prevTide->getTime()->format('c'),
+                    'heightCm' => $prevTide->getHeightCm(),
+                ];
+            }
+
+            $nextTide = $tides->getNextTide();
+            if (null !== $nextTide) {
+                $result['tides']['next'] = [
+                    'type' => $nextTide->getType()->value,
+                    'time' => $nextTide->getTime()->format('c'),
+                    'heightCm' => $nextTide->getHeightCm(),
+                ];
+            }
+
+            $nextHigh = $tides->getNextHighTide();
+            if (null !== $nextHigh) {
+                $result['tides']['nextHigh'] = [
+                    'time' => $nextHigh->getTime()->format('c'),
+                    'heightCm' => $nextHigh->getHeightCm(),
+                ];
+            }
+
+            $nextLow = $tides->getNextLowTide();
+            if (null !== $nextLow) {
+                $result['tides']['nextLow'] = [
+                    'time' => $nextLow->getTime()->format('c'),
+                    'heightCm' => $nextLow->getHeightCm(),
+                ];
+            }
         }
 
         $metrics = $conditions['metrics'];

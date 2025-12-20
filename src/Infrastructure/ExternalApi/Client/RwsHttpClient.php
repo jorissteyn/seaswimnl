@@ -16,6 +16,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 {
     private const METADATA_PATH = '/METADATASERVICES/OphalenCatalogus';
     private const LATEST_OBSERVATIONS_PATH = '/ONLINEWAARNEMINGENSERVICES/OphalenLaatsteWaarnemingen';
+    private const OBSERVATIONS_PATH = '/ONLINEWAARNEMINGENSERVICES/OphalenWaarnemingen';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -140,6 +141,52 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
     }
 
     /**
+     * Fetch tidal predictions (astronomical water heights) for a location.
+     *
+     * @return array<int, array{timestamp: string, height: float}>|null Height in cm relative to NAP
+     */
+    public function fetchTidalPredictions(string $locationCode, \DateTimeImmutable $start, \DateTimeImmutable $end): ?array
+    {
+        $payload = [
+            'Locatie' => ['Code' => $locationCode],
+            'AquoPlusWaarnemingMetadata' => [
+                'AquoMetadata' => [
+                    'Grootheid' => ['Code' => 'WATHTE'],
+                    'ProcesType' => 'astronomisch',
+                ],
+            ],
+            'Periode' => [
+                'Begindatumtijd' => $start->format('Y-m-d\TH:i:s.000P'),
+                'Einddatumtijd' => $end->format('Y-m-d\TH:i:s.000P'),
+            ],
+        ];
+
+        $url = $this->baseUrl.self::OBSERVATIONS_PATH;
+
+        try {
+            $response = $this->httpClient->request('POST', $url, [
+                'json' => $payload,
+                'timeout' => $this->timeout,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $data = $response->toArray();
+
+            return $this->normalizeTidalPredictions($data);
+        } catch (\Throwable $e) {
+            $this->logger->error('RWS API tidal predictions request failed', [
+                'location' => $locationCode,
+                'exception' => $e,
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
      * Normalize the RWS API response into a simpler format for the adapter.
      *
      * @param array<string, mixed> $data
@@ -222,5 +269,40 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
         }
 
         return $locations;
+    }
+
+    /**
+     * Normalize tidal predictions from the observations response.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return array<int, array{timestamp: string, height: float}>
+     */
+    private function normalizeTidalPredictions(array $data): array
+    {
+        $predictions = [];
+        $observations = $data['WaarnemingenLijst'] ?? [];
+
+        if ([] === $observations) {
+            return [];
+        }
+
+        $measurements = $observations[0]['MetingenLijst'] ?? [];
+
+        foreach ($measurements as $measurement) {
+            $timestamp = $measurement['Tijdstip'] ?? null;
+            $height = $measurement['Meetwaarde']['Waarde_Numeriek'] ?? null;
+
+            if (null === $timestamp || null === $height) {
+                continue;
+            }
+
+            $predictions[] = [
+                'timestamp' => $timestamp,
+                'height' => (float) $height,
+            ];
+        }
+
+        return $predictions;
     }
 }

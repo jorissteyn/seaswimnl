@@ -45,12 +45,20 @@ services:
             $cache: '@api.cache'
             $cacheTtl: '%seaswim.cache.weather_ttl%'
 
+    Seaswim\Infrastructure\ExternalApi\RijkswaterstaatTidalAdapter:
+        arguments:
+            $cache: '@api.cache'
+            $cacheTtl: '%seaswim.cache.water_ttl%'
+
     # Ports
     Seaswim\Application\Port\WaterConditionsProviderInterface:
         alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter
 
     Seaswim\Application\Port\WeatherConditionsProviderInterface:
         alias: Seaswim\Infrastructure\ExternalApi\KnmiAdapter
+
+    Seaswim\Application\Port\TidalInfoProviderInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatTidalAdapter
 
     # Repository
     Seaswim\Infrastructure\Repository\JsonFileLocationRepository:
