@@ -99,6 +99,15 @@ body {
     color: var(--color-secondary);
 }
 
+.conditions-card.tides h2 {
+    color: var(--color-success);
+}
+
+.tide-next dd {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
 .conditions-list {
     margin: 0;
 }

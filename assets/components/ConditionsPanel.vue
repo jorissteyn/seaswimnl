@@ -5,6 +5,11 @@
             :data="conditions.metrics"
         />
 
+        <TidesCard
+            v-if="conditions.tides && Object.keys(conditions.tides).length > 0"
+            :data="conditions.tides"
+        />
+
         <WaterConditions
             v-if="conditions.water"
             :data="conditions.water"
@@ -25,6 +30,7 @@
 
 <script>
 import SwimMetrics from './SwimMetrics.vue';
+import TidesCard from './TidesCard.vue';
 import WaterConditions from './WaterConditions.vue';
 import WeatherConditions from './WeatherConditions.vue';
 
@@ -32,6 +38,7 @@ export default {
     name: 'ConditionsPanel',
     components: {
         SwimMetrics,
+        TidesCard,
         WaterConditions,
         WeatherConditions,
     },

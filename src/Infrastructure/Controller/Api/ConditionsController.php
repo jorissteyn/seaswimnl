@@ -38,6 +38,7 @@ final class ConditionsController extends AbstractController
         $result = [
             'water' => null,
             'weather' => null,
+            'tides' => null,
             'metrics' => null,
         ];
 
@@ -63,6 +64,51 @@ final class ConditionsController extends AbstractController
                 'uvLevel' => $weather->getUvIndex()->getLevel(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
+        }
+
+        $tides = $conditions['tides'] ?? null;
+        if (null !== $tides) {
+            $result['tides'] = [];
+
+            $prevTide = $tides->getPreviousTide();
+            if (null !== $prevTide) {
+                $result['tides']['previous'] = [
+                    'type' => $prevTide->getType()->value,
+                    'typeLabel' => $prevTide->getType()->getLabel(),
+                    'time' => $prevTide->getTime()->format('c'),
+                    'timeFormatted' => $prevTide->getTime()->format('H:i'),
+                    'heightCm' => $prevTide->getHeightCm(),
+                ];
+            }
+
+            $nextTide = $tides->getNextTide();
+            if (null !== $nextTide) {
+                $result['tides']['next'] = [
+                    'type' => $nextTide->getType()->value,
+                    'typeLabel' => $nextTide->getType()->getLabel(),
+                    'time' => $nextTide->getTime()->format('c'),
+                    'timeFormatted' => $nextTide->getTime()->format('H:i'),
+                    'heightCm' => $nextTide->getHeightCm(),
+                ];
+            }
+
+            $nextHigh = $tides->getNextHighTide();
+            if (null !== $nextHigh) {
+                $result['tides']['nextHigh'] = [
+                    'time' => $nextHigh->getTime()->format('c'),
+                    'timeFormatted' => $nextHigh->getTime()->format('H:i'),
+                    'heightCm' => $nextHigh->getHeightCm(),
+                ];
+            }
+
+            $nextLow = $tides->getNextLowTide();
+            if (null !== $nextLow) {
+                $result['tides']['nextLow'] = [
+                    'time' => $nextLow->getTime()->format('c'),
+                    'timeFormatted' => $nextLow->getTime()->format('H:i'),
+                    'heightCm' => $nextLow->getHeightCm(),
+                ];
+            }
         }
 
         $metrics = $conditions['metrics'];
