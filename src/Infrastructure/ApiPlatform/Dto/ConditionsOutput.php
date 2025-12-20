@@ -10,6 +10,7 @@ final readonly class ConditionsOutput
         public string $locationId,
         public ?WaterConditionsOutput $water,
         public ?WeatherConditionsOutput $weather,
+        public MetricsOutput $metrics,
         public string $updatedAt,
     ) {
     }

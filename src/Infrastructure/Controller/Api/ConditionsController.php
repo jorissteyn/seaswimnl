@@ -38,6 +38,7 @@ final class ConditionsController extends AbstractController
         $result = [
             'water' => null,
             'weather' => null,
+            'metrics' => null,
         ];
 
         $water = $conditions['water'];
@@ -63,6 +64,18 @@ final class ConditionsController extends AbstractController
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
         }
+
+        $metrics = $conditions['metrics'];
+        $result['metrics'] = [
+            'safetyScore' => $metrics->getSafetyScore()->value,
+            'safetyLabel' => $metrics->getSafetyScore()->getLabel(),
+            'safetyDescription' => $metrics->getSafetyScore()->getDescription(),
+            'comfortIndex' => $metrics->getComfortIndex()->getValue(),
+            'comfortLabel' => $metrics->getComfortIndex()->getLabel(),
+            'recommendation' => $metrics->getRecommendation()->getTypeValue(),
+            'recommendationLabel' => $metrics->getRecommendation()->getLabel(),
+            'recommendationExplanation' => $metrics->getRecommendation()->getExplanation(),
+        ];
 
         return $result;
     }

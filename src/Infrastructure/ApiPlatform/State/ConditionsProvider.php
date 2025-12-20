@@ -7,9 +7,11 @@ namespace Seaswim\Infrastructure\ApiPlatform\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Seaswim\Application\UseCase\GetConditionsForLocation;
+use Seaswim\Domain\Entity\CalculatedMetrics;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Infrastructure\ApiPlatform\Dto\ConditionsOutput;
+use Seaswim\Infrastructure\ApiPlatform\Dto\MetricsOutput;
 use Seaswim\Infrastructure\ApiPlatform\Dto\WaterConditionsOutput;
 use Seaswim\Infrastructure\ApiPlatform\Dto\WeatherConditionsOutput;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -42,6 +44,7 @@ final readonly class ConditionsProvider implements ProviderInterface
             locationId: $locationId,
             water: $this->mapWater($conditions['water']),
             weather: $this->mapWeather($conditions['weather']),
+            metrics: $this->mapMetrics($conditions['metrics']),
             updatedAt: (new \DateTimeImmutable())->format('c'),
         );
     }
@@ -75,6 +78,20 @@ final readonly class ConditionsProvider implements ProviderInterface
             uvIndex: $weather->getUvIndex()->getValue(),
             uvLevel: $weather->getUvIndex()->getLevel(),
             measuredAt: $weather->getMeasuredAt()->format('c'),
+        );
+    }
+
+    private function mapMetrics(CalculatedMetrics $metrics): MetricsOutput
+    {
+        return new MetricsOutput(
+            safetyScore: $metrics->getSafetyScore()->value,
+            safetyLabel: $metrics->getSafetyScore()->getLabel(),
+            safetyDescription: $metrics->getSafetyScore()->getDescription(),
+            comfortIndex: $metrics->getComfortIndex()->getValue(),
+            comfortLabel: $metrics->getComfortIndex()->getLabel(),
+            recommendation: $metrics->getRecommendation()->getTypeValue(),
+            recommendationLabel: $metrics->getRecommendation()->getLabel(),
+            recommendationExplanation: $metrics->getRecommendation()->getExplanation(),
         );
     }
 }

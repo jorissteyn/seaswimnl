@@ -1,5 +1,10 @@
 <template>
     <div class="conditions-panel">
+        <SwimMetrics
+            v-if="conditions.metrics"
+            :data="conditions.metrics"
+        />
+
         <WaterConditions
             v-if="conditions.water"
             :data="conditions.water"
@@ -19,12 +24,14 @@
 </template>
 
 <script>
+import SwimMetrics from './SwimMetrics.vue';
 import WaterConditions from './WaterConditions.vue';
 import WeatherConditions from './WeatherConditions.vue';
 
 export default {
     name: 'ConditionsPanel',
     components: {
+        SwimMetrics,
         WaterConditions,
         WeatherConditions,
     },

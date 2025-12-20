@@ -94,6 +94,25 @@ final class ConditionsCommand extends Command
         } else {
             $io->warning('Weather conditions unavailable');
         }
+
+        $io->title('Swim Metrics');
+
+        $metrics = $conditions['metrics'];
+        $safetyColor = match ($metrics->getSafetyScore()->value) {
+            'green' => 'green',
+            'yellow' => 'yellow',
+            'red' => 'red',
+            default => 'white',
+        };
+
+        $io->table(
+            ['Metric', 'Value'],
+            [
+                ['Safety Score', sprintf('<fg=%s>%s</> (%s)', $safetyColor, strtoupper($metrics->getSafetyScore()->value), $metrics->getSafetyScore()->getLabel())],
+                ['Comfort Index', sprintf('%d/10 (%s)', $metrics->getComfortIndex()->getValue(), $metrics->getComfortIndex()->getLabel())],
+                ['Recommendation', sprintf('%s - %s', $metrics->getRecommendation()->getLabel(), $metrics->getRecommendation()->getExplanation())],
+            ],
+        );
     }
 
     private function formatForJson(array $conditions): array
@@ -121,6 +140,17 @@ final class ConditionsCommand extends Command
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
         }
+
+        $metrics = $conditions['metrics'];
+        $result['metrics'] = [
+            'safetyScore' => $metrics->getSafetyScore()->value,
+            'safetyLabel' => $metrics->getSafetyScore()->getLabel(),
+            'comfortIndex' => $metrics->getComfortIndex()->getValue(),
+            'comfortLabel' => $metrics->getComfortIndex()->getLabel(),
+            'recommendation' => $metrics->getRecommendation()->getTypeValue(),
+            'recommendationLabel' => $metrics->getRecommendation()->getLabel(),
+            'recommendationExplanation' => $metrics->getRecommendation()->getExplanation(),
+        ];
 
         return $result;
     }
