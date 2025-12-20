@@ -1,0 +1,79 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Seaswim\Infrastructure\Repository;
+
+use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Domain\ValueObject\Location;
+
+final class JsonFileLocationRepository implements LocationRepositoryInterface
+{
+    private string $filePath;
+
+    public function __construct(string $projectDir)
+    {
+        $this->filePath = $projectDir.'/var/data/locations.json';
+    }
+
+    public function findAll(): array
+    {
+        if (!file_exists($this->filePath)) {
+            return [];
+        }
+
+        $content = file_get_contents($this->filePath);
+        if ($content === false) {
+            return [];
+        }
+
+        $data = json_decode($content, true);
+        if (!is_array($data)) {
+            return [];
+        }
+
+        return array_map(
+            fn (array $item) => new Location(
+                $item['id'],
+                $item['name'],
+                (float) $item['latitude'],
+                (float) $item['longitude'],
+            ),
+            $data,
+        );
+    }
+
+    public function findById(string $id): ?Location
+    {
+        foreach ($this->findAll() as $location) {
+            if ($location->getId() === $id) {
+                return $location;
+            }
+        }
+
+        return null;
+    }
+
+    public function saveAll(array $locations): void
+    {
+        $dir = dirname($this->filePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $data = array_map(
+            fn (Location $location) => [
+                'id' => $location->getId(),
+                'name' => $location->getName(),
+                'latitude' => $location->getLatitude(),
+                'longitude' => $location->getLongitude(),
+            ],
+            $locations,
+        );
+
+        file_put_contents(
+            $this->filePath,
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        );
+    }
+}

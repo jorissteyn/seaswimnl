@@ -15,3 +15,41 @@ services:
     Seaswim\Infrastructure\Controller\:
         resource: '../src/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
+
+    # HTTP Clients
+    Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClient:
+        arguments:
+            $baseUrl: '%seaswim.apis.rijkswaterstaat.base_url%'
+            $timeout: '%seaswim.apis.rijkswaterstaat.timeout%'
+
+    Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient:
+        arguments:
+            $baseUrl: '%seaswim.apis.knmi.base_url%'
+            $apiKey: '%seaswim.apis.knmi.api_key%'
+            $timeout: '%seaswim.apis.knmi.timeout%'
+
+    # Adapters
+    Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter:
+        arguments:
+            $cache: '@api.cache'
+            $cacheTtl: '%seaswim.cache.water_ttl%'
+
+    Seaswim\Infrastructure\ExternalApi\KnmiAdapter:
+        arguments:
+            $cache: '@api.cache'
+            $cacheTtl: '%seaswim.cache.weather_ttl%'
+
+    # Ports
+    Seaswim\Application\Port\WaterConditionsProviderInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter
+
+    Seaswim\Application\Port\WeatherConditionsProviderInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\KnmiAdapter
+
+    # Repository
+    Seaswim\Infrastructure\Repository\JsonFileLocationRepository:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    Seaswim\Application\Port\LocationRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\JsonFileLocationRepository
