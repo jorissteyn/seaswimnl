@@ -1,0 +1,17 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    Seaswim\:
+        resource: '../src/'
+        exclude:
+            - '../src/Domain/Entity/'
+            - '../src/Domain/ValueObject/'
+            - '../src/Infrastructure/Kernel.php'
+
+    Seaswim\Infrastructure\Controller\:
+        resource: '../src/Infrastructure/Controller/'
+        tags: ['controller.service_arguments']

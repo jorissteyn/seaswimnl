@@ -1,0 +1,43 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Symfony
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+!var/data/.gitkeep
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+
+# PHP-CS-Fixer
+.php-cs-fixer.cache
+
+# Frontend build
+/public/build/
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# API cache
+/var/api-cache/
+
+# DDEV
+.ddev/.gitignore
+.ddev/db_snapshots/
+.ddev/sequelpro.spf
+.ddev/.webimageBuild/
+.ddev/xhprof/
+.ddev/import-db/

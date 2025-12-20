@@ -1,0 +1,5 @@
+controllers:
+    resource:
+        path: ../src/Infrastructure/Controller/
+        namespace: Seaswim\Infrastructure\Controller
+    type: attribute

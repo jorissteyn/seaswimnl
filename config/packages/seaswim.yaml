@@ -1,0 +1,8 @@
+parameters:
+    seaswim.apis.rijkswaterstaat.base_url: '%env(RWS_API_URL)%'
+    seaswim.apis.rijkswaterstaat.timeout: 10
+    seaswim.apis.knmi.base_url: '%env(KNMI_API_URL)%'
+    seaswim.apis.knmi.api_key: '%env(KNMI_API_KEY)%'
+    seaswim.apis.knmi.timeout: 10
+    seaswim.cache.water_ttl: 900
+    seaswim.cache.weather_ttl: 1800

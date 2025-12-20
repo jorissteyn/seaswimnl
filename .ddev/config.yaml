@@ -1,0 +1,8 @@
+name: seaswim
+type: php
+docroot: public
+php_version: "8.4"
+webserver_type: nginx-fpm
+database:
+  type: none
+nodejs_version: "20"

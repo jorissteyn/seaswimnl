@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: php-cs-fixer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+  analyse:
+    name: Psalm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run Psalm
+        run: vendor/bin/psalm --no-progress
+
+  test:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
+
+  build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build

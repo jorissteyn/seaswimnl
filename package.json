@@ -1,0 +1,17 @@
+{
+    "name": "seaswim",
+    "version": "1.0.0",
+    "description": "Water condition data for sea swimming locations in the Netherlands",
+    "scripts": {
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production"
+    },
+    "devDependencies": {
+        "@hotwired/stimulus": "^3.2.2",
+        "@symfony/webpack-encore": "^5.0.0",
+        "vue": "^3.5.0",
+        "vue-loader": "^17.4.0",
+        "webpack-notifier": "^1.15.0"
+    }
+}

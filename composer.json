@@ -1,0 +1,56 @@
+{
+    "name": "seaswim/seaswim",
+    "description": "Water condition data for sea swimming locations in the Netherlands",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4",
+        "symfony/framework-bundle": "^7.2",
+        "symfony/runtime": "^7.2",
+        "symfony/yaml": "^7.2",
+        "symfony/dotenv": "^7.2",
+        "symfony/console": "^7.2",
+        "symfony/http-client": "^7.2",
+        "symfony/cache": "^7.2",
+        "symfony/webpack-encore-bundle": "^2.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "vimeo/psalm": "^5.26",
+        "phpunit/phpunit": "^11.4",
+        "symfony/browser-kit": "^7.2",
+        "symfony/css-selector": "^7.2",
+        "symfony/phpunit-bridge": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Seaswim\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Seaswim\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true,
+            "symfony/flex": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": ["@auto-scripts"],
+        "post-update-cmd": ["@auto-scripts"]
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "7.2.*"
+        }
+    }
+}
