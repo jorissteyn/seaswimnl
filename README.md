@@ -59,16 +59,22 @@ make clean      # Clear caches
 
 ```bash
 # Show conditions for a location
-ddev exec bin/seaswim conditions <location-id>
+ddev exec bin/seaswim seaswim:conditions <location-id>
 
-# List all locations
-ddev exec bin/seaswim locations
+# Show conditions as JSON
+ddev exec bin/seaswim seaswim:conditions <location-id> --json
 
-# Refresh location data from external sources
-ddev exec bin/seaswim locations:refresh
+# Refresh location data from Rijkswaterstaat
+ddev exec bin/seaswim seaswim:locations:refresh
 
 # Fetch fresh data for all locations
-ddev exec bin/seaswim fetch
+ddev exec bin/seaswim seaswim:fetch
+
+# Clear API cache
+ddev exec bin/seaswim seaswim:cache:clear
+
+# List all commands
+ddev exec bin/seaswim list seaswim
 ```
 
 ## Environment Variables
