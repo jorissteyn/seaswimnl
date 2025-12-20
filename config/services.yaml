@@ -53,3 +53,8 @@ services:
 
     Seaswim\Application\Port\LocationRepositoryInterface:
         alias: Seaswim\Infrastructure\Repository\JsonFileLocationRepository
+
+    # Use Cases
+    Seaswim\Application\UseCase\ClearCache:
+        arguments:
+            $cache: '@api.cache'

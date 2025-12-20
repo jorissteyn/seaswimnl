@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Seaswim CLI wrapper
+ *
+ * This script provides a convenient way to run Seaswim commands.
+ * Usage: bin/seaswim <command> [arguments] [options]
+ */
+
+use Seaswim\Infrastructure\Kernel;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+
+if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {
+    throw new LogicException('Symfony Runtime is missing. Try running "composer require symfony/runtime".');
+}
+
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
+
+return function (array $context) {
+    $kernel = new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
+    $application = new Application($kernel);
+
+    // Filter to only show seaswim commands by default
+    $application->setName('Seaswim');
+    $application->setVersion('1.0.0');
+
+    return $application;
+};
