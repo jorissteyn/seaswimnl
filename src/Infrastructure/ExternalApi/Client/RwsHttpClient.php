@@ -94,22 +94,42 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             ],
         ];
 
+        $url = $this->baseUrl.self::METADATA_PATH;
+
         try {
-            $response = $this->httpClient->request('POST', $this->baseUrl.self::METADATA_PATH, [
+            $response = $this->httpClient->request('POST', $url, [
                 'json' => $payload,
                 'timeout' => $this->timeout,
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
                 ],
             ]);
+
+            $statusCode = $response->getStatusCode();
+            $this->logger->debug('Response status: {status}', ['status' => $statusCode]);
+
+            if ($statusCode >= 400) {
+                $this->logger->error('RWS API locations request failed', [
+                    'status' => $statusCode,
+                    'response' => $response->getContent(false),
+                ]);
+
+                return null;
+            }
 
             $data = $response->toArray();
 
             return $this->normalizeLocations($data);
+        } catch (\Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface $e) {
+            $response = $e->getResponse();
+            $statusCode = $response->getStatusCode();
+            $body = $response->getContent(false);
+            $this->logger->error("RWS API locations request failed: HTTP {$statusCode} - {$body}");
+
+            return null;
         } catch (\Throwable $e) {
-            $this->logger->error('RWS API locations request failed', [
-                'error' => $e->getMessage(),
-            ]);
+            $this->logger->error('RWS API locations request failed: '.$e->getMessage());
 
             return null;
         }
@@ -182,18 +202,18 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
         foreach ($locationList as $location) {
             $code = $location['Code'] ?? null;
             $name = $location['Naam'] ?? $code;
-            $x = $location['X'] ?? null;
-            $y = $location['Y'] ?? null;
+            $lat = $location['Lat'] ?? null;
+            $lon = $location['Lon'] ?? null;
 
-            if (null === $code || null === $x || null === $y) {
+            if (null === $code || null === $lat || null === $lon) {
                 continue;
             }
 
             $locations[] = [
                 'code' => $code,
                 'name' => $name,
-                'latitude' => (float) $y,
-                'longitude' => (float) $x,
+                'latitude' => (float) $lat,
+                'longitude' => (float) $lon,
             ];
         }
 
