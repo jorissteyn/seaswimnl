@@ -114,6 +114,33 @@ API responses are cached using Symfony Cache (filesystem adapter):
 - Weather conditions: 30 minutes TTL
 - Stale data is served if the API is unavailable
 
+## Swim Metrics
+
+The application calculates swim metrics from raw data:
+
+### Safety Score (Traffic Light)
+| Score | Meaning | Triggers |
+|-------|---------|----------|
+| Green | Safe | All conditions within safe thresholds |
+| Yellow | Caution | Water temp 10-15°C, waves 1-2m, moderate quality, wind 20-40 km/h |
+| Red | Unsafe | Water temp <10°C, waves >2m, poor quality, wind >40 km/h |
+
+A single red condition triggers a red score. Any yellow (no red) triggers yellow.
+
+### Comfort Index (1-10)
+Weighted average of conditions:
+- Water temperature: 40% (optimal 18-22°C)
+- Air temperature: 20% (optimal 20-25°C)
+- Wind speed: 20% (optimal <10 km/h)
+- UV index: 10% (optimal 3-5)
+- Wave height: 10% (optimal <0.5m)
+
+### Swim Recommendation
+Based on safety score and comfort index:
+- **Now** - Safe conditions with good comfort
+- **Later today** - Marginal conditions, may improve
+- **Not recommended** - Unsafe conditions
+
 ## Project Structure
 
 ```
