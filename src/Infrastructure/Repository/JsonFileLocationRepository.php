@@ -23,7 +23,7 @@ final class JsonFileLocationRepository implements LocationRepositoryInterface
         }
 
         $content = file_get_contents($this->filePath);
-        if ($content === false) {
+        if (false === $content) {
             return [];
         }
 
@@ -73,7 +73,7 @@ final class JsonFileLocationRepository implements LocationRepositoryInterface
 
         file_put_contents(
             $this->filePath,
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
         );
     }
 }

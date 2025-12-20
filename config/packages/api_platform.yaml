@@ -10,6 +10,7 @@ api_platform:
         json:
             mime_types: ['application/json']
     docs_formats:
-        json: true
-        jsonld: false
-        html: true
+        json:
+            mime_types: ['application/json']
+        html:
+            mime_types: ['text/html']

@@ -13,14 +13,14 @@ final class SwimTimeRecommender
 {
     public function recommend(SafetyScore $safety, ComfortIndex $comfort): SwimRecommendation
     {
-        if ($safety === SafetyScore::Red) {
+        if (SafetyScore::Red === $safety) {
             return new SwimRecommendation(
                 SwimRecommendationType::NotRecommended,
                 'Current conditions are unsafe for swimming. Check back later when conditions improve.',
             );
         }
 
-        if ($safety === SafetyScore::Yellow) {
+        if (SafetyScore::Yellow === $safety) {
             if ($comfort->getValue() >= 6) {
                 return new SwimRecommendation(
                     SwimRecommendationType::Now,

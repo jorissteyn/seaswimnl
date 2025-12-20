@@ -21,23 +21,38 @@ final class ComfortIndexCalculator
         $scores = [];
         $weights = [];
 
-        if ($water !== null) {
-            $scores[] = $this->scoreWaterTemperature($water->getTemperature()->getCelsius());
-            $weights[] = self::WATER_TEMP_WEIGHT;
+        if (null !== $water) {
+            $waterTemp = $water->getTemperature()->getCelsius();
+            if (null !== $waterTemp) {
+                $scores[] = $this->scoreWaterTemperature($waterTemp);
+                $weights[] = self::WATER_TEMP_WEIGHT;
+            }
 
-            $scores[] = $this->scoreWaveHeight($water->getWaveHeight()->getMeters());
-            $weights[] = self::WAVE_HEIGHT_WEIGHT;
+            $waveHeight = $water->getWaveHeight()->getMeters();
+            if (null !== $waveHeight) {
+                $scores[] = $this->scoreWaveHeight($waveHeight);
+                $weights[] = self::WAVE_HEIGHT_WEIGHT;
+            }
         }
 
-        if ($weather !== null) {
-            $scores[] = $this->scoreAirTemperature($weather->getAirTemperature()->getCelsius());
-            $weights[] = self::AIR_TEMP_WEIGHT;
+        if (null !== $weather) {
+            $airTemp = $weather->getAirTemperature()->getCelsius();
+            if (null !== $airTemp) {
+                $scores[] = $this->scoreAirTemperature($airTemp);
+                $weights[] = self::AIR_TEMP_WEIGHT;
+            }
 
-            $scores[] = $this->scoreWindSpeed($weather->getWindSpeed()->getKilometersPerHour());
-            $weights[] = self::WIND_SPEED_WEIGHT;
+            $windSpeed = $weather->getWindSpeed()->getKilometersPerHour();
+            if (null !== $windSpeed) {
+                $scores[] = $this->scoreWindSpeed($windSpeed);
+                $weights[] = self::WIND_SPEED_WEIGHT;
+            }
 
-            $scores[] = $this->scoreUvIndex($weather->getUvIndex()->getValue());
-            $weights[] = self::UV_INDEX_WEIGHT;
+            $uvIndex = $weather->getUvIndex()->getValue();
+            if (null !== $uvIndex) {
+                $scores[] = $this->scoreUvIndex($uvIndex);
+                $weights[] = self::UV_INDEX_WEIGHT;
+            }
         }
 
         if (empty($scores)) {

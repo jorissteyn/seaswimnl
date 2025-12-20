@@ -34,7 +34,7 @@ final readonly class RijkswaterstaatAdapter implements WaterConditionsProviderIn
 
         $data = $this->client->fetchWaterData($location->getId());
 
-        if ($data === null) {
+        if (null === $data) {
             // Return stale cache if available
             $staleItem = $this->cache->getItem($cacheKey.'_stale');
             if ($staleItem->isHit()) {

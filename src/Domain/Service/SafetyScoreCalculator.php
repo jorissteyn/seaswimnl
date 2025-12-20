@@ -23,7 +23,7 @@ final class SafetyScoreCalculator
         $hasRed = false;
         $hasYellow = false;
 
-        if ($water !== null) {
+        if (null !== $water) {
             $waterTemp = $water->getTemperature()->getCelsius();
             if ($waterTemp < self::RED_WATER_TEMP) {
                 $hasRed = true;
@@ -39,16 +39,16 @@ final class SafetyScoreCalculator
             }
 
             $quality = $water->getQuality();
-            if ($quality === WaterQuality::Poor) {
+            if (WaterQuality::Poor === $quality) {
                 $hasRed = true;
-            } elseif ($quality === WaterQuality::Moderate) {
+            } elseif (WaterQuality::Moderate === $quality) {
                 $hasYellow = true;
             }
         } else {
             $hasYellow = true;
         }
 
-        if ($weather !== null) {
+        if (null !== $weather) {
             $windSpeed = $weather->getWindSpeed()->getKilometersPerHour();
             if ($windSpeed > self::RED_WIND_SPEED) {
                 $hasRed = true;

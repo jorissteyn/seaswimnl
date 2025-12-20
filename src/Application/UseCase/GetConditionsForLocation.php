@@ -33,7 +33,7 @@ final readonly class GetConditionsForLocation
     {
         $location = $this->locationRepository->findById($locationId);
 
-        if ($location === null) {
+        if (null === $location) {
             return null;
         }
 

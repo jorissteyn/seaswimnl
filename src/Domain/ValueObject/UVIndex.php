@@ -28,12 +28,12 @@ final readonly class UVIndex
 
     public function isKnown(): bool
     {
-        return $this->value !== null;
+        return null !== $this->value;
     }
 
     public function getLevel(): string
     {
-        if ($this->value === null) {
+        if (null === $this->value) {
             return 'Unknown';
         }
 

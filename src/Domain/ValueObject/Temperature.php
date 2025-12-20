@@ -28,6 +28,6 @@ final readonly class Temperature
 
     public function isKnown(): bool
     {
-        return $this->celsius !== null;
+        return null !== $this->celsius;
     }
 }

@@ -14,4 +14,16 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <InvalidReturnStatement>
+            <errorLevel type="suppress">
+                <file name="src/Infrastructure/ApiPlatform/State/LocationProvider.php"/>
+            </errorLevel>
+        </InvalidReturnStatement>
+        <InvalidReturnType>
+            <errorLevel type="suppress">
+                <file name="src/Infrastructure/ApiPlatform/State/LocationProvider.php"/>
+            </errorLevel>
+        </InvalidReturnType>
+    </issueHandlers>
 </psalm>

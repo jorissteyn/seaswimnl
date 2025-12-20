@@ -23,7 +23,7 @@ final class ConditionsController extends AbstractController
     {
         $conditions = $this->getConditions->execute($location);
 
-        if ($conditions === null) {
+        if (null === $conditions) {
             return $this->json(
                 ['error' => 'Location not found'],
                 Response::HTTP_NOT_FOUND,
@@ -42,7 +42,7 @@ final class ConditionsController extends AbstractController
         ];
 
         $water = $conditions['water'];
-        if ($water !== null) {
+        if (null !== $water) {
             $result['water'] = [
                 'temperature' => $water->getTemperature()->getCelsius(),
                 'waveHeight' => $water->getWaveHeight()->getMeters(),
@@ -54,7 +54,7 @@ final class ConditionsController extends AbstractController
         }
 
         $weather = $conditions['weather'];
-        if ($weather !== null) {
+        if (null !== $weather) {
             $result['weather'] = [
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getKilometersPerHour(),

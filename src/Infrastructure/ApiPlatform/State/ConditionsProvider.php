@@ -30,13 +30,13 @@ final readonly class ConditionsProvider implements ProviderInterface
     {
         $locationId = $uriVariables['location'] ?? null;
 
-        if ($locationId === null) {
+        if (null === $locationId) {
             throw new NotFoundHttpException('Location not specified');
         }
 
         $conditions = $this->getConditions->execute($locationId);
 
-        if ($conditions === null) {
+        if (null === $conditions) {
             throw new NotFoundHttpException('Location not found');
         }
 
@@ -51,7 +51,7 @@ final readonly class ConditionsProvider implements ProviderInterface
 
     private function mapWater(?WaterConditions $water): ?WaterConditionsOutput
     {
-        if ($water === null) {
+        if (null === $water) {
             return null;
         }
 
@@ -67,7 +67,7 @@ final readonly class ConditionsProvider implements ProviderInterface
 
     private function mapWeather(?WeatherConditions $weather): ?WeatherConditionsOutput
     {
-        if ($weather === null) {
+        if (null === $weather) {
             return null;
         }
 

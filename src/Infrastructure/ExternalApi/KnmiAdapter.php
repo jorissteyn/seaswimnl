@@ -36,7 +36,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
             $location->getLongitude(),
         );
 
-        if ($data === null) {
+        if (null === $data) {
             // Return stale cache if available
             $staleItem = $this->cache->getItem($cacheKey.'_stale');
             if ($staleItem->isHit()) {

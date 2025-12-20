@@ -27,10 +27,10 @@ final readonly class FetchAllData
         $weatherCount = 0;
 
         foreach ($locations as $location) {
-            if ($this->waterProvider->getConditions($location) !== null) {
+            if (null !== $this->waterProvider->getConditions($location)) {
                 ++$waterCount;
             }
-            if ($this->weatherProvider->getConditions($location) !== null) {
+            if (null !== $this->weatherProvider->getConditions($location)) {
                 ++$weatherCount;
             }
         }

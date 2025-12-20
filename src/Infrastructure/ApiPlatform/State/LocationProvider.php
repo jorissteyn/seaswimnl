@@ -26,7 +26,7 @@ final readonly class LocationProvider implements ProviderInterface
         if (isset($uriVariables['id'])) {
             $location = $this->locationRepository->findById($uriVariables['id']);
 
-            if ($location === null) {
+            if (null === $location) {
                 throw new NotFoundHttpException('Location not found');
             }
 

@@ -28,11 +28,11 @@ final readonly class WindSpeed
 
     public function getKilometersPerHour(): ?float
     {
-        return $this->metersPerSecond !== null ? $this->metersPerSecond * 3.6 : null;
+        return null !== $this->metersPerSecond ? $this->metersPerSecond * 3.6 : null;
     }
 
     public function isKnown(): bool
     {
-        return $this->metersPerSecond !== null;
+        return null !== $this->metersPerSecond;
     }
 }

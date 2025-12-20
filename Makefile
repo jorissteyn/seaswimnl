@@ -33,7 +33,7 @@ lint-fix: ## Run PHP-CS-Fixer and fix issues
 	ddev exec vendor/bin/php-cs-fixer fix
 
 analyse: ## Run Psalm static analysis
-	ddev exec vendor/bin/psalm
+	ddev exec vendor/bin/psalm --threads=1
 
 ## —— Frontend ———————————————————————————————————————————————————————————————————
 

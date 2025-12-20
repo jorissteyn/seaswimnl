@@ -28,6 +28,6 @@ final readonly class WaterHeight
 
     public function isKnown(): bool
     {
-        return $this->meters !== null;
+        return null !== $this->meters;
     }
 }

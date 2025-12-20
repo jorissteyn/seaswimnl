@@ -40,14 +40,15 @@ final class ConditionsCommand extends Command
 
         $conditions = $this->getConditions->execute($locationId);
 
-        if ($conditions === null) {
+        if (null === $conditions) {
             $io->error(sprintf('Location "%s" not found', $locationId));
 
             return Command::FAILURE;
         }
 
         if ($asJson) {
-            $output->writeln(json_encode($this->formatForJson($conditions), JSON_PRETTY_PRINT));
+            $json = json_encode($this->formatForJson($conditions), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+            $output->writeln($json);
 
             return Command::SUCCESS;
         }
@@ -62,13 +63,13 @@ final class ConditionsCommand extends Command
         $io->title('Water Conditions');
 
         $water = $conditions['water'];
-        if ($water !== null) {
+        if (null !== $water) {
             $io->table(
                 ['Metric', 'Value'],
                 [
-                    ['Temperature', $water->getTemperature()->getCelsius() !== null ? $water->getTemperature()->getCelsius().'°C' : 'N/A'],
-                    ['Wave Height', $water->getWaveHeight()->getMeters() !== null ? $water->getWaveHeight()->getMeters().'m' : 'N/A'],
-                    ['Water Height', $water->getWaterHeight()->getMeters() !== null ? $water->getWaterHeight()->getMeters().'m' : 'N/A'],
+                    ['Temperature', null !== $water->getTemperature()->getCelsius() ? $water->getTemperature()->getCelsius().'°C' : 'N/A'],
+                    ['Wave Height', null !== $water->getWaveHeight()->getMeters() ? $water->getWaveHeight()->getMeters().'m' : 'N/A'],
+                    ['Water Height', null !== $water->getWaterHeight()->getMeters() ? $water->getWaterHeight()->getMeters().'m' : 'N/A'],
                     ['Quality', $water->getQuality()->getLabel()],
                     ['Measured At', $water->getMeasuredAt()->format('Y-m-d H:i:s')],
                 ],
@@ -80,14 +81,14 @@ final class ConditionsCommand extends Command
         $io->title('Weather Conditions');
 
         $weather = $conditions['weather'];
-        if ($weather !== null) {
+        if (null !== $weather) {
             $io->table(
                 ['Metric', 'Value'],
                 [
-                    ['Air Temperature', $weather->getAirTemperature()->getCelsius() !== null ? $weather->getAirTemperature()->getCelsius().'°C' : 'N/A'],
-                    ['Wind Speed', $weather->getWindSpeed()->getKilometersPerHour() !== null ? round($weather->getWindSpeed()->getKilometersPerHour(), 1).' km/h' : 'N/A'],
+                    ['Air Temperature', null !== $weather->getAirTemperature()->getCelsius() ? $weather->getAirTemperature()->getCelsius().'°C' : 'N/A'],
+                    ['Wind Speed', null !== $weather->getWindSpeed()->getKilometersPerHour() ? round($weather->getWindSpeed()->getKilometersPerHour(), 1).' km/h' : 'N/A'],
                     ['Wind Direction', $weather->getWindDirection() ?? 'N/A'],
-                    ['UV Index', $weather->getUvIndex()->getValue() !== null ? $weather->getUvIndex()->getValue().' ('.$weather->getUvIndex()->getLevel().')' : 'N/A'],
+                    ['UV Index', null !== $weather->getUvIndex()->getValue() ? $weather->getUvIndex()->getValue().' ('.$weather->getUvIndex()->getLevel().')' : 'N/A'],
                     ['Measured At', $weather->getMeasuredAt()->format('Y-m-d H:i:s')],
                 ],
             );
@@ -120,7 +121,7 @@ final class ConditionsCommand extends Command
         $result = [];
 
         $water = $conditions['water'];
-        if ($water !== null) {
+        if (null !== $water) {
             $result['water'] = [
                 'temperature' => $water->getTemperature()->getCelsius(),
                 'waveHeight' => $water->getWaveHeight()->getMeters(),
@@ -131,7 +132,7 @@ final class ConditionsCommand extends Command
         }
 
         $weather = $conditions['weather'];
-        if ($weather !== null) {
+        if (null !== $weather) {
             $result['weather'] = [
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getMetersPerSecond(),

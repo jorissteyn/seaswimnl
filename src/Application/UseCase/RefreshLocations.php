@@ -23,7 +23,7 @@ final readonly class RefreshLocations
     {
         $data = $this->rwsClient->fetchLocations();
 
-        if ($data === null) {
+        if (null === $data) {
             return -1; // Error
         }
 
