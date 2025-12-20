@@ -7,6 +7,8 @@
     --color-danger: #e76f51;
     --color-text: #264653;
     --color-background: #f8f9fa;
+    --color-card: #ffffff;
+    --color-border: #dee2e6;
 }
 
 * {
@@ -20,4 +22,152 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Location Selector */
+.location-selector {
+    margin-bottom: 1.5rem;
+}
+
+.location-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.location-selector select {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-card);
+}
+
+/* Conditions Panel */
+.conditions-panel {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 600px) {
+    .conditions-panel {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Conditions Card */
+.conditions-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.conditions-card h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: var(--color-primary);
+}
+
+.conditions-card.water h2 {
+    color: var(--color-primary);
+}
+
+.conditions-card.weather h2 {
+    color: var(--color-secondary);
+}
+
+.conditions-list {
+    margin: 0;
+}
+
+.condition-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.condition-item:last-child {
+    border-bottom: none;
+}
+
+.condition-item dt {
+    font-weight: 500;
+}
+
+.condition-item dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.quality-good {
+    color: var(--color-success);
+}
+
+.quality-moderate {
+    color: var(--color-warning);
+}
+
+.quality-poor {
+    color: var(--color-danger);
+}
+
+.timestamp {
+    margin: 1rem 0 0 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* States */
+.loading, .prompt, .unavailable {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error button {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.error button:hover {
+    background: #005f92;
 }
