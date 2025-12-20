@@ -2,6 +2,23 @@
 
 Water condition data for sea swimming locations in the Netherlands.
 
+## Overview
+
+Seaswim provides real-time water and weather conditions for swimming locations along the Dutch coast. It helps swimmers make informed decisions about when and where to swim.
+
+**Features:**
+- Dashboard for viewing water conditions at swim locations
+- CLI tool for quick access to conditions data
+- API for wearable devices (smartwatches, fitness trackers)
+
+## Tech Stack
+
+- **Backend:** PHP 8.4, Symfony 7.4
+- **Frontend:** Vue.js 3, Webpack Encore
+- **API:** API Platform
+- **Local Development:** DDEV
+- **Code Quality:** PHP-CS-Fixer, Psalm, PHPUnit
+
 ## Prerequisites
 
 - [DDEV](https://ddev.readthedocs.io/en/stable/) installed
@@ -36,6 +53,22 @@ make build      # Build frontend assets
 make watch      # Watch frontend assets for changes
 make ci         # Run all CI checks
 make clean      # Clear caches
+```
+
+## CLI Tool
+
+```bash
+# Show conditions for a location
+ddev exec bin/seaswim conditions <location-id>
+
+# List all locations
+ddev exec bin/seaswim locations
+
+# Refresh location data from external sources
+ddev exec bin/seaswim locations:refresh
+
+# Fetch fresh data for all locations
+ddev exec bin/seaswim fetch
 ```
 
 ## Environment Variables
