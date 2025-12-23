@@ -88,7 +88,7 @@ final class ConditionsCommand extends Command
                 ['Metric', 'Value'],
                 [
                     ['Air Temperature', null !== $weather->getAirTemperature()->getCelsius() ? $weather->getAirTemperature()->getCelsius().'°C' : 'N/A'],
-                    ['Wind Speed', null !== $weather->getWindSpeed()->getKilometersPerHour() ? round($weather->getWindSpeed()->getKilometersPerHour(), 1).' km/h' : 'N/A'],
+                    ['Wind Speed', $this->formatWindSpeed($weather->getWindSpeed())],
                     ['Wind Direction', $weather->getWindDirection() ?? 'N/A'],
                     ['UV Index', null !== $weather->getUvIndex()->getValue() ? $weather->getUvIndex()->getValue().' ('.$weather->getUvIndex()->getLevel().')' : 'N/A'],
                     ['Measured At', $weather->getMeasuredAt()->format('Y-m-d H:i:s')],
@@ -168,6 +168,19 @@ final class ConditionsCommand extends Command
         );
     }
 
+    private function formatWindSpeed(\Seaswim\Domain\ValueObject\WindSpeed $windSpeed): string
+    {
+        $kmh = $windSpeed->getKilometersPerHour();
+        $beaufort = $windSpeed->getBeaufort();
+        $label = $windSpeed->getBeaufortLabel();
+
+        if (null === $kmh || null === $beaufort || null === $label) {
+            return 'N/A';
+        }
+
+        return sprintf('%s km/h (Bft %d: %s)', round($kmh, 1), $beaufort, $label);
+    }
+
     private function formatForJson(array $conditions): array
     {
         $result = [];
@@ -188,6 +201,9 @@ final class ConditionsCommand extends Command
             $result['weather'] = [
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getMetersPerSecond(),
+                'windSpeedKmh' => $weather->getWindSpeed()->getKilometersPerHour(),
+                'windBeaufort' => $weather->getWindSpeed()->getBeaufort(),
+                'windBeaufortLabel' => $weather->getWindSpeed()->getBeaufortLabel(),
                 'windDirection' => $weather->getWindDirection(),
                 'uvIndex' => $weather->getUvIndex()->getValue(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
