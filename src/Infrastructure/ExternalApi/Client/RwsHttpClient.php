@@ -234,16 +234,21 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             switch ($grootheid) {
                 case 'T':
                     // Only use surface water temperature (OW), not air temperature (LT)
-                    if ('OW' === $compartiment) {
+                    // Take the first valid reading (request is filtered to RIKZMON_TEMP)
+                    if ('OW' === $compartiment && null === $result['waterTemperature']) {
                         $result['waterTemperature'] = $value;
                     }
                     break;
                 case 'WATHTE':
                     // Convert from cm to meters
-                    $result['waterHeight'] = null !== $value ? $value / 100.0 : null;
+                    if (null === $result['waterHeight']) {
+                        $result['waterHeight'] = null !== $value ? $value / 100.0 : null;
+                    }
                     break;
                 case 'Hm0':
-                    $result['waveHeight'] = $value;
+                    if (null === $result['waveHeight']) {
+                        $result['waveHeight'] = $value;
+                    }
                     break;
             }
         }
