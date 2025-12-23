@@ -2,10 +2,6 @@
     <div class="conditions-card tides">
         <h2>Tides</h2>
         <dl class="conditions-list">
-            <div v-if="waterHeight !== null" class="condition-item">
-                <dt>Current Water Height</dt>
-                <dd>{{ formatWaterHeight(waterHeight) }}</dd>
-            </div>
             <div v-if="data.previous" class="condition-item">
                 <dt>Previous {{ data.previous.typeLabel }}</dt>
                 <dd>{{ data.previous.timeFormatted }} ({{ formatHeight(data.previous.heightCm) }})</dd>
@@ -22,8 +18,14 @@
                 <dt>Next Low Tide</dt>
                 <dd>{{ data.nextLow.timeFormatted }} ({{ formatHeight(data.nextLow.heightCm) }})</dd>
             </div>
+            <div v-if="waterHeight !== null" class="condition-item">
+                <dt>Current Water Height</dt>
+                <dd>{{ formatWaterHeight(waterHeight) }}</dd>
+            </div>
         </dl>
-        <p class="timestamp">Heights relative to NAP</p>
+        <p class="timestamp">
+            Heights relative to NAP<span v-if="measuredAt"> · Last updated: {{ formatTime(measuredAt) }}</span>
+        </p>
     </div>
 </template>
 
@@ -39,6 +41,10 @@ export default {
             type: Number,
             default: null,
         },
+        measuredAt: {
+            type: String,
+            default: null,
+        },
     },
     methods: {
         formatHeight(cm) {
@@ -47,6 +53,10 @@ export default {
         formatWaterHeight(meters) {
             const cm = Math.round(meters * 100);
             return `${cm > 0 ? '+' : ''}${cm} cm`;
+        },
+        formatTime(isoString) {
+            if (!isoString) return '';
+            return new Date(isoString).toLocaleString();
         },
     },
 };

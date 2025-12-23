@@ -9,6 +9,7 @@
             v-if="conditions.tides && Object.keys(conditions.tides).length > 0"
             :data="conditions.tides"
             :water-height="conditions.water?.waterHeight"
+            :measured-at="conditions.water?.measuredAt"
         />
 
         <WaterConditions
