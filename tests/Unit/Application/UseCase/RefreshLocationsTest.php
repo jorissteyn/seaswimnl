@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Application\UseCase;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\LocationRepositoryInterface;
 use Seaswim\Application\UseCase\RefreshLocations;
-use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface;
+use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
 final class RefreshLocationsTest extends TestCase
@@ -17,8 +17,8 @@ final class RefreshLocationsTest extends TestCase
     {
         $locationRepository = $this->createMock(LocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $knmiStationRepository = $this->createMock(KnmiStationRepositoryInterface::class);
-        $knmiClient = $this->createMock(KnmiHttpClientInterface::class);
+        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
@@ -27,22 +27,22 @@ final class RefreshLocationsTest extends TestCase
                 ['code' => 'hoekvanholland', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12],
             ]);
 
-        $knmiClient->expects($this->once())
+        $buienradarClient->expects($this->once())
             ->method('fetchStations')
             ->willReturn([
-                ['code' => '310', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
-                ['code' => '330', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12],
+                ['code' => '6310', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
+                ['code' => '6330', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12],
             ]);
 
         $locationRepository->expects($this->once())
             ->method('saveAll')
             ->with($this->callback(fn ($locations) => 2 === \count($locations)));
 
-        $knmiStationRepository->expects($this->once())
+        $buienradarStationRepository->expects($this->once())
             ->method('saveAll')
             ->with($this->callback(fn ($stations) => 2 === \count($stations)));
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $knmiStationRepository, $knmiClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(2, $result['locations']);
@@ -53,35 +53,35 @@ final class RefreshLocationsTest extends TestCase
     {
         $locationRepository = $this->createMock(LocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $knmiStationRepository = $this->createMock(KnmiStationRepositoryInterface::class);
-        $knmiClient = $this->createMock(KnmiHttpClientInterface::class);
+        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
             ->willReturn(null);
 
-        $knmiClient->expects($this->once())
+        $buienradarClient->expects($this->once())
             ->method('fetchStations')
             ->willReturn([
-                ['code' => '310', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
+                ['code' => '6310', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
             ]);
 
         $locationRepository->expects($this->never())
             ->method('saveAll');
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $knmiStationRepository, $knmiClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(-1, $result['locations']);
         $this->assertSame(1, $result['stations']);
     }
 
-    public function testExecuteReturnsMinusOneOnKnmiApiFailure(): void
+    public function testExecuteReturnsMinusOneOnBuienradarApiFailure(): void
     {
         $locationRepository = $this->createMock(LocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $knmiStationRepository = $this->createMock(KnmiStationRepositoryInterface::class);
-        $knmiClient = $this->createMock(KnmiHttpClientInterface::class);
+        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
@@ -89,14 +89,14 @@ final class RefreshLocationsTest extends TestCase
                 ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
             ]);
 
-        $knmiClient->expects($this->once())
+        $buienradarClient->expects($this->once())
             ->method('fetchStations')
             ->willReturn(null);
 
-        $knmiStationRepository->expects($this->never())
+        $buienradarStationRepository->expects($this->never())
             ->method('saveAll');
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $knmiStationRepository, $knmiClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(1, $result['locations']);

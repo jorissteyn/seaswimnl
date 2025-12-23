@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Seaswim\Application\UseCase;
 
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\LocationRepositoryInterface;
-use Seaswim\Domain\ValueObject\KnmiStation;
+use Seaswim\Domain\ValueObject\BuienradarStation;
 use Seaswim\Domain\ValueObject\Location;
-use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface;
+use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
 final readonly class RefreshLocations
@@ -16,8 +16,8 @@ final readonly class RefreshLocations
     public function __construct(
         private LocationRepositoryInterface $locationRepository,
         private RwsHttpClientInterface $rwsClient,
-        private KnmiStationRepositoryInterface $knmiStationRepository,
-        private KnmiHttpClientInterface $knmiClient,
+        private BuienradarStationRepositoryInterface $buienradarStationRepository,
+        private BuienradarHttpClientInterface $buienradarClient,
     ) {
     }
 
@@ -27,7 +27,7 @@ final readonly class RefreshLocations
     public function execute(): array
     {
         $locationsCount = $this->refreshRwsLocations();
-        $stationsCount = $this->refreshKnmiStations();
+        $stationsCount = $this->refreshBuienradarStations();
 
         return [
             'locations' => $locationsCount,
@@ -58,9 +58,9 @@ final readonly class RefreshLocations
         return count($locations);
     }
 
-    private function refreshKnmiStations(): int
+    private function refreshBuienradarStations(): int
     {
-        $data = $this->knmiClient->fetchStations();
+        $data = $this->buienradarClient->fetchStations();
 
         if (null === $data) {
             return -1; // Error
@@ -68,7 +68,7 @@ final readonly class RefreshLocations
 
         $stations = [];
         foreach ($data as $item) {
-            $stations[] = new KnmiStation(
+            $stations[] = new BuienradarStation(
                 $item['code'],
                 $item['name'],
                 $item['latitude'],
@@ -76,7 +76,7 @@ final readonly class RefreshLocations
             );
         }
 
-        $this->knmiStationRepository->saveAll($stations);
+        $this->buienradarStationRepository->saveAll($stations);
 
         return count($stations);
     }

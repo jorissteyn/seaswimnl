@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Service;
 
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
-use Seaswim\Domain\ValueObject\KnmiStation;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
+use Seaswim\Domain\ValueObject\BuienradarStation;
 
-final readonly class KnmiStationMatcher
+final readonly class BuienradarStationMatcher
 {
     private const MAX_LEVENSHTEIN_DISTANCE = 3;
-    private const DEFAULT_STATION_CODE = '260'; // De Bilt
+    private const DEFAULT_STATION_CODE = '6260'; // De Bilt
 
     public function __construct(
-        private KnmiStationRepositoryInterface $stationRepository,
+        private BuienradarStationRepositoryInterface $stationRepository,
     ) {
     }
 
-    public function findMatchingStation(string $locationName): ?KnmiStation
+    public function findMatchingStation(string $locationName): ?BuienradarStation
     {
         $stations = $this->stationRepository->findAll();
 

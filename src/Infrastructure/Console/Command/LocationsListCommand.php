@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Console\Command;
 
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\LocationRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +21,7 @@ final class LocationsListCommand extends Command
 {
     public function __construct(
         private readonly LocationRepositoryInterface $locationRepository,
-        private readonly KnmiStationRepositoryInterface $knmiStationRepository,
+        private readonly BuienradarStationRepositoryInterface $buienradarStationRepository,
     ) {
         parent::__construct();
     }
@@ -31,7 +31,7 @@ final class LocationsListCommand extends Command
         $this
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON')
             ->addOption('search', 's', InputOption::VALUE_REQUIRED, 'Filter locations by name or code')
-            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, knmi (default: both)');
+            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, buienradar (default: both)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -55,10 +55,10 @@ final class LocationsListCommand extends Command
             }
         }
 
-        if (null === $source || 'knmi' === $source) {
-            foreach ($this->knmiStationRepository->findAll() as $station) {
+        if (null === $source || 'buienradar' === $source) {
+            foreach ($this->buienradarStationRepository->findAll() as $station) {
                 $items[] = [
-                    'source' => 'knmi',
+                    'source' => 'buienradar',
                     'id' => $station->getCode(),
                     'name' => $station->getName(),
                     'latitude' => $station->getLatitude(),

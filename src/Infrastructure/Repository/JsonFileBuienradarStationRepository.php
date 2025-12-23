@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Repository;
 
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
-use Seaswim\Domain\ValueObject\KnmiStation;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
+use Seaswim\Domain\ValueObject\BuienradarStation;
 
-final class JsonFileKnmiStationRepository implements KnmiStationRepositoryInterface
+final class JsonFileBuienradarStationRepository implements BuienradarStationRepositoryInterface
 {
     private string $filePath;
 
     public function __construct(string $projectDir)
     {
-        $this->filePath = $projectDir.'/var/data/knmi-stations.json';
+        $this->filePath = $projectDir.'/var/data/buienradar-stations.json';
     }
 
     public function findAll(): array
@@ -33,7 +33,7 @@ final class JsonFileKnmiStationRepository implements KnmiStationRepositoryInterf
         }
 
         return array_map(
-            fn (array $item) => new KnmiStation(
+            fn (array $item) => new BuienradarStation(
                 $item['code'],
                 $item['name'],
                 (float) $item['latitude'],
@@ -43,7 +43,7 @@ final class JsonFileKnmiStationRepository implements KnmiStationRepositoryInterf
         );
     }
 
-    public function findByCode(string $code): ?KnmiStation
+    public function findByCode(string $code): ?BuienradarStation
     {
         foreach ($this->findAll() as $station) {
             if ($station->getCode() === $code) {
@@ -62,7 +62,7 @@ final class JsonFileKnmiStationRepository implements KnmiStationRepositoryInterf
         }
 
         $data = array_map(
-            fn (KnmiStation $station) => [
+            fn (BuienradarStation $station) => [
                 'code' => $station->getCode(),
                 'name' => $station->getName(),
                 'latitude' => $station->getLatitude(),

@@ -7,18 +7,18 @@ namespace Seaswim\Infrastructure\ExternalApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Seaswim\Application\Port\WeatherConditionsProviderInterface;
 use Seaswim\Domain\Entity\WeatherConditions;
-use Seaswim\Domain\Service\KnmiStationMatcher;
+use Seaswim\Domain\Service\BuienradarStationMatcher;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WindSpeed;
-use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface;
+use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 
-final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
+final readonly class BuienradarAdapter implements WeatherConditionsProviderInterface
 {
     public function __construct(
-        private KnmiHttpClientInterface $client,
-        private KnmiStationMatcher $stationMatcher,
+        private BuienradarHttpClientInterface $client,
+        private BuienradarStationMatcher $stationMatcher,
         private CacheItemPoolInterface $cache,
         private int $cacheTtl,
     ) {
@@ -26,7 +26,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
 
     public function getConditions(Location $location): ?WeatherConditions
     {
-        // Find matching KNMI station for this RWS location
+        // Find matching Buienradar station for this RWS location
         $station = $this->stationMatcher->findMatchingStation($location->getName());
 
         if (null === $station) {
@@ -34,7 +34,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
         }
 
         // Cache by station code to avoid duplicate fetches
-        $cacheKey = 'knmi_weather_'.$station->getCode();
+        $cacheKey = 'buienradar_weather_'.$station->getCode();
         $cacheItem = $this->cache->getItem($cacheKey);
 
         if ($cacheItem->isHit()) {
@@ -44,7 +44,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
             return $this->cloneWithLocation($cachedConditions, $location);
         }
 
-        $data = $this->client->fetchHourlyData($station->getCode());
+        $data = $this->client->fetchWeatherData($station->getCode());
 
         if (null === $data) {
             // Return stale cache if available
@@ -83,7 +83,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
             airTemperature: Temperature::fromCelsius($data['temperature'] ?? null),
             windSpeed: WindSpeed::fromMetersPerSecond($data['windSpeed'] ?? null),
             windDirection: $data['windDirection'] ?? null,
-            uvIndex: UVIndex::fromValue(null), // UV not available in KNMI hourly data
+            uvIndex: UVIndex::fromValue(null), // UV not available in Buienradar feed
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
         );
     }

@@ -66,7 +66,7 @@ make ci       # Run all checks
 - **Swim locations:** Named locations along the Dutch coast/lakes with geographic coordinates
 - **Water conditions:** Water temperature, wave height, water height, current speed
 - **Weather conditions:** Air temperature, wind speed, wind direction, UV index
-- **Data sources:** Rijkswaterstaat (water data), KNMI (weather data)
+- **Data sources:** Rijkswaterstaat (water data), Buienradar (weather data)
 - Target users: Sea swimmers, open water swimming enthusiasts in the Netherlands
 
 ## Important Constraints
@@ -76,4 +76,4 @@ make ci       # Run all checks
 
 ## External Dependencies
 - **Rijkswaterstaat API:** Water conditions (temperature, waves, currents)
-- **KNMI API:** Weather conditions (air temperature, wind, UV index)
+- **Buienradar API:** Weather conditions (air temperature, wind, humidity)

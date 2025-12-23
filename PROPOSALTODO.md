@@ -4,7 +4,7 @@ Potential features and capabilities to propose for Seaswim.
 
 ## Proposals
 
-- [ ] **Core data retrieval** - Fetching water conditions from Dutch data sources (Rijkswaterstaat, KNMI)
+- [ ] **Core data retrieval** - Fetching water conditions from Dutch data sources (Rijkswaterstaat, Buienradar)
 - [ ] **Dashboard** - Vue.js frontend for viewing conditions
 - [ ] **CLI tool** - Command-line interface for checking conditions, managing data retrieval, and location management
 - [ ] **Wearable API** - API Platform endpoints for devices

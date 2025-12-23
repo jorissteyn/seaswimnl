@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\ExternalApi\Client;
 
-interface KnmiHttpClientInterface
+interface BuienradarHttpClientInterface
 {
     /**
-     * Fetch the list of KNMI weather stations.
+     * Fetch the list of Buienradar weather stations.
      *
      * @return array<int, array{code: string, name: string, latitude: float, longitude: float}>|null
      */
     public function fetchStations(): ?array;
 
     /**
-     * Fetch hourly weather data for a given station.
-     * Returns yesterday's latest data since KNMI publishes with ~1 day delay.
+     * Fetch current weather data for a given station.
      *
      * @return array<string, mixed>|null Normalized weather data or null on failure
      */
-    public function fetchHourlyData(string $stationCode, ?\DateTimeImmutable $date = null): ?array;
+    public function fetchWeatherData(string $stationCode): ?array;
 }

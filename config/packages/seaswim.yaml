@@ -1,7 +1,7 @@
 parameters:
     seaswim.apis.rijkswaterstaat.base_url: '%env(RWS_API_URL)%'
     seaswim.apis.rijkswaterstaat.timeout: 30
-    seaswim.apis.knmi.base_url: 'https://www.daggegevens.knmi.nl'
-    seaswim.apis.knmi.timeout: 30
+    seaswim.apis.buienradar.base_url: '%env(BUIENRADAR_API_URL)%'
+    seaswim.apis.buienradar.timeout: 30
     seaswim.cache.water_ttl: 3600
     seaswim.cache.weather_ttl: 3600

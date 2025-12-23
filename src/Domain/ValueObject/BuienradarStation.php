@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\ValueObject;
 
-final readonly class KnmiStation
+final readonly class BuienradarStation
 {
     public function __construct(
         private string $code,

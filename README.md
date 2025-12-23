@@ -85,9 +85,8 @@ Copy `.env` to `.env.local` and configure:
 # Rijkswaterstaat API (WaterWebservices)
 RWS_API_URL=https://ddapi20-waterwebservices.rijkswaterstaat.nl
 
-# KNMI API (Open Data Platform)
-KNMI_API_URL=https://api.dataplatform.knmi.nl/open-data/v1
-KNMI_API_KEY=your-api-key-here
+# Buienradar API
+BUIENRADAR_API_URL=https://data.buienradar.nl/2.0/feed/json
 ```
 
 ## API Endpoints Used
@@ -106,12 +105,12 @@ Data retrieved:
 
 See [RWS.md](RWS.md) for detailed API documentation.
 
-### KNMI Open Data
+### Buienradar
 
-Weather data is fetched from the KNMI Open Data Platform:
+Weather data is fetched from the Buienradar JSON feed:
 - Air temperature
 - Wind speed and direction
-- UV index
+- Humidity
 
 ## Caching
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Infrastructure\Console\Command;
 
 use Seaswim\Application\Port\LocationRepositoryInterface;
-use Seaswim\Domain\Service\KnmiStationMatcher;
+use Seaswim\Domain\Service\BuienradarStationMatcher;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,13 +15,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'seaswim:locations:match',
-    description: 'Show the matching KNMI station for an RWS location',
+    description: 'Show the matching Buienradar station for an RWS location',
 )]
 final class LocationsMatchCommand extends Command
 {
     public function __construct(
         private readonly LocationRepositoryInterface $locationRepository,
-        private readonly KnmiStationMatcher $stationMatcher,
+        private readonly BuienradarStationMatcher $stationMatcher,
     ) {
         parent::__construct();
     }
@@ -65,12 +65,12 @@ final class LocationsMatchCommand extends Command
         $station = $this->stationMatcher->findMatchingStation($location->getName());
 
         if (null === $station) {
-            $io->warning('No matching KNMI station found.');
+            $io->warning('No matching Buienradar station found.');
 
             return Command::SUCCESS;
         }
 
-        $io->section('Matching KNMI Station');
+        $io->section('Matching Buienradar Station');
         $io->table(
             ['Code', 'Name', 'Latitude', 'Longitude'],
             [[$station->getCode(), $station->getName(), $station->getLatitude(), $station->getLongitude()]],

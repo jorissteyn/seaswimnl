@@ -25,13 +25,13 @@ services:
     Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface:
         alias: Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClient
 
-    Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient:
+    Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClient:
         arguments:
-            $baseUrl: '%seaswim.apis.knmi.base_url%'
-            $timeout: '%seaswim.apis.knmi.timeout%'
+            $baseUrl: '%seaswim.apis.buienradar.base_url%'
+            $timeout: '%seaswim.apis.buienradar.timeout%'
 
-    Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface:
-        alias: Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient
+    Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface:
+        alias: Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClient
 
     # Adapters
     Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter:
@@ -39,7 +39,7 @@ services:
             $cache: '@api.cache'
             $cacheTtl: '%seaswim.cache.water_ttl%'
 
-    Seaswim\Infrastructure\ExternalApi\KnmiAdapter:
+    Seaswim\Infrastructure\ExternalApi\BuienradarAdapter:
         arguments:
             $cache: '@api.cache'
             $cacheTtl: '%seaswim.cache.weather_ttl%'
@@ -54,7 +54,7 @@ services:
         alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter
 
     Seaswim\Application\Port\WeatherConditionsProviderInterface:
-        alias: Seaswim\Infrastructure\ExternalApi\KnmiAdapter
+        alias: Seaswim\Infrastructure\ExternalApi\BuienradarAdapter
 
     Seaswim\Application\Port\TidalInfoProviderInterface:
         alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatTidalAdapter
@@ -67,12 +67,12 @@ services:
     Seaswim\Application\Port\LocationRepositoryInterface:
         alias: Seaswim\Infrastructure\Repository\JsonFileLocationRepository
 
-    Seaswim\Infrastructure\Repository\JsonFileKnmiStationRepository:
+    Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    Seaswim\Application\Port\KnmiStationRepositoryInterface:
-        alias: Seaswim\Infrastructure\Repository\JsonFileKnmiStationRepository
+    Seaswim\Application\Port\BuienradarStationRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository
 
     # Use Cases
     Seaswim\Application\UseCase\ClearCache:

@@ -5,33 +5,33 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Infrastructure\ExternalApi;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Application\Port\KnmiStationRepositoryInterface;
-use Seaswim\Domain\Service\KnmiStationMatcher;
-use Seaswim\Domain\ValueObject\KnmiStation;
+use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
+use Seaswim\Domain\Service\BuienradarStationMatcher;
+use Seaswim\Domain\ValueObject\BuienradarStation;
 use Seaswim\Domain\ValueObject\Location;
-use Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface;
-use Seaswim\Infrastructure\ExternalApi\KnmiAdapter;
+use Seaswim\Infrastructure\ExternalApi\BuienradarAdapter;
+use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-final class KnmiAdapterTest extends TestCase
+final class BuienradarAdapterTest extends TestCase
 {
     private ArrayAdapter $cache;
-    private KnmiStationMatcher $stationMatcher;
-    private KnmiStationRepositoryInterface $stationRepository;
+    private BuienradarStationMatcher $stationMatcher;
+    private BuienradarStationRepositoryInterface $stationRepository;
 
     protected function setUp(): void
     {
         $this->cache = new ArrayAdapter();
-        $this->stationRepository = $this->createMock(KnmiStationRepositoryInterface::class);
-        $this->stationMatcher = new KnmiStationMatcher($this->stationRepository);
+        $this->stationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $this->stationMatcher = new BuienradarStationMatcher($this->stationRepository);
     }
 
     public function testGetConditionsReturnsWeatherConditions(): void
     {
-        $client = $this->createMock(KnmiHttpClientInterface::class);
+        $client = $this->createMock(BuienradarHttpClientInterface::class);
         $client->expects($this->once())
-            ->method('fetchHourlyData')
-            ->with('310')
+            ->method('fetchWeatherData')
+            ->with('6310')
             ->willReturn([
                 'temperature' => 22.0,
                 'windSpeed' => 5.0,
@@ -40,10 +40,10 @@ final class KnmiAdapterTest extends TestCase
                 'timestamp' => '2024-12-20T10:00:00+01:00',
             ]);
 
-        $vlissingenStation = new KnmiStation('310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
-        $adapter = new KnmiAdapter($client, $this->stationMatcher, $this->cache, 1800);
+        $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
         $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
@@ -56,10 +56,10 @@ final class KnmiAdapterTest extends TestCase
 
     public function testGetConditionsDefaultsToDeBiltWhenNoStationMatch(): void
     {
-        $client = $this->createMock(KnmiHttpClientInterface::class);
+        $client = $this->createMock(BuienradarHttpClientInterface::class);
         $client->expects($this->once())
-            ->method('fetchHourlyData')
-            ->with('260') // De Bilt
+            ->method('fetchWeatherData')
+            ->with('6260') // De Bilt
             ->willReturn([
                 'temperature' => 18.0,
                 'windSpeed' => 3.0,
@@ -69,10 +69,10 @@ final class KnmiAdapterTest extends TestCase
             ]);
 
         $this->stationRepository->method('findAll')->willReturn([
-            new KnmiStation('260', 'De Bilt', 52.10, 5.18),
+            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
         ]);
 
-        $adapter = new KnmiAdapter($client, $this->stationMatcher, $this->cache, 1800);
+        $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
         $location = new Location('offshore', 'Offshore platform XYZ', 52.00, 4.00);
 
         $conditions = $adapter->getConditions($location);
@@ -83,9 +83,9 @@ final class KnmiAdapterTest extends TestCase
 
     public function testGetConditionsReturnsCachedData(): void
     {
-        $client = $this->createMock(KnmiHttpClientInterface::class);
+        $client = $this->createMock(BuienradarHttpClientInterface::class);
         $client->expects($this->once())
-            ->method('fetchHourlyData')
+            ->method('fetchWeatherData')
             ->willReturn([
                 'temperature' => 22.0,
                 'windSpeed' => 5.0,
@@ -94,10 +94,10 @@ final class KnmiAdapterTest extends TestCase
                 'timestamp' => '2024-12-20T10:00:00+01:00',
             ]);
 
-        $vlissingenStation = new KnmiStation('310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
-        $adapter = new KnmiAdapter($client, $this->stationMatcher, $this->cache, 1800);
+        $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
         $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         // First call should hit the API
@@ -112,15 +112,15 @@ final class KnmiAdapterTest extends TestCase
 
     public function testGetConditionsReturnsNullOnApiFailure(): void
     {
-        $client = $this->createMock(KnmiHttpClientInterface::class);
+        $client = $this->createMock(BuienradarHttpClientInterface::class);
         $client->expects($this->once())
-            ->method('fetchHourlyData')
+            ->method('fetchWeatherData')
             ->willReturn(null);
 
-        $vlissingenStation = new KnmiStation('310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
-        $adapter = new KnmiAdapter($client, $this->stationMatcher, $this->cache, 1800);
+        $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
         $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
@@ -130,18 +130,18 @@ final class KnmiAdapterTest extends TestCase
 
     public function testHandlesPartialData(): void
     {
-        $client = $this->createMock(KnmiHttpClientInterface::class);
-        $client->method('fetchHourlyData')
+        $client = $this->createMock(BuienradarHttpClientInterface::class);
+        $client->method('fetchWeatherData')
             ->willReturn([
                 'temperature' => 22.0,
                 'timestamp' => '2024-12-20T10:00:00+01:00',
                 // windSpeed, windDirection, humidity are missing
             ]);
 
-        $vlissingenStation = new KnmiStation('310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
-        $adapter = new KnmiAdapter($client, $this->stationMatcher, $this->cache, 1800);
+        $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
         $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
