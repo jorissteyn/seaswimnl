@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'seaswim:locations:refresh',
-    description: 'Refresh swim locations from Rijkswaterstaat',
+    description: 'Refresh swim locations from Rijkswaterstaat and weather stations from KNMI',
 )]
 final class LocationsRefreshCommand extends Command
 {
@@ -27,18 +27,26 @@ final class LocationsRefreshCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->info('Refreshing locations from Rijkswaterstaat...');
+        $io->info('Refreshing locations from Rijkswaterstaat and KNMI...');
 
-        $count = $this->refreshLocations->execute();
+        $result = $this->refreshLocations->execute();
 
-        if ($count < 0) {
-            $io->error('Failed to refresh locations. API may be unavailable.');
+        $hasError = false;
 
-            return Command::FAILURE;
+        if ($result['locations'] < 0) {
+            $io->error('Failed to refresh RWS locations. API may be unavailable.');
+            $hasError = true;
+        } else {
+            $io->success(sprintf('Refreshed %d RWS locations', $result['locations']));
         }
 
-        $io->success(sprintf('Refreshed %d locations', $count));
+        if ($result['stations'] < 0) {
+            $io->error('Failed to refresh KNMI stations.');
+            $hasError = true;
+        } else {
+            $io->success(sprintf('Refreshed %d KNMI weather stations', $result['stations']));
+        }
 
-        return Command::SUCCESS;
+        return $hasError ? Command::FAILURE : Command::SUCCESS;
     }
 }

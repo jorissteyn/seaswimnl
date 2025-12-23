@@ -118,9 +118,6 @@ final class ConditionsController extends AbstractController
             'safetyDescription' => $metrics->getSafetyScore()->getDescription(),
             'comfortIndex' => $metrics->getComfortIndex()->getValue(),
             'comfortLabel' => $metrics->getComfortIndex()->getLabel(),
-            'recommendation' => $metrics->getRecommendation()->getTypeValue(),
-            'recommendationLabel' => $metrics->getRecommendation()->getLabel(),
-            'recommendationExplanation' => $metrics->getRecommendation()->getExplanation(),
         ];
 
         return $result;

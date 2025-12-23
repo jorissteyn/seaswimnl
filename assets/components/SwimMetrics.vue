@@ -7,20 +7,9 @@
                 <dd>
                     <span :class="['safety-badge', data.safetyScore]">
                         {{ data.safetyLabel }}
+                        <span v-if="data.safetyScore === 'red'" class="tooltip-trigger" :title="data.safetyDescription">ⓘ</span>
                     </span>
                 </dd>
-            </div>
-            <div class="condition-item">
-                <dt>Conditions</dt>
-                <dd>{{ data.safetyDescription }}</dd>
-            </div>
-            <div class="condition-item">
-                <dt>Recommendation</dt>
-                <dd>{{ data.recommendationLabel }}</dd>
-            </div>
-            <div class="condition-item">
-                <dt>Details</dt>
-                <dd>{{ data.recommendationExplanation }}</dd>
             </div>
             <div class="condition-item">
                 <dt>Comfort Index</dt>
@@ -48,6 +37,12 @@ export default {
 </script>
 
 <style scoped>
+.tooltip-trigger {
+    margin-left: 0.4rem;
+    cursor: help;
+    opacity: 0.9;
+}
+
 .comfort-value {
     display: flex;
     align-items: center;

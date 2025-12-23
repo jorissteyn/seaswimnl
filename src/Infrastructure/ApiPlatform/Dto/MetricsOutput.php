@@ -12,9 +12,6 @@ final readonly class MetricsOutput
         public string $safetyDescription,
         public int $comfortIndex,
         public string $comfortLabel,
-        public string $recommendation,
-        public string $recommendationLabel,
-        public string $recommendationExplanation,
     ) {
     }
 }

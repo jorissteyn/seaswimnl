@@ -190,6 +190,11 @@ export default {
 </script>
 
 <style scoped>
+.location-selector {
+    position: relative;
+    z-index: 1000;
+}
+
 .autocomplete-wrapper {
     position: relative;
     display: flex;

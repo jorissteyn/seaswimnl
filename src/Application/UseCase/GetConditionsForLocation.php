@@ -13,7 +13,6 @@ use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
-use Seaswim\Domain\Service\SwimTimeRecommender;
 use Seaswim\Domain\ValueObject\TideInfo;
 
 final readonly class GetConditionsForLocation
@@ -25,7 +24,6 @@ final readonly class GetConditionsForLocation
         private TidalInfoProviderInterface $tidalProvider,
         private SafetyScoreCalculator $safetyCalculator,
         private ComfortIndexCalculator $comfortCalculator,
-        private SwimTimeRecommender $recommender,
     ) {
     }
 
@@ -46,13 +44,12 @@ final readonly class GetConditionsForLocation
 
         $safetyScore = $this->safetyCalculator->calculate($water, $weather);
         $comfortIndex = $this->comfortCalculator->calculate($water, $weather);
-        $recommendation = $this->recommender->recommend($safetyScore, $comfortIndex);
 
         return [
             'water' => $water,
             'weather' => $weather,
             'tides' => $tides,
-            'metrics' => new CalculatedMetrics($safetyScore, $comfortIndex, $recommendation),
+            'metrics' => new CalculatedMetrics($safetyScore, $comfortIndex),
         ];
     }
 }

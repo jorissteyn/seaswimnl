@@ -68,6 +68,15 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
                 ],
             ]);
 
+            // 204 No Content means no data available for this location
+            if (204 === $response->getStatusCode()) {
+                $this->logger->debug('RWS API returned no data for location', [
+                    'location' => $locationCode,
+                ]);
+
+                return null;
+            }
+
             $data = $response->toArray();
 
             return $this->normalizeWaterData($data);

@@ -66,10 +66,22 @@ export default {
                 const response = await fetch('/api/locations');
                 if (!response.ok) throw new Error('Failed to fetch locations');
                 this.locations = await response.json();
+                this.restoreSavedLocation();
             } catch (e) {
                 this.error = 'Failed to load locations. Please check your connection.';
             } finally {
                 this.loadingLocations = false;
+            }
+        },
+        restoreSavedLocation() {
+            const savedId = localStorage.getItem('seaswim:selectedLocationId');
+            if (!savedId) return;
+
+            const location = this.locations.find(loc => loc.id === savedId);
+            if (location) {
+                this.selectLocation(location);
+            } else {
+                localStorage.removeItem('seaswim:selectedLocationId');
             }
         },
         async selectLocation(location) {
@@ -77,7 +89,12 @@ export default {
             this.conditions = null;
             this.error = null;
 
-            if (!location) return;
+            if (!location) {
+                localStorage.removeItem('seaswim:selectedLocationId');
+                return;
+            }
+
+            localStorage.setItem('seaswim:selectedLocationId', location.id);
 
             this.loadingConditions = true;
             try {

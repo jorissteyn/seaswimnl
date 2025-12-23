@@ -28,7 +28,6 @@ services:
     Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClient:
         arguments:
             $baseUrl: '%seaswim.apis.knmi.base_url%'
-            $apiKey: '%seaswim.apis.knmi.api_key%'
             $timeout: '%seaswim.apis.knmi.timeout%'
 
     Seaswim\Infrastructure\ExternalApi\Client\KnmiHttpClientInterface:
@@ -60,13 +59,20 @@ services:
     Seaswim\Application\Port\TidalInfoProviderInterface:
         alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatTidalAdapter
 
-    # Repository
+    # Repositories
     Seaswim\Infrastructure\Repository\JsonFileLocationRepository:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
     Seaswim\Application\Port\LocationRepositoryInterface:
         alias: Seaswim\Infrastructure\Repository\JsonFileLocationRepository
+
+    Seaswim\Infrastructure\Repository\JsonFileKnmiStationRepository:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    Seaswim\Application\Port\KnmiStationRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\JsonFileKnmiStationRepository
 
     # Use Cases
     Seaswim\Application\UseCase\ClearCache:

@@ -162,7 +162,6 @@ final class ConditionsCommand extends Command
             [
                 ['Safety Score', sprintf('<fg=%s>%s</> (%s)', $safetyColor, strtoupper($metrics->getSafetyScore()->value), $metrics->getSafetyScore()->getLabel())],
                 ['Comfort Index', sprintf('%d/10 (%s)', $metrics->getComfortIndex()->getValue(), $metrics->getComfortIndex()->getLabel())],
-                ['Recommendation', sprintf('%s - %s', $metrics->getRecommendation()->getLabel(), $metrics->getRecommendation()->getExplanation())],
             ],
         );
     }
@@ -238,9 +237,6 @@ final class ConditionsCommand extends Command
             'safetyLabel' => $metrics->getSafetyScore()->getLabel(),
             'comfortIndex' => $metrics->getComfortIndex()->getValue(),
             'comfortLabel' => $metrics->getComfortIndex()->getLabel(),
-            'recommendation' => $metrics->getRecommendation()->getTypeValue(),
-            'recommendationLabel' => $metrics->getRecommendation()->getLabel(),
-            'recommendationExplanation' => $metrics->getRecommendation()->getExplanation(),
         ];
 
         return $result;
