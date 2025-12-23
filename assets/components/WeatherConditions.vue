@@ -8,7 +8,19 @@
             </div>
             <div class="condition-item">
                 <dt>Wind</dt>
-                <dd>{{ formatWind(data.windSpeed, data.windDirection) }}</dd>
+                <dd class="wind-display">
+                    <span v-if="data.windSpeed !== null" :class="['beaufort-badge', beaufortClass]">
+                        Bft {{ getBeaufort(data.windSpeed) }}
+                    </span>
+                    <span class="wind-speed">{{ formatWindSpeedOnly(data.windSpeed) }}</span>
+                    <span v-if="data.windDirection" class="compass" :title="data.windDirection">
+                        <span class="compass-letter compass-n">N</span>
+                        <span class="compass-letter compass-e">E</span>
+                        <span class="compass-letter compass-s">S</span>
+                        <span class="compass-letter compass-w">W</span>
+                        <span class="compass-arrow" :style="{ transform: `rotate(${getWindDegrees(data.windDirection)}deg)` }"></span>
+                    </span>
+                </dd>
             </div>
             <div class="condition-item">
                 <dt>UV Index</dt>
@@ -28,14 +40,52 @@ export default {
             required: true,
         },
     },
+    computed: {
+        beaufortClass() {
+            if (this.data.windSpeed === null) return '';
+            const bft = this.getBeaufort(this.data.windSpeed);
+            if (bft <= 3) return 'bft-calm';
+            if (bft <= 5) return 'bft-moderate';
+            if (bft <= 7) return 'bft-strong';
+            return 'bft-severe';
+        },
+    },
     methods: {
         formatTemp(value) {
             return value !== null ? `${value}°C` : 'N/A';
         },
-        formatWind(speed, direction) {
+        formatWindSpeedOnly(speed) {
             if (speed === null) return 'N/A';
-            const dir = direction ? ` ${direction}` : '';
-            return `${Math.round(speed)} km/h${dir}`;
+            return `${Math.round(speed)} km/h`;
+        },
+        getWindDegrees(direction) {
+            const directions = {
+                'N': 0, 'NNO': 22.5, 'NO': 45, 'ONO': 67.5,
+                'O': 90, 'OZO': 112.5, 'ZO': 135, 'ZZO': 157.5,
+                'Z': 180, 'ZZW': 202.5, 'ZW': 225, 'WZW': 247.5,
+                'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5,
+                // English variants
+                'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
+                'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
+                'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
+            };
+            return directions[direction] || 0;
+        },
+        getBeaufort(kmh) {
+            const ms = kmh / 3.6;
+            if (ms < 0.3) return 0;
+            if (ms < 1.6) return 1;
+            if (ms < 3.4) return 2;
+            if (ms < 5.5) return 3;
+            if (ms < 8.0) return 4;
+            if (ms < 10.8) return 5;
+            if (ms < 13.9) return 6;
+            if (ms < 17.2) return 7;
+            if (ms < 20.8) return 8;
+            if (ms < 24.5) return 9;
+            if (ms < 28.5) return 10;
+            if (ms < 32.7) return 11;
+            return 12;
         },
         formatUV(value, level) {
             if (value === null) return 'N/A';

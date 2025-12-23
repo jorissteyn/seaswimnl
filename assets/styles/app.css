@@ -334,6 +334,117 @@ body::before {
     border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
+/* Wind display with Beaufort badge */
+.wind-display {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.beaufort-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.beaufort-badge.bft-calm {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.beaufort-badge.bft-moderate {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.beaufort-badge.bft-strong {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.beaufort-badge.bft-severe {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+/* Wind compass */
+.compass {
+    position: relative;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.compass-letter {
+    position: absolute;
+    font-size: 0.4rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1;
+}
+
+.compass-n {
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e07a7a;
+}
+
+.compass-s {
+    bottom: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.compass-e {
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.compass-w {
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.compass-arrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 0.7rem;
+    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
+    transform-origin: center top;
+    margin-left: -1px;
+    margin-top: 0;
+    border-radius: 1px;
+}
+
+.compass-arrow::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid #ffffff;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .header h1 {
