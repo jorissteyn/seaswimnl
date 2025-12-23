@@ -107,17 +107,35 @@ See [RWS.md](RWS.md) for detailed API documentation.
 
 ### Buienradar
 
-Weather data is fetched from the Buienradar JSON feed:
+Weather data is fetched from the Buienradar JSON feed (`https://data.buienradar.nl/2.0/feed/json`):
 - Air temperature
-- Wind speed and direction
+- Wind speed and direction (with Beaufort scale)
 - Humidity
+
+**Station Matching:** Buienradar stations are automatically matched to RWS locations using fuzzy name matching (Levenshtein distance). The `seaswim:locations:refresh` command fetches both RWS locations and Buienradar stations.
 
 ## Caching
 
-API responses are cached using Symfony Cache (filesystem adapter):
-- Water conditions: 15 minutes TTL
-- Weather conditions: 30 minutes TTL
-- Stale data is served if the API is unavailable
+API responses are cached using Symfony Cache (filesystem adapter) stored in `var/cache/`:
+
+| Data Type | Cache TTL | Stale Fallback |
+|-----------|-----------|----------------|
+| Water conditions | 1 hour | 4 hours |
+| Weather conditions | 1 hour | 4 hours |
+| Tidal predictions | 1 hour | 4 hours |
+
+**How caching works:**
+1. Fresh data is fetched from the API and cached
+2. Subsequent requests within TTL return cached data (no API call)
+3. When TTL expires, fresh data is fetched
+4. If API fails, stale cached data is served (up to 4x TTL)
+5. Specific error messages are shown when APIs fail
+
+**Cache commands:**
+```bash
+# Clear all API caches
+ddev exec bin/seaswim seaswim:cache:clear
+```
 
 ## Swim Metrics
 
