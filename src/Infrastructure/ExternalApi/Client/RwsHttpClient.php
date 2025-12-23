@@ -211,6 +211,13 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             'timestamp' => null,
         ];
 
+        // Track timestamps for each measurement type to pick the most recent
+        $timestamps = [
+            'waterTemperature' => null,
+            'waterHeight' => null,
+            'waveHeight' => null,
+        ];
+
         $observations = $data['WaarnemingenLijst'] ?? [];
 
         foreach ($observations as $observation) {
@@ -223,33 +230,42 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
                 continue;
             }
 
-            $latestMeasurement = $measurements[\count($measurements) - 1];
-            $value = $latestMeasurement['Meetwaarde']['Waarde_Numeriek'] ?? null;
-            $timestamp = $latestMeasurement['Tijdstip'] ?? null;
+            // Check each measurement in this observation
+            foreach ($measurements as $measurement) {
+                $value = $measurement['Meetwaarde']['Waarde_Numeriek'] ?? null;
+                $timestamp = $measurement['Tijdstip'] ?? null;
 
-            if (null !== $timestamp && null === $result['timestamp']) {
-                $result['timestamp'] = $timestamp;
-            }
+                if (null === $value || null === $timestamp) {
+                    continue;
+                }
 
-            switch ($grootheid) {
-                case 'T':
-                    // Only use surface water temperature (OW), not air temperature (LT)
-                    // Take the first valid reading (request is filtered to RIKZMON_TEMP)
-                    if ('OW' === $compartiment && null === $result['waterTemperature']) {
-                        $result['waterTemperature'] = $value;
-                    }
-                    break;
-                case 'WATHTE':
-                    // Convert from cm to meters
-                    if (null === $result['waterHeight']) {
-                        $result['waterHeight'] = null !== $value ? $value / 100.0 : null;
-                    }
-                    break;
-                case 'Hm0':
-                    if (null === $result['waveHeight']) {
-                        $result['waveHeight'] = $value;
-                    }
-                    break;
+                switch ($grootheid) {
+                    case 'T':
+                        // Only use surface water temperature (OW), not air temperature (LT)
+                        // Pick the most recent reading by timestamp
+                        if ('OW' === $compartiment) {
+                            if (null === $timestamps['waterTemperature'] || $timestamp > $timestamps['waterTemperature']) {
+                                $result['waterTemperature'] = $value;
+                                $timestamps['waterTemperature'] = $timestamp;
+                                $result['timestamp'] = $timestamp;
+                            }
+                        }
+                        break;
+                    case 'WATHTE':
+                        // Convert from cm to meters, pick most recent
+                        if (null === $timestamps['waterHeight'] || $timestamp > $timestamps['waterHeight']) {
+                            $result['waterHeight'] = $value / 100.0;
+                            $timestamps['waterHeight'] = $timestamp;
+                        }
+                        break;
+                    case 'Hm0':
+                        // Pick most recent
+                        if (null === $timestamps['waveHeight'] || $timestamp > $timestamps['waveHeight']) {
+                            $result['waveHeight'] = $value;
+                            $timestamps['waveHeight'] = $timestamp;
+                        }
+                        break;
+                }
             }
         }
 
