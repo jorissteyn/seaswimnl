@@ -11,10 +11,6 @@
                 <dd>{{ formatMeters(data.waveHeight) }}</dd>
             </div>
             <div class="condition-item">
-                <dt>Water Height</dt>
-                <dd>{{ formatMeters(data.waterHeight) }}</dd>
-            </div>
-            <div class="condition-item">
                 <dt>Quality</dt>
                 <dd :class="'quality-' + data.quality">{{ data.qualityLabel }}</dd>
             </div>
