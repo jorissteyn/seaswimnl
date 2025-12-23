@@ -74,10 +74,24 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
     {
         $date ??= new \DateTimeImmutable();
 
-        // Try yesterday's full day data since KNMI publishes with ~1 day delay
+        // Try today first - KNMI hourly data may be available with only a few hours delay
+        $data = $this->fetchHourlyDataForDate($stationCode, $date);
+
+        if (null !== $data) {
+            return $data;
+        }
+
+        // Fall back to yesterday if today's data isn't available yet
         $yesterday = $date->modify('-1 day');
-        $startDate = $yesterday->format('Ymd').'01';
-        $endDate = $yesterday->format('Ymd').'24';
+
+        return $this->fetchHourlyDataForDate($stationCode, $yesterday);
+    }
+
+    private function fetchHourlyDataForDate(string $stationCode, \DateTimeImmutable $date): ?array
+    {
+        // Request all hours (01-24) for this date
+        $startDate = $date->format('Ymd').'01';
+        $endDate = $date->format('Ymd').'24';
 
         try {
             $response = $this->httpClient->request('POST', $this->baseUrl.self::HOURLY_DATA_PATH, [
@@ -97,9 +111,9 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
             $data = $response->toArray();
 
             if ([] === $data) {
-                $this->logger->warning('KNMI API returned empty data', [
+                $this->logger->debug('KNMI API returned no data for date', [
                     'station' => $stationCode,
-                    'date' => $yesterday->format('Y-m-d'),
+                    'date' => $date->format('Y-m-d'),
                 ]);
 
                 return null;
@@ -109,7 +123,7 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
         } catch (\Throwable $e) {
             $this->logger->error('KNMI API request failed', [
                 'station' => $stationCode,
-                'date' => $yesterday->format('Y-m-d'),
+                'date' => $date->format('Y-m-d'),
                 'exception' => $e,
             ]);
 
