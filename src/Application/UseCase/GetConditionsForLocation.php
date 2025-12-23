@@ -28,7 +28,7 @@ final readonly class GetConditionsForLocation
     }
 
     /**
-     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics}|null
+     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics, errors: array<string, string>}|null
      */
     public function execute(string $locationId): ?array
     {
@@ -38,9 +38,22 @@ final readonly class GetConditionsForLocation
             return null;
         }
 
+        $errors = [];
+
         $water = $this->waterProvider->getConditions($location);
+        if (null === $water) {
+            $errors['water'] = $this->waterProvider->getLastError() ?? 'Failed to fetch water conditions';
+        }
+
         $weather = $this->weatherProvider->getConditions($location);
+        if (null === $weather) {
+            $errors['weather'] = $this->weatherProvider->getLastError() ?? 'Failed to fetch weather conditions';
+        }
+
         $tides = $this->tidalProvider->getTidalInfo($location);
+        if (null === $tides) {
+            $errors['tides'] = $this->tidalProvider->getLastError() ?? 'Failed to fetch tidal data';
+        }
 
         $safetyScore = $this->safetyCalculator->calculate($water, $weather);
         $comfortIndex = $this->comfortCalculator->calculate($water, $weather);
@@ -50,6 +63,7 @@ final readonly class GetConditionsForLocation
             'weather' => $weather,
             'tides' => $tides,
             'metrics' => new CalculatedMetrics($safetyScore, $comfortIndex),
+            'errors' => $errors,
         ];
     }
 }

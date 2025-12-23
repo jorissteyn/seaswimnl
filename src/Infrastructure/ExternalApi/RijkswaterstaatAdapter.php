@@ -14,17 +14,25 @@ use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
-final readonly class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
+final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
 {
+    private ?string $lastError = null;
+
     public function __construct(
-        private RwsHttpClientInterface $client,
-        private CacheItemPoolInterface $cache,
-        private int $cacheTtl,
+        private readonly RwsHttpClientInterface $client,
+        private readonly CacheItemPoolInterface $cache,
+        private readonly int $cacheTtl,
     ) {
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 
     public function getConditions(Location $location): ?WaterConditions
     {
+        $this->lastError = null;
         $cacheKey = 'rws_water_'.$location->getId();
         $cacheItem = $this->cache->getItem($cacheKey);
 
@@ -35,9 +43,13 @@ final readonly class RijkswaterstaatAdapter implements WaterConditionsProviderIn
         $data = $this->client->fetchWaterData($location->getId());
 
         if (null === $data) {
+            $this->lastError = $this->client->getLastError();
+
             // Return stale cache if available
             $staleItem = $this->cache->getItem($cacheKey.'_stale');
             if ($staleItem->isHit()) {
+                $this->lastError = null; // Clear error since we have stale data
+
                 return $staleItem->get();
             }
 

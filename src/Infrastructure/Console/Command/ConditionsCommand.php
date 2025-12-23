@@ -62,6 +62,8 @@ final class ConditionsCommand extends Command
     {
         $io->title('Water Conditions');
 
+        $errors = $conditions['errors'] ?? [];
+
         $water = $conditions['water'];
         if (null !== $water) {
             $io->table(
@@ -75,7 +77,7 @@ final class ConditionsCommand extends Command
                 ],
             );
         } else {
-            $io->warning('Water conditions unavailable');
+            $io->error($errors['water'] ?? 'Water conditions unavailable');
         }
 
         $io->title('Weather Conditions');
@@ -93,7 +95,7 @@ final class ConditionsCommand extends Command
                 ],
             );
         } else {
-            $io->warning('Weather conditions unavailable');
+            $io->error($errors['weather'] ?? 'Weather conditions unavailable');
         }
 
         $io->title('Tides');
@@ -144,7 +146,7 @@ final class ConditionsCommand extends Command
                 $io->warning('No tide data available');
             }
         } else {
-            $io->warning('Tidal information unavailable for this location');
+            $io->error($errors['tides'] ?? 'Tidal information unavailable for this location');
         }
 
         $io->title('Swim Metrics');
@@ -238,6 +240,11 @@ final class ConditionsCommand extends Command
             'comfortIndex' => $metrics->getComfortIndex()->getValue(),
             'comfortLabel' => $metrics->getComfortIndex()->getLabel(),
         ];
+
+        $errors = $conditions['errors'] ?? [];
+        if ([] !== $errors) {
+            $result['errors'] = $errors;
+        }
 
         return $result;
     }

@@ -10,4 +10,6 @@ use Seaswim\Domain\ValueObject\TideInfo;
 interface TidalInfoProviderInterface
 {
     public function getTidalInfo(Location $location): ?TideInfo;
+
+    public function getLastError(): ?string;
 }

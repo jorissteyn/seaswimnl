@@ -12,18 +12,25 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *
  * @see https://waterwebservices.rijkswaterstaat.nl
  */
-final readonly class RwsHttpClient implements RwsHttpClientInterface
+final class RwsHttpClient implements RwsHttpClientInterface
 {
     private const METADATA_PATH = '/METADATASERVICES/OphalenCatalogus';
     private const LATEST_OBSERVATIONS_PATH = '/ONLINEWAARNEMINGENSERVICES/OphalenLaatsteWaarnemingen';
     private const OBSERVATIONS_PATH = '/ONLINEWAARNEMINGENSERVICES/OphalenWaarnemingen';
 
+    private ?string $lastError = null;
+
     public function __construct(
-        private HttpClientInterface $httpClient,
-        private LoggerInterface $logger,
-        private string $baseUrl,
-        private int $timeout,
+        private readonly HttpClientInterface $httpClient,
+        private readonly LoggerInterface $logger,
+        private readonly string $baseUrl,
+        private readonly int $timeout,
     ) {
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 
     /**
@@ -33,6 +40,8 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
      */
     public function fetchWaterData(string $locationCode): ?array
     {
+        $this->lastError = null;
+
         $payload = [
             'LocatieLijst' => [
                 ['Code' => $locationCode],
@@ -70,6 +79,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 
             // 204 No Content means no data available for this location
             if (204 === $response->getStatusCode()) {
+                $this->lastError = 'No water data available for this location';
                 $this->logger->debug('RWS API returned no data for location', [
                     'location' => $locationCode,
                 ]);
@@ -81,6 +91,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 
             return $this->normalizeWaterData($data);
         } catch (\Throwable $e) {
+            $this->lastError = 'RWS API error: '.$e->getMessage();
             $this->logger->error('RWS API request failed', [
                 'location' => $locationCode,
                 'exception' => $e,
@@ -97,6 +108,8 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
      */
     public function fetchLocations(): ?array
     {
+        $this->lastError = null;
+
         $payload = [
             'CatalogusFilter' => [
                 'Compartimenten' => true,
@@ -120,6 +133,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             $this->logger->debug('Response status: {status}', ['status' => $statusCode]);
 
             if ($statusCode >= 400) {
+                $this->lastError = sprintf('RWS API returned HTTP %d', $statusCode);
                 $this->logger->error('RWS API locations request failed', [
                     'status' => $statusCode,
                     'response' => $response->getContent(false),
@@ -133,6 +147,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             return $this->normalizeLocations($data);
         } catch (\Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface $e) {
             $response = $e->getResponse();
+            $this->lastError = sprintf('RWS API error: HTTP %d', $response->getStatusCode());
             $this->logger->error('RWS API locations request failed', [
                 'status' => $response->getStatusCode(),
                 'response' => $response->getContent(false),
@@ -141,6 +156,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 
             return null;
         } catch (\Throwable $e) {
+            $this->lastError = 'RWS API error: '.$e->getMessage();
             $this->logger->error('RWS API locations request failed', [
                 'exception' => $e,
             ]);
@@ -156,6 +172,8 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
      */
     public function fetchTidalPredictions(string $locationCode, \DateTimeImmutable $start, \DateTimeImmutable $end): ?array
     {
+        $this->lastError = null;
+
         $payload = [
             'Locatie' => ['Code' => $locationCode],
             'AquoPlusWaarnemingMetadata' => [
@@ -186,6 +204,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 
             return $this->normalizeTidalPredictions($data);
         } catch (\Throwable $e) {
+            $this->lastError = 'RWS API error: '.$e->getMessage();
             $this->logger->error('RWS API tidal predictions request failed', [
                 'location' => $locationCode,
                 'exception' => $e,

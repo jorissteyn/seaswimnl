@@ -26,4 +26,9 @@ interface RwsHttpClientInterface
      * @return array<int, array{timestamp: string, height: float}>|null Height in cm relative to NAP
      */
     public function fetchTidalPredictions(string $locationCode, \DateTimeImmutable $start, \DateTimeImmutable $end): ?array;
+
+    /**
+     * Get the last error message from a failed API call.
+     */
+    public function getLastError(): ?string;
 }

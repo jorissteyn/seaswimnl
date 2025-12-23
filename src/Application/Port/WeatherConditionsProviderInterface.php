@@ -10,4 +10,6 @@ use Seaswim\Domain\ValueObject\Location;
 interface WeatherConditionsProviderInterface
 {
     public function getConditions(Location $location): ?WeatherConditions;
+
+    public function getLastError(): ?string;
 }

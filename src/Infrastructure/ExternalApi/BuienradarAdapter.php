@@ -14,22 +14,33 @@ use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WindSpeed;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 
-final readonly class BuienradarAdapter implements WeatherConditionsProviderInterface
+final class BuienradarAdapter implements WeatherConditionsProviderInterface
 {
+    private ?string $lastError = null;
+
     public function __construct(
-        private BuienradarHttpClientInterface $client,
-        private BuienradarStationMatcher $stationMatcher,
-        private CacheItemPoolInterface $cache,
-        private int $cacheTtl,
+        private readonly BuienradarHttpClientInterface $client,
+        private readonly BuienradarStationMatcher $stationMatcher,
+        private readonly CacheItemPoolInterface $cache,
+        private readonly int $cacheTtl,
     ) {
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 
     public function getConditions(Location $location): ?WeatherConditions
     {
+        $this->lastError = null;
+
         // Find matching Buienradar station for this RWS location
         $station = $this->stationMatcher->findMatchingStation($location->getName());
 
         if (null === $station) {
+            $this->lastError = sprintf('No Buienradar station found matching "%s"', $location->getName());
+
             return null;
         }
 
@@ -47,9 +58,12 @@ final readonly class BuienradarAdapter implements WeatherConditionsProviderInter
         $data = $this->client->fetchWeatherData($station->getCode());
 
         if (null === $data) {
+            $this->lastError = $this->client->getLastError();
+
             // Return stale cache if available
             $staleItem = $this->cache->getItem($cacheKey.'_stale');
             if ($staleItem->isHit()) {
+                $this->lastError = null; // Clear error since we have stale data
                 $staleConditions = $staleItem->get();
 
                 return $this->cloneWithLocation($staleConditions, $location);

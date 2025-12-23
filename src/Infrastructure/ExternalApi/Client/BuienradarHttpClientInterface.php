@@ -19,4 +19,9 @@ interface BuienradarHttpClientInterface
      * @return array<string, mixed>|null Normalized weather data or null on failure
      */
     public function fetchWeatherData(string $stationCode): ?array;
+
+    /**
+     * Get the last error message from a failed API call.
+     */
+    public function getLastError(): ?string;
 }

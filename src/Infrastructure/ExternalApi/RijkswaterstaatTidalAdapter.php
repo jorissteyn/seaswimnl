@@ -11,18 +11,26 @@ use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\TideInfo;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
-final readonly class RijkswaterstaatTidalAdapter implements TidalInfoProviderInterface
+final class RijkswaterstaatTidalAdapter implements TidalInfoProviderInterface
 {
+    private ?string $lastError = null;
+
     public function __construct(
-        private RwsHttpClientInterface $client,
-        private TideCalculator $tideCalculator,
-        private CacheItemPoolInterface $cache,
-        private int $cacheTtl,
+        private readonly RwsHttpClientInterface $client,
+        private readonly TideCalculator $tideCalculator,
+        private readonly CacheItemPoolInterface $cache,
+        private readonly int $cacheTtl,
     ) {
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 
     public function getTidalInfo(Location $location): ?TideInfo
     {
+        $this->lastError = null;
         $cacheKey = 'rws_tides_'.$location->getId();
         $cacheItem = $this->cache->getItem($cacheKey);
 
@@ -36,7 +44,15 @@ final readonly class RijkswaterstaatTidalAdapter implements TidalInfoProviderInt
 
         $predictions = $this->client->fetchTidalPredictions($location->getId(), $start, $end);
 
-        if (null === $predictions || [] === $predictions) {
+        if (null === $predictions) {
+            $this->lastError = $this->client->getLastError();
+
+            return null;
+        }
+
+        if ([] === $predictions) {
+            $this->lastError = 'No tidal data available for this location';
+
             return null;
         }
 

@@ -17,6 +17,8 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
     /** @var array<string, mixed>|null */
     private ?array $cachedFeed = null;
 
+    private ?string $lastError = null;
+
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly LoggerInterface $logger,
@@ -25,8 +27,14 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
     ) {
     }
 
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+
     public function fetchStations(): ?array
     {
+        $this->lastError = null;
         $feed = $this->fetchFeed();
 
         if (null === $feed) {
@@ -36,6 +44,8 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
         $measurements = $feed['actual']['stationmeasurements'] ?? [];
 
         if (!is_array($measurements)) {
+            $this->lastError = 'Buienradar API returned invalid data format';
+
             return null;
         }
 
@@ -58,6 +68,7 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
 
     public function fetchWeatherData(string $stationCode): ?array
     {
+        $this->lastError = null;
         $feed = $this->fetchFeed();
 
         if (null === $feed) {
@@ -67,6 +78,8 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
         $measurements = $feed['actual']['stationmeasurements'] ?? [];
 
         if (!is_array($measurements)) {
+            $this->lastError = 'Buienradar API returned invalid data format';
+
             return null;
         }
 
@@ -76,6 +89,7 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
             }
         }
 
+        $this->lastError = sprintf('Buienradar station %s not found', $stationCode);
         $this->logger->warning('Buienradar station not found in feed', [
             'station' => $stationCode,
         ]);
@@ -102,6 +116,7 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
 
             return $this->cachedFeed;
         } catch (\Throwable $e) {
+            $this->lastError = 'Buienradar API error: '.$e->getMessage();
             $this->logger->error('Buienradar API request failed', [
                 'exception' => $e,
             ]);
