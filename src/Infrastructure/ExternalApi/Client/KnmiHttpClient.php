@@ -70,15 +70,14 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
         return self::STATIONS;
     }
 
-    public function fetchHourlyData(string $stationCode, \DateTimeImmutable $date): ?array
+    public function fetchHourlyData(string $stationCode, ?\DateTimeImmutable $date = null): ?array
     {
-        // Format date for KNMI API (YYYYMMDDHH format)
-        // We request data for the current hour
-        $hour = (int) $date->format('H');
-        // KNMI uses hours 1-24, not 0-23
-        $knmiHour = 0 === $hour ? 24 : $hour;
-        $startDate = $date->format('Ymd').sprintf('%02d', $knmiHour);
-        $endDate = $startDate;
+        $date ??= new \DateTimeImmutable();
+
+        // Try yesterday's full day data since KNMI publishes with ~1 day delay
+        $yesterday = $date->modify('-1 day');
+        $startDate = $yesterday->format('Ymd').'01';
+        $endDate = $yesterday->format('Ymd').'24';
 
         try {
             $response = $this->httpClient->request('POST', $this->baseUrl.self::HOURLY_DATA_PATH, [
@@ -100,7 +99,7 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
             if ([] === $data) {
                 $this->logger->warning('KNMI API returned empty data', [
                     'station' => $stationCode,
-                    'date' => $date->format('Y-m-d H:i'),
+                    'date' => $yesterday->format('Y-m-d'),
                 ]);
 
                 return null;
@@ -110,7 +109,7 @@ final readonly class KnmiHttpClient implements KnmiHttpClientInterface
         } catch (\Throwable $e) {
             $this->logger->error('KNMI API request failed', [
                 'station' => $stationCode,
-                'date' => $date->format('Y-m-d H:i'),
+                'date' => $yesterday->format('Y-m-d'),
                 'exception' => $e,
             ]);
 

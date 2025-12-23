@@ -44,7 +44,7 @@ final readonly class KnmiAdapter implements WeatherConditionsProviderInterface
             return $this->cloneWithLocation($cachedConditions, $location);
         }
 
-        $data = $this->client->fetchHourlyData($station->getCode(), new \DateTimeImmutable());
+        $data = $this->client->fetchHourlyData($station->getCode());
 
         if (null === $data) {
             // Return stale cache if available

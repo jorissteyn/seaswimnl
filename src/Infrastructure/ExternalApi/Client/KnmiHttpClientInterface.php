@@ -15,8 +15,9 @@ interface KnmiHttpClientInterface
 
     /**
      * Fetch hourly weather data for a given station.
+     * Returns yesterday's latest data since KNMI publishes with ~1 day delay.
      *
      * @return array<string, mixed>|null Normalized weather data or null on failure
      */
-    public function fetchHourlyData(string $stationCode, \DateTimeImmutable $date): ?array;
+    public function fetchHourlyData(string $stationCode, ?\DateTimeImmutable $date = null): ?array;
 }
