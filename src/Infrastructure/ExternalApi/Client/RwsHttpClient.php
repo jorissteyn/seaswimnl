@@ -217,6 +217,7 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
             $metadata = $observation['AquoMetadata'] ?? [];
             $measurements = $observation['MetingenLijst'] ?? [];
             $grootheid = $metadata['Grootheid']['Code'] ?? null;
+            $compartiment = $metadata['Compartiment']['Code'] ?? null;
 
             if ([] === $measurements) {
                 continue;
@@ -232,7 +233,10 @@ final readonly class RwsHttpClient implements RwsHttpClientInterface
 
             switch ($grootheid) {
                 case 'T':
-                    $result['waterTemperature'] = $value;
+                    // Only use surface water temperature (OW), not air temperature (LT)
+                    if ('OW' === $compartiment) {
+                        $result['waterTemperature'] = $value;
+                    }
                     break;
                 case 'WATHTE':
                     // Convert from cm to meters
