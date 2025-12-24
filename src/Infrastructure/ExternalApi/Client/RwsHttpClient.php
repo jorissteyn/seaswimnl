@@ -317,7 +317,7 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         }
                         break;
                     case 'WINDSHD':
-                        // Wind speed in knots, pick most recent
+                        // Wind speed in m/s
                         if (null === $timestamps['windSpeed'] || $timestamp > $timestamps['windSpeed']) {
                             $result['windSpeed'] = $value;
                             $timestamps['windSpeed'] = $timestamp;

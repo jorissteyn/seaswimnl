@@ -84,7 +84,7 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
             waveHeight: WaveHeight::fromMeters($data['waveHeight'] ?? null),
             waterHeight: WaterHeight::fromMeters($data['waterHeight'] ?? null),
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
-            windSpeed: isset($data['windSpeed']) ? WindSpeed::fromKnots($data['windSpeed']) : null,
+            windSpeed: isset($data['windSpeed']) ? WindSpeed::fromMetersPerSecond($data['windSpeed']) : null,
             windDirection: $data['windDirection'] ?? null,
             wavePeriod: isset($data['wavePeriod']) ? WavePeriod::fromSeconds($data['wavePeriod']) : null,
             waveDirection: isset($data['waveDirection']) ? WaveDirection::fromDegrees($data['waveDirection']) : null,
