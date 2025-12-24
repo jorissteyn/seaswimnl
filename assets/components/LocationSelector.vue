@@ -244,7 +244,7 @@ export default {
         scrollToMatch(searchText) {
             const search = searchText.toLowerCase();
             const index = this.filteredLocations.findIndex(loc =>
-                loc.name.toLowerCase().startsWith(search)
+                loc.name.toLowerCase().includes(search)
             );
             if (index !== -1) {
                 this.highlightedIndex = index;
@@ -379,9 +379,9 @@ export default {
     top: calc(100% + 0.5rem);
     left: 0;
     right: 0;
-    max-height: 280px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    max-height: 320px;
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0.5rem;
     list-style: none;
@@ -442,6 +442,7 @@ export default {
     cursor: pointer;
     border-bottom: 1px solid rgba(0, 100, 150, 0.1);
     transition: color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .show-all-toggle:hover {
@@ -459,6 +460,9 @@ export default {
     list-style: none;
     margin: 0;
     padding: 0;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
 }
 
 .locations-list li {
@@ -494,21 +498,21 @@ export default {
     z-index: 100;
 }
 
-/* Custom scrollbar for dropdown */
-.dropdown-list::-webkit-scrollbar {
+/* Custom scrollbar for locations list */
+.locations-list::-webkit-scrollbar {
     width: 6px;
 }
 
-.dropdown-list::-webkit-scrollbar-track {
+.locations-list::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.dropdown-list::-webkit-scrollbar-thumb {
+.locations-list::-webkit-scrollbar-thumb {
     background: rgba(0, 100, 150, 0.25);
     border-radius: 3px;
 }
 
-.dropdown-list::-webkit-scrollbar-thumb:hover {
+.locations-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 100, 150, 0.4);
 }
 </style>
