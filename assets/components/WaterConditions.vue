@@ -44,9 +44,18 @@
             </div>
             <div class="condition-item">
                 <dt>Wave Direction</dt>
-                <dd>
-                    {{ formatWaveDirection(data.waveDirection, data.waveDirectionCompass) }}
-                    <span v-if="data.waveDirectionStation" v-tooltip="waveDirectionTooltip" class="info-icon">ⓘ</span>
+                <dd class="wave-direction-display">
+                    <template v-if="data.waveDirection !== null">
+                        <span class="compass" :title="`${data.waveDirectionCompass} (${Math.round(data.waveDirection)}°)`">
+                            <span class="compass-letter compass-n">N</span>
+                            <span class="compass-letter compass-e">E</span>
+                            <span class="compass-letter compass-s">S</span>
+                            <span class="compass-letter compass-w">W</span>
+                            <span class="compass-arrow" :style="{ transform: `rotate(${data.waveDirection}deg)` }"></span>
+                        </span>
+                        <span v-if="data.waveDirectionStation" v-tooltip="waveDirectionTooltip" class="info-icon">ⓘ</span>
+                    </template>
+                    <template v-else>N/A</template>
                 </dd>
             </div>
         </dl>
@@ -101,10 +110,6 @@ export default {
         },
         formatSeconds(value) {
             return value !== null ? `${value}s` : 'N/A';
-        },
-        formatWaveDirection(degrees, compass) {
-            if (degrees === null) return 'N/A';
-            return `${compass} (${Math.round(degrees)}°)`;
         },
         formatWindSpeed(speed) {
             if (speed === null) return 'N/A';
