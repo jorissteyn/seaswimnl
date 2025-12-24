@@ -37,21 +37,30 @@
                     <polyline :points="isOpen ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"></polyline>
                 </svg>
             </button>
-            <ul
+            <div
                 v-show="isOpen && filteredLocations.length > 0"
                 class="dropdown-list"
                 ref="dropdown"
             >
-                <li
-                    v-for="(location, index) in filteredLocations"
-                    :key="location.id"
-                    :class="{ highlighted: index === highlightedIndex }"
-                    @mousedown.prevent="selectLocation(location)"
-                    @mouseenter="highlightedIndex = index"
-                >
-                    {{ location.name }}
-                </li>
-            </ul>
+                <label class="show-all-toggle" @mousedown.prevent>
+                    <input
+                        type="checkbox"
+                        v-model="showAllLocations"
+                    />
+                    <span>Show all RWS locations</span>
+                </label>
+                <ul class="locations-list">
+                    <li
+                        v-for="(location, index) in filteredLocations"
+                        :key="location.id"
+                        :class="{ highlighted: index === highlightedIndex }"
+                        @mousedown.prevent="selectLocation(location)"
+                        @mouseenter="highlightedIndex = index"
+                    >
+                        {{ location.name }}
+                    </li>
+                </ul>
+            </div>
             <div v-show="isOpen && filteredLocations.length === 0" class="dropdown-empty">
                 No locations found
             </div>
@@ -82,18 +91,67 @@ export default {
             searchText: '',
             isOpen: false,
             highlightedIndex: 0,
+            showAllLocations: false,
         };
     },
     computed: {
         placeholder() {
             return this.loading ? 'Loading locations...' : 'Type to search...';
         },
+        simplifiedLocations() {
+            if (!this.locations.length) return [];
+
+            // Group locations by base name and geographic proximity
+            const groups = new Map();
+
+            for (const loc of this.locations) {
+                const baseName = this.extractBaseName(loc.name);
+                let foundGroup = false;
+
+                // Check if this location belongs to an existing group
+                for (const [key, group] of groups) {
+                    const representative = group[0];
+                    const sameBaseName = this.extractBaseName(representative.name) === baseName;
+                    const isNearby = this.isNearby(loc, representative);
+
+                    if (sameBaseName || isNearby) {
+                        group.push(loc);
+                        foundGroup = true;
+                        break;
+                    }
+                }
+
+                if (!foundGroup) {
+                    groups.set(loc.id, [loc]);
+                }
+            }
+
+            // Pick best representative from each group
+            const simplified = [];
+            for (const group of groups.values()) {
+                // Sort by name length (prefer shorter, more generic names)
+                // Then by whether it doesn't have numbers or technical suffixes
+                group.sort((a, b) => {
+                    const aScore = this.getNameScore(a.name);
+                    const bScore = this.getNameScore(b.name);
+                    return aScore - bScore;
+                });
+                simplified.push(group[0]);
+            }
+
+            // Sort alphabetically
+            return simplified.sort((a, b) => a.name.localeCompare(b.name));
+        },
+        activeLocations() {
+            return this.showAllLocations ? this.locations : this.simplifiedLocations;
+        },
         filteredLocations() {
+            const locations = this.activeLocations;
             if (!this.searchText.trim()) {
-                return this.locations;
+                return locations;
             }
             const search = this.searchText.toLowerCase();
-            return this.locations.filter(loc =>
+            return locations.filter(loc =>
                 loc.name.toLowerCase().includes(search)
             );
         },
@@ -179,11 +237,53 @@ export default {
         scrollToHighlighted() {
             this.$nextTick(() => {
                 const dropdown = this.$refs.dropdown;
-                const highlighted = dropdown?.children[this.highlightedIndex];
+                const list = dropdown?.querySelector('.locations-list');
+                const highlighted = list?.children[this.highlightedIndex];
                 if (highlighted) {
                     highlighted.scrollIntoView({ block: 'nearest' });
                 }
             });
+        },
+        extractBaseName(name) {
+            // Extract base name before comma or common suffixes
+            let base = name.split(',')[0].trim();
+            // Remove trailing numbers
+            base = base.replace(/\s+\d+$/, '');
+            // Remove common technical suffixes
+            base = base.replace(/\s+(meetpunt|punt|boven|beneden|links|rechts|noord|oost|zuid|west|inlaat|uitlaat|platform|badstrand|zwemstrand|strand)$/i, '');
+            return base.toLowerCase();
+        },
+        isNearby(loc1, loc2) {
+            // Check if two locations are within ~3km of each other
+            const lat1 = loc1.latitude;
+            const lon1 = loc1.longitude;
+            const lat2 = loc2.latitude;
+            const lon2 = loc2.longitude;
+
+            // Quick approximation: 1 degree lat ≈ 111km, 1 degree lon ≈ 67km (at NL latitude)
+            const latDiff = Math.abs(lat1 - lat2) * 111;
+            const lonDiff = Math.abs(lon1 - lon2) * 67;
+            const approxDistance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
+
+            return approxDistance < 3;
+        },
+        getNameScore(name) {
+            // Lower score = better (more suitable as representative)
+            let score = name.length;
+
+            // Penalize names with numbers
+            if (/\d/.test(name)) score += 50;
+
+            // Penalize names with technical terms
+            if (/meetpunt|punt|klep|inlaat|uitlaat|platform/i.test(name)) score += 100;
+
+            // Penalize names with directional suffixes
+            if (/boven|beneden|links|rechts|noord|oost|zuid|west/i.test(name)) score += 30;
+
+            // Prefer names with "badstrand" or "zwemstrand" (swimming-relevant)
+            if (/badstrand|zwemstrand|strand/i.test(name)) score -= 20;
+
+            return score;
         },
     },
 };
@@ -324,7 +424,37 @@ export default {
     100% { background-position: 0 130px; }
 }
 
-.dropdown-list li {
+.show-all-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 100, 150, 0.1);
+    transition: color 0.2s ease;
+}
+
+.show-all-toggle:hover {
+    color: var(--color-text);
+}
+
+.show-all-toggle input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.locations-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.locations-list li {
     position: relative;
     padding: 0.75rem 1rem;
     border-radius: 10px;
@@ -333,8 +463,8 @@ export default {
     color: var(--color-text);
 }
 
-.dropdown-list li:hover,
-.dropdown-list li.highlighted {
+.locations-list li:hover,
+.locations-list li.highlighted {
     background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 119, 182, 0.25) 100%);
     color: var(--color-primary);
     transform: translateX(4px);
