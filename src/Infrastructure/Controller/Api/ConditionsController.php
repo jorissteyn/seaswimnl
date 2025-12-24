@@ -55,8 +55,6 @@ final class ConditionsController extends AbstractController
                 'waveHeight' => (null !== $waveHeightBuoy ? $waveHeightBuoy['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters(),
                 'waveHeightBuoy' => $waveHeightBuoy,
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
-                'quality' => $water->getQuality()->value,
-                'qualityLabel' => $water->getQuality()->getLabel(),
                 'windSpeed' => $water->getWindSpeed()?->getKilometersPerHour(),
                 'windDirection' => $water->getWindDirection(),
                 'measuredAt' => $water->getMeasuredAt()->format('c'),

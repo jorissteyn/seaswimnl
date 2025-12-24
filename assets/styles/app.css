@@ -188,17 +188,17 @@ body::before {
 }
 
 /* Safety colors */
-.safety-green, .quality-good {
+.safety-green {
     color: #4ade80 !important;
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
 }
 
-.safety-yellow, .quality-moderate {
+.safety-yellow {
     color: #fbbf24 !important;
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
 }
 
-.safety-red, .quality-poor {
+.safety-red {
     color: #f87171 !important;
     text-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
 }

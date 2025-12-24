@@ -6,7 +6,6 @@ namespace Seaswim\Tests\Unit\Infrastructure\ExternalApi;
 
 use PHPUnit\Framework\TestCase;
 use Seaswim\Domain\ValueObject\Location;
-use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -113,26 +112,5 @@ final class RijkswaterstaatAdapterTest extends TestCase
         $conditions2 = $adapter->getConditions($location);
         $this->assertNotNull($conditions2);
         $this->assertSame(18.5, $conditions2->getTemperature()->getCelsius());
-    }
-
-    public function testMapsWaterQualityCorrectly(): void
-    {
-        $client = $this->createMock(RwsHttpClientInterface::class);
-        $client->method('fetchWaterData')
-            ->willReturn([
-                'waterTemperature' => 18.5,
-                'waterHeight' => 0.45,
-                'waveHeight' => 0.8,
-                'quality' => 'good',
-                'timestamp' => '2024-12-20T10:00:00+01:00',
-            ]);
-
-        $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
-
-        $conditions = $adapter->getConditions($location);
-
-        $this->assertNotNull($conditions);
-        $this->assertSame(WaterQuality::Good, $conditions->getQuality());
     }
 }

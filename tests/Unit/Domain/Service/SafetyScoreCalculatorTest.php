@@ -13,7 +13,6 @@ use Seaswim\Domain\ValueObject\SafetyScore;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WaterHeight;
-use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Domain\ValueObject\WindSpeed;
 
@@ -30,7 +29,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testGreenScoreWithOptimalConditions(): void
     {
-        $water = $this->createWaterConditions(18.0, 0.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(18.0, 0.5);
         $weather = $this->createWeatherConditions(5.0); // 18 km/h
 
         $score = $this->calculator->calculate($water, $weather);
@@ -40,7 +39,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testYellowScoreWithLowWaterTemperature(): void
     {
-        $water = $this->createWaterConditions(12.0, 0.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(12.0, 0.5);
         $weather = $this->createWeatherConditions(5.0);
 
         $score = $this->calculator->calculate($water, $weather);
@@ -50,7 +49,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testRedScoreWithVeryLowWaterTemperature(): void
     {
-        $water = $this->createWaterConditions(8.0, 0.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(8.0, 0.5);
         $weather = $this->createWeatherConditions(5.0);
 
         $score = $this->calculator->calculate($water, $weather);
@@ -60,7 +59,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testYellowScoreWithHighWaves(): void
     {
-        $water = $this->createWaterConditions(18.0, 1.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(18.0, 1.5);
         $weather = $this->createWeatherConditions(5.0);
 
         $score = $this->calculator->calculate($water, $weather);
@@ -70,27 +69,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testRedScoreWithVeryHighWaves(): void
     {
-        $water = $this->createWaterConditions(18.0, 2.5, WaterQuality::Good);
-        $weather = $this->createWeatherConditions(5.0);
-
-        $score = $this->calculator->calculate($water, $weather);
-
-        $this->assertSame(SafetyScore::Red, $score);
-    }
-
-    public function testYellowScoreWithModerateWaterQuality(): void
-    {
-        $water = $this->createWaterConditions(18.0, 0.5, WaterQuality::Moderate);
-        $weather = $this->createWeatherConditions(5.0);
-
-        $score = $this->calculator->calculate($water, $weather);
-
-        $this->assertSame(SafetyScore::Yellow, $score);
-    }
-
-    public function testRedScoreWithPoorWaterQuality(): void
-    {
-        $water = $this->createWaterConditions(18.0, 0.5, WaterQuality::Poor);
+        $water = $this->createWaterConditions(18.0, 2.5);
         $weather = $this->createWeatherConditions(5.0);
 
         $score = $this->calculator->calculate($water, $weather);
@@ -100,7 +79,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testYellowScoreWithHighWindSpeed(): void
     {
-        $water = $this->createWaterConditions(18.0, 0.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(18.0, 0.5);
         $weather = $this->createWeatherConditions(8.5); // ~30 km/h
 
         $score = $this->calculator->calculate($water, $weather);
@@ -110,7 +89,7 @@ final class SafetyScoreCalculatorTest extends TestCase
 
     public function testRedScoreWithVeryHighWindSpeed(): void
     {
-        $water = $this->createWaterConditions(18.0, 0.5, WaterQuality::Good);
+        $water = $this->createWaterConditions(18.0, 0.5);
         $weather = $this->createWeatherConditions(12.0); // ~43 km/h
 
         $score = $this->calculator->calculate($water, $weather);
@@ -130,7 +109,7 @@ final class SafetyScoreCalculatorTest extends TestCase
     public function testRedConditionOverridesYellow(): void
     {
         // Multiple yellow conditions, but one red
-        $water = $this->createWaterConditions(12.0, 1.5, WaterQuality::Moderate); // Yellow temp, yellow waves, yellow quality
+        $water = $this->createWaterConditions(12.0, 1.5); // Yellow temp, yellow waves
         $weather = $this->createWeatherConditions(12.0); // Red wind
 
         $score = $this->calculator->calculate($water, $weather);
@@ -138,14 +117,13 @@ final class SafetyScoreCalculatorTest extends TestCase
         $this->assertSame(SafetyScore::Red, $score);
     }
 
-    private function createWaterConditions(float $temp, float $waveHeight, WaterQuality $quality): WaterConditions
+    private function createWaterConditions(float $temp, float $waveHeight): WaterConditions
     {
         return new WaterConditions(
             $this->location,
             Temperature::fromCelsius($temp),
             WaveHeight::fromMeters($waveHeight),
             WaterHeight::fromMeters(0.0),
-            $quality,
             new \DateTimeImmutable(),
         );
     }

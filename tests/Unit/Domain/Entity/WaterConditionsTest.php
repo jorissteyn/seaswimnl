@@ -9,7 +9,6 @@ use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
-use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
 
 final class WaterConditionsTest extends TestCase
@@ -20,7 +19,6 @@ final class WaterConditionsTest extends TestCase
         $temperature = Temperature::fromCelsius(18.5);
         $waveHeight = WaveHeight::fromMeters(0.8);
         $waterHeight = WaterHeight::fromMeters(0.45);
-        $quality = WaterQuality::Good;
         $measuredAt = new \DateTimeImmutable('2024-12-20T10:00:00+01:00');
 
         $conditions = new WaterConditions(
@@ -28,7 +26,6 @@ final class WaterConditionsTest extends TestCase
             $temperature,
             $waveHeight,
             $waterHeight,
-            $quality,
             $measuredAt,
         );
 
@@ -36,7 +33,6 @@ final class WaterConditionsTest extends TestCase
         $this->assertSame($temperature, $conditions->getTemperature());
         $this->assertSame($waveHeight, $conditions->getWaveHeight());
         $this->assertSame($waterHeight, $conditions->getWaterHeight());
-        $this->assertSame($quality, $conditions->getQuality());
         $this->assertSame($measuredAt, $conditions->getMeasuredAt());
     }
 
@@ -48,13 +44,11 @@ final class WaterConditionsTest extends TestCase
             Temperature::unknown(),
             WaveHeight::unknown(),
             WaterHeight::unknown(),
-            WaterQuality::Unknown,
             new \DateTimeImmutable(),
         );
 
         $this->assertFalse($conditions->getTemperature()->isKnown());
         $this->assertFalse($conditions->getWaveHeight()->isKnown());
         $this->assertFalse($conditions->getWaterHeight()->isKnown());
-        $this->assertSame(WaterQuality::Unknown, $conditions->getQuality());
     }
 }

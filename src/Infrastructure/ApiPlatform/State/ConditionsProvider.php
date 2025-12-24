@@ -59,8 +59,6 @@ final readonly class ConditionsProvider implements ProviderInterface
             temperature: $water->getTemperature()->getCelsius(),
             waveHeight: $water->getWaveHeight()->getMeters(),
             waterHeight: $water->getWaterHeight()->getMeters(),
-            quality: $water->getQuality()->value,
-            qualityLabel: $water->getQuality()->getLabel(),
             measuredAt: $water->getMeasuredAt()->format('c'),
         );
     }

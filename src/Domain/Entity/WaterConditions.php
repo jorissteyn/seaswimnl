@@ -7,7 +7,6 @@ namespace Seaswim\Domain\Entity;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
-use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Domain\ValueObject\WindSpeed;
 
@@ -18,7 +17,6 @@ final readonly class WaterConditions
         private Temperature $temperature,
         private WaveHeight $waveHeight,
         private WaterHeight $waterHeight,
-        private WaterQuality $quality,
         private \DateTimeImmutable $measuredAt,
         private ?WindSpeed $windSpeed = null,
         private ?string $windDirection = null,
@@ -43,11 +41,6 @@ final readonly class WaterConditions
     public function getWaterHeight(): WaterHeight
     {
         return $this->waterHeight;
-    }
-
-    public function getQuality(): WaterQuality
-    {
-        return $this->quality;
     }
 
     public function getMeasuredAt(): \DateTimeImmutable

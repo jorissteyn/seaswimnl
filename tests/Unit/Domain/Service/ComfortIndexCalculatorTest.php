@@ -12,7 +12,6 @@ use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WaterHeight;
-use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Domain\ValueObject\WindSpeed;
 
@@ -99,7 +98,6 @@ final class ComfortIndexCalculatorTest extends TestCase
             Temperature::fromCelsius($temp),
             WaveHeight::fromMeters($waveHeight),
             WaterHeight::fromMeters(0.0),
-            WaterQuality::Good,
             new \DateTimeImmutable(),
         );
     }

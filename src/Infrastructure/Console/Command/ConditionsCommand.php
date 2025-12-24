@@ -72,7 +72,6 @@ final class ConditionsCommand extends Command
                     ['Temperature', null !== $water->getTemperature()->getCelsius() ? $water->getTemperature()->getCelsius().'°C' : 'N/A'],
                     ['Wave Height', null !== $water->getWaveHeight()->getMeters() ? $water->getWaveHeight()->getMeters().'m' : 'N/A'],
                     ['Water Height', null !== $water->getWaterHeight()->getMeters() ? $water->getWaterHeight()->getMeters().'m' : 'N/A'],
-                    ['Quality', $water->getQuality()->getLabel()],
                     ['Measured At', $water->getMeasuredAt()->format('Y-m-d H:i:s')],
                 ],
             );
@@ -191,7 +190,6 @@ final class ConditionsCommand extends Command
                 'temperature' => $water->getTemperature()->getCelsius(),
                 'waveHeight' => $water->getWaveHeight()->getMeters(),
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
-                'quality' => $water->getQuality()->value,
                 'measuredAt' => $water->getMeasuredAt()->format('c'),
             ];
         }

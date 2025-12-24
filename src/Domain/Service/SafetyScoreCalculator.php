@@ -7,7 +7,6 @@ namespace Seaswim\Domain\Service;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\ValueObject\SafetyScore;
-use Seaswim\Domain\ValueObject\WaterQuality;
 
 final class SafetyScoreCalculator
 {
@@ -35,13 +34,6 @@ final class SafetyScoreCalculator
             if ($waveHeight > self::RED_WAVE_HEIGHT) {
                 $hasRed = true;
             } elseif ($waveHeight > self::YELLOW_WAVE_HEIGHT) {
-                $hasYellow = true;
-            }
-
-            $quality = $water->getQuality();
-            if (WaterQuality::Poor === $quality) {
-                $hasRed = true;
-            } elseif (WaterQuality::Moderate === $quality) {
                 $hasYellow = true;
             }
         } else {

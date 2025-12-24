@@ -10,8 +10,6 @@ final readonly class WaterConditionsOutput
         public ?float $temperature,
         public ?float $waveHeight,
         public ?float $waterHeight,
-        public string $quality,
-        public string $qualityLabel,
         public string $measuredAt,
     ) {
     }

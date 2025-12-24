@@ -35,10 +35,6 @@
                     <template v-else>N/A</template>
                 </dd>
             </div>
-            <div class="condition-item">
-                <dt>Quality</dt>
-                <dd :class="'quality-' + data.quality">{{ data.qualityLabel }}</dd>
-            </div>
         </dl>
         <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
     </div>
