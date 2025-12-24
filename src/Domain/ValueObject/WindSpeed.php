@@ -16,6 +16,12 @@ final readonly class WindSpeed
         return new self($value);
     }
 
+    public static function fromKnots(?float $value): self
+    {
+        // 1 knot = 0.514444 m/s
+        return new self(null !== $value ? $value * 0.514444 : null);
+    }
+
     public static function unknown(): self
     {
         return new self(null);
