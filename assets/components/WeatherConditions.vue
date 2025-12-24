@@ -29,14 +29,11 @@
                 <dt>Sunpower</dt>
                 <dd class="sunpower-display">
                     <template v-if="data.sunpower !== null">
-                        <span class="sun-indicator" :class="sunClass">
-                            <span class="sun-core"></span>
-                            <span class="sun-ray ray-1"></span>
-                            <span class="sun-ray ray-2"></span>
-                            <span class="sun-ray ray-3"></span>
-                            <span class="sun-ray ray-4"></span>
+                        <span class="sunpower-bar">
+                            <span class="sunpower-fill" :style="{ width: sunpowerPercent + '%' }"></span>
+                            <span class="sunpower-marker" :style="{ left: sunpowerPercent + '%' }"></span>
                         </span>
-                        <span class="sunpower-value">{{ Math.round(data.sunpower) }} W/m²</span>
+                        <span class="sunpower-value">{{ Math.round(data.sunpower) }}</span>
                     </template>
                     <template v-else>N/A</template>
                 </dd>
@@ -68,14 +65,10 @@ export default {
             if (bft <= 7) return 'bft-strong';
             return 'bft-severe';
         },
-        sunClass() {
-            if (this.data.sunpower === null) return 'sun-none';
-            const sp = this.data.sunpower;
-            if (sp < 1) return 'sun-none';
-            if (sp < 200) return 'sun-low';
-            if (sp < 400) return 'sun-moderate';
-            if (sp < 700) return 'sun-good';
-            return 'sun-strong';
+        sunpowerPercent() {
+            if (this.data.sunpower === null) return 0;
+            // Scale: 0-1000 W/m² maps to 0-100%
+            return Math.min(100, Math.max(0, (this.data.sunpower / 1000) * 100));
         },
     },
     methods: {
