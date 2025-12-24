@@ -117,7 +117,12 @@ final class ConditionsCommand extends Command
         $io->title('Tides');
 
         $tides = $conditions['tides'];
+        $tidalStation = $conditions['tidalStation'] ?? null;
         if (null !== $tides) {
+            if (null !== $tidalStation) {
+                $io->note(sprintf('Tidal data from %s (%.1f km away)', $tidalStation['name'], $tidalStation['distanceKm']));
+            }
+
             $rows = [];
 
             $prevTide = $tides->getPreviousTide();
@@ -254,8 +259,11 @@ final class ConditionsCommand extends Command
         }
 
         $tides = $conditions['tides'];
+        $tidalStation = $conditions['tidalStation'] ?? null;
         if (null !== $tides) {
-            $result['tides'] = [];
+            $result['tides'] = [
+                'station' => $tidalStation,
+            ];
 
             $prevTide = $tides->getPreviousTide();
             if (null !== $prevTide) {

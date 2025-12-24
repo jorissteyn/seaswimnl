@@ -87,12 +87,17 @@ final class ConditionsController extends AbstractController
         }
 
         $tides = $conditions['tides'] ?? null;
+        $tidalStation = $conditions['tidalStation'] ?? null;
         if (null !== $tides) {
+            // If tidal data comes from a nearby station, use that station's info
+            // Otherwise use the water location (which is the selected location)
+            $tidalLocation = null !== $tidalStation
+                ? ['id' => $tidalStation['id'], 'name' => $tidalStation['name']]
+                : (null !== $water ? ['id' => $water->getLocation()->getId(), 'name' => $water->getLocation()->getName()] : null);
+
             $result['tides'] = [
-                'location' => null !== $water ? [
-                    'id' => $water->getLocation()->getId(),
-                    'name' => $water->getLocation()->getName(),
-                ] : null,
+                'location' => $tidalLocation,
+                'station' => $tidalStation,
             ];
 
             $prevTide = $tides->getPreviousTide();

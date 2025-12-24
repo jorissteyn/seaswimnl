@@ -32,8 +32,24 @@ final readonly class NearestRwsLocationFinder
      */
     public function findNearest(Location $location, array $allLocations, string $capability): ?array
     {
-        $nearest = null;
-        $minDistance = PHP_FLOAT_MAX;
+        $candidates = $this->findNearestCandidates($location, $allLocations, $capability, 1);
+
+        return $candidates[0] ?? null;
+    }
+
+    /**
+     * Find the nearest locations with the specified measurement capability, sorted by distance.
+     *
+     * @param Location   $location     The location to find the nearest stations for
+     * @param Location[] $allLocations All available RWS locations
+     * @param string     $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3', 'WATHTE')
+     * @param int        $limit        Maximum number of candidates to return
+     *
+     * @return array<int, array{location: Location, distanceKm: float}> Stations sorted by distance
+     */
+    public function findNearestCandidates(Location $location, array $allLocations, string $capability, int $limit = 5): array
+    {
+        $candidates = [];
 
         foreach ($allLocations as $candidate) {
             // Skip the same location
@@ -53,20 +69,16 @@ final readonly class NearestRwsLocationFinder
                 $candidate->getLongitude()
             );
 
-            if ($distance < $minDistance) {
-                $minDistance = $distance;
-                $nearest = $candidate;
-            }
+            $candidates[] = [
+                'location' => $candidate,
+                'distanceKm' => round($distance, 2),
+            ];
         }
 
-        if (null === $nearest) {
-            return null;
-        }
+        // Sort by distance
+        usort($candidates, fn ($a, $b) => $a['distanceKm'] <=> $b['distanceKm']);
 
-        return [
-            'location' => $nearest,
-            'distanceKm' => round($minDistance, 2),
-        ];
+        return \array_slice($candidates, 0, $limit);
     }
 
     /**

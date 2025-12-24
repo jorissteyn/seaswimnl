@@ -91,6 +91,10 @@ export default {
     computed: {
         locationTooltip() {
             if (!this.data.location) return '';
+            const station = this.data.station;
+            if (station && station.distanceKm >= 2) {
+                return `RWS station: ${this.data.location.name} (${this.data.location.id}), ${station.distanceKm} km away`;
+            }
             return `RWS station: ${this.data.location.name} (${this.data.location.id})`;
         },
         canShowGraph() {
