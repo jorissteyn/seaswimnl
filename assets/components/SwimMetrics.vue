@@ -3,11 +3,10 @@
         <h2>Swim Metrics</h2>
         <dl class="conditions-list">
             <div class="condition-item">
-                <dt>Safety</dt>
+                <dt>Safety <span v-tooltip="safetyTooltip" class="info-icon">ⓘ</span></dt>
                 <dd>
                     <span :class="['safety-badge', data.safetyScore]">
                         {{ data.safetyLabel }}
-                        <span v-if="data.safetyScore === 'red'" class="tooltip-trigger" :title="data.safetyDescription">ⓘ</span>
                     </span>
                 </dd>
             </div>
@@ -34,6 +33,17 @@ export default {
         },
     },
     computed: {
+        safetyTooltip() {
+            let tooltip = `Thresholds:
+🟢 Green: Safe conditions
+🟡 Yellow: Water <15°C, waves >1m, or wind >20 km/h
+🔴 Red: Water <10°C, waves >2m, or wind >40 km/h`;
+
+            if (this.data.safetyDescription) {
+                tooltip += `\n\nCurrent: ${this.data.safetyDescription}`;
+            }
+            return tooltip;
+        },
         comfortTooltip() {
             return `Weighted score (1-10) based on:
 • Water temp (40%) - ideal 18-22°C
@@ -49,12 +59,6 @@ export default {
 </script>
 
 <style scoped>
-.tooltip-trigger {
-    margin-left: 0.4rem;
-    cursor: help;
-    opacity: 0.9;
-}
-
 .comfort-value {
     display: flex;
     align-items: center;
