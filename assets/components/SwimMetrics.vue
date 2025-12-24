@@ -12,7 +12,7 @@
                 </dd>
             </div>
             <div class="condition-item">
-                <dt>Comfort Index</dt>
+                <dt>Comfort Index <span v-tooltip="comfortTooltip" class="info-icon">ⓘ</span></dt>
                 <dd class="comfort-value">
                     <span class="comfort-bar">
                         <span class="comfort-fill" :style="{ width: (data.comfortIndex * 10) + '%' }"></span>
@@ -31,6 +31,18 @@ export default {
         data: {
             type: Object,
             required: true,
+        },
+    },
+    computed: {
+        comfortTooltip() {
+            return `Weighted score (1-10) based on:
+• Water temp (40%) - ideal 18-22°C
+• Air temp (20%) - ideal 20-25°C
+• Wind (20%) - calm <10 km/h best
+• Sunpower (10%) - ideal 300-600 W/m²
+• Waves (10%) - calm <0.3m best
+
+8-10 Excellent | 6-7 Good | 4-5 Fair | 1-3 Poor`;
         },
     },
 };
