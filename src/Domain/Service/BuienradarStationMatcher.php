@@ -6,18 +6,30 @@ namespace Seaswim\Domain\Service;
 
 use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Domain\ValueObject\BuienradarStation;
+use Seaswim\Domain\ValueObject\Location;
 
+/**
+ * Finds the nearest Buienradar weather station for a given RWS location.
+ *
+ * Uses the Haversine formula to calculate the great-circle distance
+ * between the RWS location and all Buienradar stations, returning
+ * the closest one along with the distance.
+ */
 final readonly class BuienradarStationMatcher
 {
-    private const MAX_LEVENSHTEIN_DISTANCE = 3;
-    private const DEFAULT_STATION_CODE = '6260'; // De Bilt
+    private const EARTH_RADIUS_KM = 6371.0;
 
     public function __construct(
         private BuienradarStationRepositoryInterface $stationRepository,
     ) {
     }
 
-    public function findMatchingStation(string $locationName): ?BuienradarStation
+    /**
+     * Find the nearest Buienradar station to the given location.
+     *
+     * @return array{station: BuienradarStation, distanceKm: float}|null
+     */
+    public function findNearestStation(Location $location): ?array
     {
         $stations = $this->stationRepository->findAll();
 
@@ -25,68 +37,50 @@ final readonly class BuienradarStationMatcher
             return null;
         }
 
-        $defaultStation = null;
+        $nearest = null;
+        $minDistance = PHP_FLOAT_MAX;
+
         foreach ($stations as $station) {
-            if (self::DEFAULT_STATION_CODE === $station->getCode()) {
-                $defaultStation = $station;
-                break;
+            $distance = $this->calculateDistance(
+                $location->getLatitude(),
+                $location->getLongitude(),
+                $station->getLatitude(),
+                $station->getLongitude()
+            );
+
+            if ($distance < $minDistance) {
+                $minDistance = $distance;
+                $nearest = $station;
             }
         }
 
-        $normalizedLocationName = $this->normalize($locationName);
-        $locationFirstWord = $this->extractFirstWord($normalizedLocationName);
-
-        // First try exact match on first word
-        foreach ($stations as $station) {
-            $normalizedStationName = $this->normalize($station->getName());
-            $stationFirstWord = $this->extractFirstWord($normalizedStationName);
-
-            if ($locationFirstWord === $stationFirstWord) {
-                return $station;
-            }
+        if (null === $nearest) {
+            return null;
         }
 
-        // Then try fuzzy match using Levenshtein distance
-        $bestMatch = null;
-        $bestDistance = self::MAX_LEVENSHTEIN_DISTANCE + 1;
-
-        foreach ($stations as $station) {
-            $normalizedStationName = $this->normalize($station->getName());
-            $stationFirstWord = $this->extractFirstWord($normalizedStationName);
-
-            $distance = levenshtein($locationFirstWord, $stationFirstWord);
-
-            if ($distance < $bestDistance) {
-                $bestDistance = $distance;
-                $bestMatch = $station;
-            }
-        }
-
-        if ($bestDistance <= self::MAX_LEVENSHTEIN_DISTANCE) {
-            return $bestMatch;
-        }
-
-        return $defaultStation;
+        return [
+            'station' => $nearest,
+            'distanceKm' => round($minDistance, 1),
+        ];
     }
 
-    private function normalize(string $name): string
+    /**
+     * Calculate the distance between two points using the Haversine formula.
+     *
+     * @return float Distance in kilometers
+     */
+    private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
-        // Convert to lowercase
-        $normalized = mb_strtolower($name);
+        $lat1Rad = deg2rad($lat1);
+        $lat2Rad = deg2rad($lat2);
+        $deltaLat = deg2rad($lat2 - $lat1);
+        $deltaLon = deg2rad($lon2 - $lon1);
 
-        // Remove dots and other punctuation
-        $normalized = preg_replace('/[.\-_\/]/', ' ', $normalized) ?? $normalized;
+        $a = sin($deltaLat / 2) ** 2
+            + cos($lat1Rad) * cos($lat2Rad) * sin($deltaLon / 2) ** 2;
 
-        // Normalize whitespace
-        $normalized = preg_replace('/\s+/', ' ', $normalized) ?? $normalized;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
-        return trim($normalized);
-    }
-
-    private function extractFirstWord(string $name): string
-    {
-        $parts = explode(' ', $name);
-
-        return $parts[0] ?? '';
+        return self::EARTH_RADIUS_KM * $c;
     }
 }

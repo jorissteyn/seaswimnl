@@ -75,6 +75,7 @@ final class ConditionsController extends AbstractController
                 'station' => null !== $station ? [
                     'code' => $station->getCode(),
                     'name' => $station->getName(),
+                    'distanceKm' => $weather->getStationDistanceKm(),
                 ] : null,
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getKilometersPerHour(),

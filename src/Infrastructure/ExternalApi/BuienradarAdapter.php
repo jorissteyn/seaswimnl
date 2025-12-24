@@ -35,14 +35,17 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
     {
         $this->lastError = null;
 
-        // Find matching Buienradar station for this RWS location
-        $station = $this->stationMatcher->findMatchingStation($location->getName());
+        // Find nearest Buienradar station for this RWS location
+        $result = $this->stationMatcher->findNearestStation($location);
 
-        if (null === $station) {
-            $this->lastError = sprintf('No Buienradar station found matching "%s"', $location->getName());
+        if (null === $result) {
+            $this->lastError = 'No Buienradar stations available';
 
             return null;
         }
+
+        $station = $result['station'];
+        $distanceKm = $result['distanceKm'];
 
         // Cache by station code to avoid duplicate fetches
         $cacheKey = 'buienradar_weather_'.$station->getCode();
@@ -72,7 +75,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             return null;
         }
 
-        $conditions = $this->mapToEntity($location, $data, $station);
+        $conditions = $this->mapToEntity($location, $data, $station, $distanceKm);
 
         $cacheItem->set($conditions);
         $cacheItem->expiresAfter($this->cacheTtl);
@@ -90,7 +93,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
     /**
      * @param array<string, mixed> $data
      */
-    private function mapToEntity(Location $location, array $data, \Seaswim\Domain\ValueObject\BuienradarStation $station): WeatherConditions
+    private function mapToEntity(Location $location, array $data, \Seaswim\Domain\ValueObject\BuienradarStation $station, float $distanceKm): WeatherConditions
     {
         return new WeatherConditions(
             location: $location,
@@ -100,6 +103,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             sunpower: Sunpower::fromWattsPerSquareMeter($data['sunpower'] ?? null),
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
             station: $station,
+            stationDistanceKm: $distanceKm,
         );
     }
 
@@ -113,6 +117,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             sunpower: $conditions->getSunpower(),
             measuredAt: $conditions->getMeasuredAt(),
             station: $conditions->getStation(),
+            stationDistanceKm: $conditions->getStationDistanceKm(),
         );
     }
 }

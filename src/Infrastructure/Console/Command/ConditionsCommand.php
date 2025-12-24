@@ -94,9 +94,15 @@ final class ConditionsCommand extends Command
 
         $weather = $conditions['weather'];
         if (null !== $weather) {
+            $station = $weather->getStation();
+            $stationInfo = null !== $station
+                ? sprintf('%s (%s), %.1f km', $station->getName(), $station->getCode(), $weather->getStationDistanceKm())
+                : 'N/A';
+
             $io->table(
                 ['Metric', 'Value'],
                 [
+                    ['Station', $stationInfo],
                     ['Air Temperature', null !== $weather->getAirTemperature()->getCelsius() ? $weather->getAirTemperature()->getCelsius().'°C' : 'N/A'],
                     ['Wind Speed', $this->formatWindSpeed($weather->getWindSpeed())],
                     ['Wind Direction', $weather->getWindDirection() ?? 'N/A'],
@@ -229,7 +235,13 @@ final class ConditionsCommand extends Command
 
         $weather = $conditions['weather'];
         if (null !== $weather) {
+            $station = $weather->getStation();
             $result['weather'] = [
+                'station' => null !== $station ? [
+                    'code' => $station->getCode(),
+                    'name' => $station->getName(),
+                    'distanceKm' => $weather->getStationDistanceKm(),
+                ] : null,
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getMetersPerSecond(),
                 'windSpeedKmh' => $weather->getWindSpeed()->getKilometersPerHour(),

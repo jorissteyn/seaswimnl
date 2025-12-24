@@ -20,6 +20,7 @@ final readonly class WeatherConditions
         private Sunpower $sunpower,
         private \DateTimeImmutable $measuredAt,
         private ?BuienradarStation $station = null,
+        private ?float $stationDistanceKm = null,
     ) {
     }
 
@@ -56,5 +57,10 @@ final readonly class WeatherConditions
     public function getStation(): ?BuienradarStation
     {
         return $this->station;
+    }
+
+    public function getStationDistanceKm(): ?float
+    {
+        return $this->stationDistanceKm;
     }
 }

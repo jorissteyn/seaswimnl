@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'seaswim:locations:match',
-    description: 'Show the matching Buienradar station for an RWS location',
+    description: 'Show the nearest Buienradar station for an RWS location',
 )]
 final class LocationsMatchCommand extends Command
 {
@@ -62,18 +62,21 @@ final class LocationsMatchCommand extends Command
             [[$location->getId(), $location->getName(), $location->getLatitude(), $location->getLongitude()]],
         );
 
-        $station = $this->stationMatcher->findMatchingStation($location->getName());
+        $result = $this->stationMatcher->findNearestStation($location);
 
-        if (null === $station) {
-            $io->warning('No matching Buienradar station found.');
+        if (null === $result) {
+            $io->warning('No Buienradar stations found.');
 
             return Command::SUCCESS;
         }
 
-        $io->section('Matching Buienradar Station');
+        $station = $result['station'];
+        $distanceKm = $result['distanceKm'];
+
+        $io->section('Nearest Buienradar Station');
         $io->table(
-            ['Code', 'Name', 'Latitude', 'Longitude'],
-            [[$station->getCode(), $station->getName(), $station->getLatitude(), $station->getLongitude()]],
+            ['Code', 'Name', 'Latitude', 'Longitude', 'Distance'],
+            [[$station->getCode(), $station->getName(), $station->getLatitude(), $station->getLongitude(), sprintf('%.1f km', $distanceKm)]],
         );
 
         return Command::SUCCESS;

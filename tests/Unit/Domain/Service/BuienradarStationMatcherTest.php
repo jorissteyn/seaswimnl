@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Domain\Service\BuienradarStationMatcher;
 use Seaswim\Domain\ValueObject\BuienradarStation;
+use Seaswim\Domain\ValueObject\Location;
 
 final class BuienradarStationMatcherTest extends TestCase
 {
@@ -20,99 +21,86 @@ final class BuienradarStationMatcherTest extends TestCase
         $this->matcher = new BuienradarStationMatcher($this->repository);
     }
 
-    public function testExactFirstWordMatch(): void
+    public function testFindsNearestStation(): void
     {
-        $vlissingen = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $deBiltStation = new BuienradarStation('6260', 'De Bilt', 52.10, 5.18);
 
         $this->repository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
-            $vlissingen,
-            new BuienradarStation('6235', 'De Kooy', 52.92, 4.79),
+            $deBiltStation,
+            $vlissingenStation,
         ]);
 
-        $result = $this->matcher->findMatchingStation('Vlissingen havenmond');
+        // RWS location near Vlissingen
+        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.45, 3.61, [], []);
 
-        $this->assertSame($vlissingen, $result);
+        $result = $this->matcher->findNearestStation($location);
+
+        $this->assertNotNull($result);
+        $this->assertSame($vlissingenStation, $result['station']);
+        $this->assertLessThan(5, $result['distanceKm']); // Should be very close
     }
 
-    public function testMatchWithDotInName(): void
+    public function testReturnsDistanceInKilometers(): void
     {
-        $hoekVanHolland = new BuienradarStation('6330', 'Hoek van Holland', 51.98, 4.12);
+        $station = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+
+        $this->repository->method('findAll')->willReturn([$station]);
+
+        // Location about 10km away
+        $location = new Location('test', 'Test Location', 51.50, 3.70, [], []);
+
+        $result = $this->matcher->findNearestStation($location);
+
+        $this->assertNotNull($result);
+        $this->assertIsFloat($result['distanceKm']);
+        $this->assertGreaterThan(0, $result['distanceKm']);
+    }
+
+    public function testFindsClosestOfMultipleStations(): void
+    {
+        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $deBiltStation = new BuienradarStation('6260', 'De Bilt', 52.10, 5.18);
+        $rotterdamStation = new BuienradarStation('6344', 'Rotterdam', 51.96, 4.45);
 
         $this->repository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
-            $hoekVanHolland,
+            $deBiltStation,
+            $vlissingenStation,
+            $rotterdamStation,
         ]);
 
-        $result = $this->matcher->findMatchingStation('Hoek.v.Holland meetpaal');
+        // Location near Rotterdam
+        $location = new Location('hoekvanholland', 'Hoek van Holland', 51.98, 4.12, [], []);
 
-        $this->assertSame($hoekVanHolland, $result);
+        $result = $this->matcher->findNearestStation($location);
+
+        $this->assertNotNull($result);
+        $this->assertSame($rotterdamStation, $result['station']);
     }
 
-    public function testMatchCaseInsensitive(): void
-    {
-        $vlissingen = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
-
-        $this->repository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
-            $vlissingen,
-        ]);
-
-        $result = $this->matcher->findMatchingStation('VLISSINGEN');
-
-        $this->assertSame($vlissingen, $result);
-    }
-
-    public function testFuzzyMatchWithinThreshold(): void
-    {
-        $schiphol = new BuienradarStation('6240', 'Schiphol', 52.30, 4.77);
-
-        $this->repository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
-            $schiphol,
-        ]);
-
-        // "Schipol" (one letter off) should still match "Schiphol"
-        $result = $this->matcher->findMatchingStation('Schipol meetstation');
-
-        $this->assertSame($schiphol, $result);
-    }
-
-    public function testDefaultsToDeBiltWhenNoMatch(): void
-    {
-        $deBilt = new BuienradarStation('6260', 'De Bilt', 52.10, 5.18);
-
-        $this->repository->method('findAll')->willReturn([
-            $deBilt,
-            new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60),
-        ]);
-
-        $result = $this->matcher->findMatchingStation('Offshore platform XYZ');
-
-        $this->assertSame($deBilt, $result);
-    }
-
-    public function testNoMatchWhenNoStations(): void
+    public function testReturnsNullWhenNoStations(): void
     {
         $this->repository->method('findAll')->willReturn([]);
 
-        $result = $this->matcher->findMatchingStation('Vlissingen');
+        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60, [], []);
+
+        $result = $this->matcher->findNearestStation($location);
 
         $this->assertNull($result);
     }
 
-    public function testMatchWithDirectionalSuffix(): void
+    public function testDistanceIsRoundedToOneDecimal(): void
     {
-        $valkenburg = new BuienradarStation('6210', 'Valkenburg', 52.17, 4.42);
+        $station = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
 
-        $this->repository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
-            $valkenburg,
-        ]);
+        $this->repository->method('findAll')->willReturn([$station]);
 
-        // "Valkenburg" first word should match
-        $result = $this->matcher->findMatchingStation('Valkenburg buitenhaven zuidelijk');
+        $location = new Location('test', 'Test', 51.50, 3.70, [], []);
 
-        $this->assertSame($valkenburg, $result);
+        $result = $this->matcher->findNearestStation($location);
+
+        $this->assertNotNull($result);
+        // Check that distance is rounded (has at most 1 decimal place)
+        $this->assertSame(round($result['distanceKm'], 1), $result['distanceKm']);
     }
 }
