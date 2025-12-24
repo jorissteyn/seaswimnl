@@ -32,7 +32,7 @@
             <div class="condition-item">
                 <dt>Wave Height</dt>
                 <dd>
-                    {{ formatMeters(data.waveHeight) }}
+                    {{ formatWaveHeight(data.waveHeight) }}
                     <span v-if="data.waveHeightBuoy" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
@@ -106,8 +106,12 @@ export default {
         formatTemp(value) {
             return value !== null ? `${value}°C` : 'N/A';
         },
-        formatMeters(value) {
-            return value !== null ? `${value}m` : 'N/A';
+        formatWaveHeight(value) {
+            if (value === null) return 'N/A';
+            if (value < 1) {
+                return `${Math.round(value * 100)} cm`;
+            }
+            return `${value.toFixed(1)} m`;
         },
         formatSeconds(value) {
             return value !== null ? `${value}s` : 'N/A';

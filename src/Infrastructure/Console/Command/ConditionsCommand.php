@@ -79,7 +79,7 @@ final class ConditionsCommand extends Command
                 ['Metric', 'Value'],
                 [
                     ['Temperature', null !== $water->getTemperature()->getCelsius() ? $water->getTemperature()->getCelsius().'°C' : 'N/A'],
-                    ['Wave Height', null !== $waveHeight ? $waveHeight.'m'.$this->formatStationSuffix($waveHeightStation) : 'N/A'],
+                    ['Wave Height', $this->formatWaveHeight($waveHeight).$this->formatStationSuffix($waveHeightStation)],
                     ['Wave Period', null !== $wavePeriod ? $wavePeriod.'s'.$this->formatStationSuffix($wavePeriodStation) : 'N/A'],
                     ['Wave Direction', null !== $waveDirection ? $waveDirectionCompass.' ('.(int) $waveDirection.'°)'.$this->formatStationSuffix($waveDirectionStation) : 'N/A'],
                     ['Water Height', null !== $water->getWaterHeight()->getMeters() ? $water->getWaterHeight()->getMeters().'m' : 'N/A'],
@@ -212,6 +212,22 @@ final class ConditionsCommand extends Command
         }
 
         return sprintf(' <fg=gray>[%s, %.1fkm]</>', $station['name'], $station['distanceKm']);
+    }
+
+    /**
+     * Format wave height: cm if under 1m, otherwise 0.1m steps.
+     */
+    private function formatWaveHeight(?float $meters): string
+    {
+        if (null === $meters) {
+            return 'N/A';
+        }
+
+        if ($meters < 1) {
+            return sprintf('%d cm', (int) round($meters * 100));
+        }
+
+        return sprintf('%.1f m', $meters);
     }
 
     private function formatForJson(array $conditions): array
