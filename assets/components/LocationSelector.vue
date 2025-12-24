@@ -315,7 +315,7 @@ export default {
 }
 
 .autocomplete-wrapper input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--color-text-light);
 }
 
 .autocomplete-wrapper input:hover {
@@ -339,7 +339,7 @@ export default {
     position: absolute;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-light);
     cursor: pointer;
     padding: 0.5rem;
     display: flex;
@@ -350,7 +350,7 @@ export default {
 
 .clear-btn:hover,
 .dropdown-btn:hover {
-    color: rgba(255, 255, 255, 1);
+    color: var(--color-primary);
 }
 
 .clear-btn:disabled,
