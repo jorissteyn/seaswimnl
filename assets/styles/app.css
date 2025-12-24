@@ -458,6 +458,41 @@ body::before {
     color: var(--color-accent);
 }
 
+/* Tide graph */
+.tide-graph {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+}
+
+.tide-graph svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.tide-wave {
+    stroke: var(--color-secondary);
+    opacity: 0.6;
+}
+
+.current-height-line {
+    stroke: var(--color-accent);
+    opacity: 0.8;
+}
+
+.current-position {
+    fill: var(--color-accent);
+    filter: drop-shadow(0 0 6px rgba(144, 224, 239, 0.6));
+}
+
+.tide-label {
+    font-size: 10px;
+    fill: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .header h1 {
