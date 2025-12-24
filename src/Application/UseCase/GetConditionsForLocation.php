@@ -12,12 +12,16 @@ use Seaswim\Domain\Entity\CalculatedMetrics;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
-use Seaswim\Domain\Service\NearestBuoyFinder;
+use Seaswim\Domain\Service\NearestStationFinder;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
 use Seaswim\Domain\ValueObject\TideInfo;
 
 final readonly class GetConditionsForLocation
 {
+    private const CAPABILITY_WAVE_HEIGHT = 'Hm0';
+    private const CAPABILITY_WAVE_PERIOD = 'Tm02';
+    private const CAPABILITY_WAVE_DIRECTION = 'Th3';
+
     public function __construct(
         private LocationRepositoryInterface $locationRepository,
         private WaterConditionsProviderInterface $waterProvider,
@@ -25,12 +29,12 @@ final readonly class GetConditionsForLocation
         private TidalInfoProviderInterface $tidalProvider,
         private SafetyScoreCalculator $safetyCalculator,
         private ComfortIndexCalculator $comfortCalculator,
-        private NearestBuoyFinder $buoyFinder,
+        private NearestStationFinder $stationFinder,
     ) {
     }
 
     /**
-     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics, errors: array<string, string>, waveHeightBuoy: array{id: string, name: string, distanceKm: float, waveHeight: float}|null}|null
+     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics, errors: array<string, string>, waveHeightStation: array<string, mixed>|null, wavePeriodStation: array<string, mixed>|null, waveDirectionStation: array<string, mixed>|null}|null
      */
     public function execute(string $locationId): ?array
     {
@@ -41,16 +45,28 @@ final readonly class GetConditionsForLocation
         }
 
         $errors = [];
-        $waveHeightBuoy = null;
+        $waveHeightStation = null;
+        $wavePeriodStation = null;
+        $waveDirectionStation = null;
 
         $water = $this->waterProvider->getConditions($location);
         if (null === $water) {
             $errors['water'] = $this->waterProvider->getLastError() ?? 'Failed to fetch water conditions';
         }
 
-        // If wave height is not available, try to get it from the nearest buoy
+        // If wave height is not available, try to get it from the nearest station
         if (null !== $water && null === $water->getWaveHeight()->getMeters()) {
-            $waveHeightBuoy = $this->fetchWaveHeightFromNearestBuoy($water);
+            $waveHeightStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_HEIGHT);
+        }
+
+        // If wave period is not available, try to get it from the nearest station
+        if (null !== $water && (null === $water->getWavePeriod() || null === $water->getWavePeriod()->getSeconds())) {
+            $wavePeriodStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_PERIOD);
+        }
+
+        // If wave direction is not available, try to get it from the nearest station
+        if (null !== $water && (null === $water->getWaveDirection() || null === $water->getWaveDirection()->getDegrees())) {
+            $waveDirectionStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_DIRECTION);
         }
 
         $weather = $this->weatherProvider->getConditions($location);
@@ -72,34 +88,66 @@ final readonly class GetConditionsForLocation
             'tides' => $tides,
             'metrics' => new CalculatedMetrics($safetyScore, $comfortIndex),
             'errors' => $errors,
-            'waveHeightBuoy' => $waveHeightBuoy,
+            'waveHeightStation' => $waveHeightStation,
+            'wavePeriodStation' => $wavePeriodStation,
+            'waveDirectionStation' => $waveDirectionStation,
         ];
     }
 
     /**
-     * @return array{id: string, name: string, distanceKm: float, waveHeight: float}|null
+     * Fetch data from the nearest station that has the specified capability.
+     *
+     * @return array<string, mixed>|null
      */
-    private function fetchWaveHeightFromNearestBuoy(WaterConditions $water): ?array
+    private function fetchFromNearestStation(WaterConditions $water, string $capability): ?array
     {
         $allLocations = $this->locationRepository->findAll();
-        $buoyResult = $this->buoyFinder->findNearest($water->getLocation(), $allLocations);
+        $stationResult = $this->stationFinder->findNearest($water->getLocation(), $allLocations, $capability);
 
-        if (null === $buoyResult) {
+        if (null === $stationResult) {
             return null;
         }
 
-        $buoy = $buoyResult['location'];
-        $buoyConditions = $this->waterProvider->getConditions($buoy);
+        $station = $stationResult['location'];
+        $stationConditions = $this->waterProvider->getConditions($station);
 
-        if (null === $buoyConditions || null === $buoyConditions->getWaveHeight()->getMeters()) {
+        if (null === $stationConditions) {
             return null;
         }
 
-        return [
-            'id' => $buoy->getId(),
-            'name' => $buoy->getName(),
-            'distanceKm' => $buoyResult['distanceKm'],
-            'waveHeight' => $buoyConditions->getWaveHeight()->getMeters(),
+        $baseResult = [
+            'id' => $station->getId(),
+            'name' => $station->getName(),
+            'distanceKm' => $stationResult['distanceKm'],
         ];
+
+        switch ($capability) {
+            case self::CAPABILITY_WAVE_HEIGHT:
+                $value = $stationConditions->getWaveHeight()->getMeters();
+
+                return null === $value ? null : [...$baseResult, 'waveHeight' => $value];
+
+            case self::CAPABILITY_WAVE_PERIOD:
+                $wavePeriod = $stationConditions->getWavePeriod();
+                $value = $wavePeriod?->getSeconds();
+
+                return null === $value ? null : [...$baseResult, 'wavePeriod' => $value];
+
+            case self::CAPABILITY_WAVE_DIRECTION:
+                $waveDirection = $stationConditions->getWaveDirection();
+                if (null === $waveDirection) {
+                    return null;
+                }
+                $value = $waveDirection->getDegrees();
+
+                return null === $value ? null : [
+                    ...$baseResult,
+                    'waveDirection' => $value,
+                    'waveDirectionCompass' => $waveDirection->getCompassDirection(),
+                ];
+
+            default:
+                return null;
+        }
     }
 }

@@ -65,12 +65,23 @@ final class ConditionsCommand extends Command
         $errors = $conditions['errors'] ?? [];
 
         $water = $conditions['water'];
+        $waveHeightStation = $conditions['waveHeightStation'] ?? null;
+        $wavePeriodStation = $conditions['wavePeriodStation'] ?? null;
+        $waveDirectionStation = $conditions['waveDirectionStation'] ?? null;
+
         if (null !== $water) {
+            $waveHeight = (null !== $waveHeightStation ? $waveHeightStation['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters();
+            $wavePeriod = (null !== $wavePeriodStation ? $wavePeriodStation['wavePeriod'] : null) ?? $water->getWavePeriod()?->getSeconds();
+            $waveDirection = (null !== $waveDirectionStation ? $waveDirectionStation['waveDirection'] : null) ?? $water->getWaveDirection()?->getDegrees();
+            $waveDirectionCompass = (null !== $waveDirectionStation ? $waveDirectionStation['waveDirectionCompass'] : null) ?? $water->getWaveDirection()?->getCompassDirection();
+
             $io->table(
                 ['Metric', 'Value'],
                 [
                     ['Temperature', null !== $water->getTemperature()->getCelsius() ? $water->getTemperature()->getCelsius().'°C' : 'N/A'],
-                    ['Wave Height', null !== $water->getWaveHeight()->getMeters() ? $water->getWaveHeight()->getMeters().'m' : 'N/A'],
+                    ['Wave Height', null !== $waveHeight ? $waveHeight.'m'.$this->formatStationSuffix($waveHeightStation) : 'N/A'],
+                    ['Wave Period', null !== $wavePeriod ? $wavePeriod.'s'.$this->formatStationSuffix($wavePeriodStation) : 'N/A'],
+                    ['Wave Direction', null !== $waveDirection ? $waveDirectionCompass.' ('.(int) $waveDirection.'°)'.$this->formatStationSuffix($waveDirectionStation) : 'N/A'],
                     ['Water Height', null !== $water->getWaterHeight()->getMeters() ? $water->getWaterHeight()->getMeters().'m' : 'N/A'],
                     ['Measured At', $water->getMeasuredAt()->format('Y-m-d H:i:s')],
                 ],
@@ -180,15 +191,37 @@ final class ConditionsCommand extends Command
         return sprintf('%s km/h (Bft %d: %s)', round($kmh, 1), $beaufort, $label);
     }
 
+    /**
+     * Format a suffix showing the station name when data comes from a nearby station.
+     */
+    private function formatStationSuffix(?array $station): string
+    {
+        if (null === $station) {
+            return '';
+        }
+
+        return sprintf(' <fg=gray>[%s, %.1fkm]</>', $station['name'], $station['distanceKm']);
+    }
+
     private function formatForJson(array $conditions): array
     {
         $result = [];
 
         $water = $conditions['water'];
+        $waveHeightStation = $conditions['waveHeightStation'] ?? null;
+        $wavePeriodStation = $conditions['wavePeriodStation'] ?? null;
+        $waveDirectionStation = $conditions['waveDirectionStation'] ?? null;
+
         if (null !== $water) {
             $result['water'] = [
                 'temperature' => $water->getTemperature()->getCelsius(),
-                'waveHeight' => $water->getWaveHeight()->getMeters(),
+                'waveHeight' => (null !== $waveHeightStation ? $waveHeightStation['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters(),
+                'waveHeightStation' => $waveHeightStation,
+                'wavePeriod' => (null !== $wavePeriodStation ? $wavePeriodStation['wavePeriod'] : null) ?? $water->getWavePeriod()?->getSeconds(),
+                'wavePeriodStation' => $wavePeriodStation,
+                'waveDirection' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirection'] : null) ?? $water->getWaveDirection()?->getDegrees(),
+                'waveDirectionCompass' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirectionCompass'] : null) ?? $water->getWaveDirection()?->getCompassDirection(),
+                'waveDirectionStation' => $waveDirectionStation,
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
                 'measuredAt' => $water->getMeasuredAt()->format('c'),
             ];

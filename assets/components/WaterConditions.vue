@@ -35,6 +35,20 @@
                     <span v-if="data.waveHeightBuoy" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
+            <div class="condition-item">
+                <dt>Wave Period</dt>
+                <dd>
+                    {{ formatSeconds(data.wavePeriod) }}
+                    <span v-if="data.wavePeriodStation" v-tooltip="wavePeriodTooltip" class="info-icon">ⓘ</span>
+                </dd>
+            </div>
+            <div class="condition-item">
+                <dt>Wave Direction</dt>
+                <dd>
+                    {{ formatWaveDirection(data.waveDirection, data.waveDirectionCompass) }}
+                    <span v-if="data.waveDirectionStation" v-tooltip="waveDirectionTooltip" class="info-icon">ⓘ</span>
+                </dd>
+            </div>
         </dl>
         <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
     </div>
@@ -59,6 +73,16 @@ export default {
             const buoy = this.data.waveHeightBuoy;
             return `Measured at ${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
         },
+        wavePeriodTooltip() {
+            if (!this.data.wavePeriodStation) return '';
+            const station = this.data.wavePeriodStation;
+            return `Measured at ${station.name} (${station.id}), ${station.distanceKm} km away`;
+        },
+        waveDirectionTooltip() {
+            if (!this.data.waveDirectionStation) return '';
+            const station = this.data.waveDirectionStation;
+            return `Measured at ${station.name} (${station.id}), ${station.distanceKm} km away`;
+        },
         beaufortClass() {
             if (this.data.windSpeed === null) return '';
             const bft = this.getBeaufort(this.data.windSpeed);
@@ -74,6 +98,13 @@ export default {
         },
         formatMeters(value) {
             return value !== null ? `${value}m` : 'N/A';
+        },
+        formatSeconds(value) {
+            return value !== null ? `${value}s` : 'N/A';
+        },
+        formatWaveDirection(degrees, compass) {
+            if (degrees === null) return 'N/A';
+            return `${compass} (${Math.round(degrees)}°)`;
         },
         formatWindSpeed(speed) {
             if (speed === null) return 'N/A';

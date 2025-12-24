@@ -7,30 +7,30 @@ namespace Seaswim\Domain\Service;
 use Seaswim\Domain\ValueObject\Location;
 
 /**
- * Finds the nearest location with wave height (Hm0) measurements.
+ * Finds the nearest location with a specific measurement capability.
  *
- * Wave height (Hm0) is only measured at certain stations with wave sensors.
- * This service finds the nearest station that has Hm0 data available,
- * allowing the application to fetch wave height from a nearby location
- * when the primary location doesn't have wave measurements.
+ * Some measurements (wave height, wave period, wave direction) are only available
+ * at certain stations. This service finds the nearest station that has the
+ * specified capability, allowing the application to fetch data from a nearby
+ * location when the primary location doesn't have the measurement.
  *
  * Distance is calculated using the Haversine formula for accurate great-circle
  * distance between two points on Earth given their latitude and longitude.
  */
-final readonly class NearestBuoyFinder
+final readonly class NearestStationFinder
 {
     private const EARTH_RADIUS_KM = 6371.0;
-    private const WAVE_HEIGHT_GROOTHEID = 'Hm0';
 
     /**
-     * Find the nearest location with wave height (Hm0) measurements.
+     * Find the nearest location with the specified measurement capability.
      *
-     * @param Location   $location     The location to find the nearest wave station for
+     * @param Location   $location     The location to find the nearest station for
      * @param Location[] $allLocations All available RWS locations
+     * @param string     $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3')
      *
-     * @return array{location: Location, distanceKm: float}|null The nearest wave station and distance, or null if none found
+     * @return array{location: Location, distanceKm: float}|null The nearest station and distance, or null if none found
      */
-    public function findNearest(Location $location, array $allLocations): ?array
+    public function findNearest(Location $location, array $allLocations, string $capability): ?array
     {
         $nearest = null;
         $minDistance = PHP_FLOAT_MAX;
@@ -41,8 +41,8 @@ final readonly class NearestBuoyFinder
                 continue;
             }
 
-            // Only consider locations with wave height data
-            if (!\in_array(self::WAVE_HEIGHT_GROOTHEID, $candidate->getGrootheden(), true)) {
+            // Only consider locations with the requested capability
+            if (!\in_array($capability, $candidate->getGrootheden(), true)) {
                 continue;
             }
 

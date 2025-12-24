@@ -77,6 +77,18 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         'Grootheid' => ['Code' => 'WINDRTG'],
                     ],
                 ],
+                [
+                    'AquoMetadata' => [
+                        'Compartiment' => ['Code' => 'OW'],
+                        'Grootheid' => ['Code' => 'Tm02'],
+                    ],
+                ],
+                [
+                    'AquoMetadata' => [
+                        'Compartiment' => ['Code' => 'OW'],
+                        'Grootheid' => ['Code' => 'Th3'],
+                    ],
+                ],
             ],
         ];
 
@@ -239,6 +251,8 @@ final class RwsHttpClient implements RwsHttpClientInterface
             'waterTemperature' => null,
             'waterHeight' => null,
             'waveHeight' => null,
+            'wavePeriod' => null,
+            'waveDirection' => null,
             'windSpeed' => null,
             'windDirection' => null,
             'timestamp' => null,
@@ -249,6 +263,8 @@ final class RwsHttpClient implements RwsHttpClientInterface
             'waterTemperature' => null,
             'waterHeight' => null,
             'waveHeight' => null,
+            'wavePeriod' => null,
+            'waveDirection' => null,
             'windSpeed' => null,
             'windDirection' => null,
         ];
@@ -314,6 +330,20 @@ final class RwsHttpClient implements RwsHttpClientInterface
                             $timestamps['windDirection'] = $timestamp;
                         }
                         break;
+                    case 'Tm02':
+                        // Wave period in seconds, pick most recent
+                        if (null === $timestamps['wavePeriod'] || $timestamp > $timestamps['wavePeriod']) {
+                            $result['wavePeriod'] = $value;
+                            $timestamps['wavePeriod'] = $timestamp;
+                        }
+                        break;
+                    case 'Th3':
+                        // Wave direction in degrees, pick most recent (keep as degrees for value object)
+                        if (null === $timestamps['waveDirection'] || $timestamp > $timestamps['waveDirection']) {
+                            $result['waveDirection'] = $value;
+                            $timestamps['waveDirection'] = $timestamp;
+                        }
+                        break;
                 }
             }
         }
@@ -327,7 +357,7 @@ final class RwsHttpClient implements RwsHttpClientInterface
     private function degreesToCompass(int $degrees): string
     {
         $directions = ['N', 'NNO', 'NO', 'ONO', 'O', 'OZO', 'ZO', 'ZZO', 'Z', 'ZZW', 'ZW', 'WZW', 'W', 'WNW', 'NW', 'NNW'];
-        $index = (int) round($degrees / 22.5) % 16;
+        $index = ((int) round($degrees / 22.5) % 16 + 16) % 16;
 
         return $directions[$index];
     }
