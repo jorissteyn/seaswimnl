@@ -8,13 +8,12 @@
             <svg :viewBox="`0 0 ${graphWidth} ${graphHeight}`" preserveAspectRatio="xMidYMid meet">
                 <!-- Wave curve -->
                 <path :d="wavePath" class="tide-wave" fill="none" stroke-width="2" />
-                <!-- Current water height line -->
+                <!-- NAP reference line (0 cm) -->
                 <line
-                    v-if="waterHeight !== null"
                     :x1="0"
-                    :y1="currentHeightY"
+                    :y1="graphHeight / 2"
                     :x2="graphWidth"
-                    :y2="currentHeightY"
+                    :y2="graphHeight / 2"
                     class="current-height-line"
                     stroke-width="2"
                     stroke-dasharray="4,4"
@@ -137,11 +136,6 @@ export default {
         highTideY() {
             return this.topPadding;
         },
-        currentHeightY() {
-            if (this.waterHeight === null) return this.graphHeight / 2;
-            const heightCm = this.waterHeight * 100;
-            return this.heightToY(heightCm);
-        },
         // Calculate current position on the wave (0 to 1)
         currentProgress() {
             if (!this.previousTime || !this.nextTime) return 0.5;
@@ -184,15 +178,6 @@ export default {
         },
     },
     methods: {
-        // Map height in cm to Y position, clamped within wave bounds
-        heightToY(heightCm) {
-            const range = this.highTideHeight - this.lowTideHeight;
-            if (range === 0) return this.graphHeight / 2;
-            const normalized = (heightCm - this.lowTideHeight) / range;
-            const y = this.lowTideY - normalized * (this.lowTideY - this.highTideY);
-            // Clamp to stay within the wave bounds
-            return Math.max(this.highTideY, Math.min(this.lowTideY, y));
-        },
         formatHeight(cm) {
             return `${cm > 0 ? '+' : ''}${Math.round(cm)} cm`;
         },
