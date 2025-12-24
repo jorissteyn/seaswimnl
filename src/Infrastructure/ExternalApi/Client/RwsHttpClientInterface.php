@@ -16,7 +16,7 @@ interface RwsHttpClientInterface
     /**
      * Fetch the catalog of available locations.
      *
-     * @return array<int, array{code: string, name: string, latitude: float, longitude: float}>|null
+     * @return array<int, array{code: string, name: string, latitude: float, longitude: float, compartimenten: array<string>, grootheden: array<string>}>|null
      */
     public function fetchLocations(): ?array;
 

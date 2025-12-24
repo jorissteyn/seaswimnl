@@ -104,7 +104,7 @@ final class RwsHttpClient implements RwsHttpClientInterface
     /**
      * Fetch the catalog of available locations.
      *
-     * @return array<int, array{code: string, name: string, latitude: float, longitude: float}>|null
+     * @return array<int, array{code: string, name: string, latitude: float, longitude: float, compartimenten: array<string>, grootheden: array<string>}>|null
      */
     public function fetchLocations(): ?array
     {
@@ -278,9 +278,9 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         }
                         break;
                     case 'Hm0':
-                        // Pick most recent
+                        // Convert from cm to meters, pick most recent
                         if (null === $timestamps['waveHeight'] || $timestamp > $timestamps['waveHeight']) {
-                            $result['waveHeight'] = $value;
+                            $result['waveHeight'] = $value / 100.0;
                             $timestamps['waveHeight'] = $timestamp;
                         }
                         break;
@@ -294,12 +294,41 @@ final class RwsHttpClient implements RwsHttpClientInterface
     /**
      * Normalize locations from the catalog response.
      *
+     * The RWS API returns locations and their metadata in separate lists with a join table:
+     * - LocatieLijst: locations with Locatie_MessageID
+     * - AquoMetadataLijst: metadata with AquoMetadata_MessageID, Compartiment.Code, Grootheid.Code
+     * - AquoMetadataLocatieLijst: links Locatie_MessageID to AquoMetaData_MessageID
+     *
      * @param array<string, mixed> $data
      *
-     * @return array<int, array{code: string, name: string, latitude: float, longitude: float}>
+     * @return array<int, array{code: string, name: string, latitude: float, longitude: float, compartimenten: array<string>, grootheden: array<string>}>
      */
     private function normalizeLocations(array $data): array
     {
+        // Build metadata lookup: AquoMetadata_MessageID => {compartiment, grootheid}
+        $metadataLookup = [];
+        foreach ($data['AquoMetadataLijst'] ?? [] as $meta) {
+            $messageId = $meta['AquoMetadata_MessageID'] ?? null;
+            if (null === $messageId) {
+                continue;
+            }
+            $metadataLookup[$messageId] = [
+                'compartiment' => $meta['Compartiment']['Code'] ?? null,
+                'grootheid' => $meta['Grootheid']['Code'] ?? null,
+            ];
+        }
+
+        // Build location metadata mapping: Locatie_MessageID => [AquoMetaData_MessageID, ...]
+        $locationMetadataMap = [];
+        foreach ($data['AquoMetadataLocatieLijst'] ?? [] as $link) {
+            $locMessageId = $link['Locatie_MessageID'] ?? null;
+            $metaMessageId = $link['AquoMetaData_MessageID'] ?? null;
+            if (null === $locMessageId || null === $metaMessageId) {
+                continue;
+            }
+            $locationMetadataMap[$locMessageId][] = $metaMessageId;
+        }
+
         $locations = [];
         $locationList = $data['LocatieLijst'] ?? [];
 
@@ -308,16 +337,39 @@ final class RwsHttpClient implements RwsHttpClientInterface
             $name = $location['Naam'] ?? $code;
             $lat = $location['Lat'] ?? null;
             $lon = $location['Lon'] ?? null;
+            $messageId = $location['Locatie_MessageID'] ?? null;
 
             if (null === $code || null === $lat || null === $lon) {
                 continue;
             }
+
+            // Resolve compartimenten and grootheden via the join table
+            $compartimenten = [];
+            $grootheden = [];
+            $metadataIds = $locationMetadataMap[$messageId] ?? [];
+            foreach ($metadataIds as $metaId) {
+                $meta = $metadataLookup[$metaId] ?? null;
+                if (null === $meta) {
+                    continue;
+                }
+                if (null !== $meta['compartiment'] && !\in_array($meta['compartiment'], $compartimenten, true)) {
+                    $compartimenten[] = $meta['compartiment'];
+                }
+                if (null !== $meta['grootheid'] && !\in_array($meta['grootheid'], $grootheden, true)) {
+                    $grootheden[] = $meta['grootheid'];
+                }
+            }
+
+            sort($compartimenten);
+            sort($grootheden);
 
             $locations[] = [
                 'code' => $code,
                 'name' => $name,
                 'latitude' => (float) $lat,
                 'longitude' => (float) $lon,
+                'compartimenten' => $compartimenten,
+                'grootheden' => $grootheden,
             ];
         }
 

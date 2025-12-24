@@ -50,6 +50,8 @@ final readonly class RefreshLocations
                 $item['name'],
                 $item['latitude'],
                 $item['longitude'],
+                $item['compartimenten'] ?? [],
+                $item['grootheden'] ?? [],
             );
         }
 

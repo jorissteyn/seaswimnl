@@ -23,8 +23,8 @@ final class RefreshLocationsTest extends TestCase
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
             ->willReturn([
-                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
-                ['code' => 'hoekvanholland', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12],
+                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE']],
+                ['code' => 'hoekvanholland', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE', 'Hm0']],
             ]);
 
         $buienradarClient->expects($this->once())
@@ -86,7 +86,7 @@ final class RefreshLocationsTest extends TestCase
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
             ->willReturn([
-                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60],
+                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE']],
             ]);
 
         $buienradarClient->expects($this->once())

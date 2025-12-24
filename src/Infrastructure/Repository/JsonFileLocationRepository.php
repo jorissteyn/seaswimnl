@@ -13,7 +13,7 @@ final class JsonFileLocationRepository implements LocationRepositoryInterface
 
     public function __construct(string $projectDir)
     {
-        $this->filePath = $projectDir.'/var/data/locations.json';
+        $this->filePath = $projectDir.'/var/data/rws-locations.json';
     }
 
     public function findAll(): array
@@ -38,6 +38,8 @@ final class JsonFileLocationRepository implements LocationRepositoryInterface
                 $item['name'],
                 (float) $item['latitude'],
                 (float) $item['longitude'],
+                $item['compartimenten'] ?? [],
+                $item['grootheden'] ?? [],
             ),
             $data,
         );
@@ -67,6 +69,8 @@ final class JsonFileLocationRepository implements LocationRepositoryInterface
                 'name' => $location->getName(),
                 'latitude' => $location->getLatitude(),
                 'longitude' => $location->getLongitude(),
+                'compartimenten' => $location->getCompartimenten(),
+                'grootheden' => $location->getGrootheden(),
             ],
             $locations,
         );

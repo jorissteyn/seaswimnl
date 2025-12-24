@@ -7,14 +7,11 @@ namespace Seaswim\Domain\Service;
 use Seaswim\Domain\ValueObject\Location;
 
 /**
- * Finds the nearest buoy (boei) location for a given RWS location.
+ * Finds the nearest location with wave height (Hm0) measurements.
  *
- * Wave height (Hm0) is only measured at offshore locations with wave buoys/sensors.
- * Coastal stations like harbors and piers don't have wave measurement equipment -
- * they only measure water temperature and water height (tide level).
- *
- * This service helps find the nearest buoy location that may have wave data,
- * allowing the application to fetch wave height from a nearby offshore buoy
+ * Wave height (Hm0) is only measured at certain stations with wave sensors.
+ * This service finds the nearest station that has Hm0 data available,
+ * allowing the application to fetch wave height from a nearby location
  * when the primary location doesn't have wave measurements.
  *
  * Distance is calculated using the Haversine formula for accurate great-circle
@@ -23,37 +20,42 @@ use Seaswim\Domain\ValueObject\Location;
 final readonly class NearestBuoyFinder
 {
     private const EARTH_RADIUS_KM = 6371.0;
+    private const WAVE_HEIGHT_GROOTHEID = 'Hm0';
 
     /**
-     * Find the nearest buoy location for a given location.
+     * Find the nearest location with wave height (Hm0) measurements.
      *
-     * @param Location   $location     The location to find the nearest buoy for
+     * @param Location   $location     The location to find the nearest wave station for
      * @param Location[] $allLocations All available RWS locations
      *
-     * @return array{location: Location, distanceKm: float}|null The nearest buoy and distance, or null if none found
+     * @return array{location: Location, distanceKm: float}|null The nearest wave station and distance, or null if none found
      */
-    public function findNearestBuoy(Location $location, array $allLocations): ?array
+    public function findNearest(Location $location, array $allLocations): ?array
     {
-        $buoys = $this->filterBuoys($allLocations);
-
-        if ([] === $buoys) {
-            return null;
-        }
-
         $nearest = null;
         $minDistance = PHP_FLOAT_MAX;
 
-        foreach ($buoys as $buoy) {
+        foreach ($allLocations as $candidate) {
+            // Skip the same location
+            if ($candidate->getId() === $location->getId()) {
+                continue;
+            }
+
+            // Only consider locations with wave height data
+            if (!\in_array(self::WAVE_HEIGHT_GROOTHEID, $candidate->getGrootheden(), true)) {
+                continue;
+            }
+
             $distance = $this->calculateDistance(
                 $location->getLatitude(),
                 $location->getLongitude(),
-                $buoy->getLatitude(),
-                $buoy->getLongitude()
+                $candidate->getLatitude(),
+                $candidate->getLongitude()
             );
 
             if ($distance < $minDistance) {
                 $minDistance = $distance;
-                $nearest = $buoy;
+                $nearest = $candidate;
             }
         }
 
@@ -65,21 +67,6 @@ final readonly class NearestBuoyFinder
             'location' => $nearest,
             'distanceKm' => round($minDistance, 2),
         ];
-    }
-
-    /**
-     * Filter locations to only include buoys.
-     *
-     * @param Location[] $locations
-     *
-     * @return Location[]
-     */
-    private function filterBuoys(array $locations): array
-    {
-        return array_filter(
-            $locations,
-            fn (Location $loc) => str_contains(strtolower($loc->getName()), 'boei')
-        );
     }
 
     /**

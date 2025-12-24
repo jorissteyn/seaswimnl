@@ -31,7 +31,8 @@ final class LocationsListCommand extends Command
         $this
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON')
             ->addOption('search', 's', InputOption::VALUE_REQUIRED, 'Filter locations by name or code')
-            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, buienradar (default: both)');
+            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, buienradar (default: both)')
+            ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter RWS locations by grootheid code (e.g., Hm0 for wave height, T for temperature, WATHTE for water height)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -40,6 +41,7 @@ final class LocationsListCommand extends Command
         $asJson = $input->getOption('json');
         $search = $input->getOption('search');
         $source = $input->getOption('source');
+        $filter = $input->getOption('filter');
 
         $items = [];
 
@@ -51,6 +53,8 @@ final class LocationsListCommand extends Command
                     'name' => $loc->getName(),
                     'latitude' => $loc->getLatitude(),
                     'longitude' => $loc->getLongitude(),
+                    'compartimenten' => $loc->getCompartimenten(),
+                    'grootheden' => $loc->getGrootheden(),
                 ];
             }
         }
@@ -63,6 +67,8 @@ final class LocationsListCommand extends Command
                     'name' => $station->getName(),
                     'latitude' => $station->getLatitude(),
                     'longitude' => $station->getLongitude(),
+                    'compartimenten' => [],
+                    'grootheden' => [],
                 ];
             }
         }
@@ -73,6 +79,13 @@ final class LocationsListCommand extends Command
                 $items,
                 fn ($item) => str_contains(strtolower($item['name']), $search)
                     || str_contains(strtolower($item['id']), $search),
+            );
+        }
+
+        if (null !== $filter) {
+            $items = array_filter(
+                $items,
+                fn ($item) => \in_array($filter, $item['grootheden'], true),
             );
         }
 
@@ -97,11 +110,13 @@ final class LocationsListCommand extends Command
                 $item['name'],
                 sprintf('%.4f', $item['latitude']),
                 sprintf('%.4f', $item['longitude']),
+                implode(', ', $item['compartimenten']),
+                implode(', ', $item['grootheden']),
             ],
             array_values($items),
         );
 
-        $io->table(['Source', 'ID', 'Name', 'Latitude', 'Longitude'], $rows);
+        $io->table(['Source', 'ID', 'Name', 'Latitude', 'Longitude', 'Compartimenten', 'Grootheden'], $rows);
 
         return Command::SUCCESS;
     }
