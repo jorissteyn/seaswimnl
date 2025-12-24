@@ -454,8 +454,8 @@ body::before {
 
 .sun-indicator {
     position: relative;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 3.2rem;
+    height: 3.2rem;
     flex-shrink: 0;
 }
 
@@ -464,8 +464,8 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 1.2rem;
+    height: 1.2rem;
     border-radius: 50%;
     background: currentColor;
     transition: all 0.3s ease;
@@ -475,19 +475,19 @@ body::before {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 2px;
-    height: 0.35rem;
+    width: 4px;
+    height: 0.7rem;
     background: currentColor;
-    border-radius: 1px;
+    border-radius: 2px;
     transform-origin: center bottom;
     opacity: 0;
     transition: all 0.3s ease;
 }
 
-.ray-1 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(0deg); }
-.ray-2 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(90deg); }
-.ray-3 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(180deg); }
-.ray-4 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(270deg); }
+.ray-1 { transform: translate(-50%, -100%) translateY(-0.6rem) rotate(0deg); }
+.ray-2 { transform: translate(-50%, -100%) translateY(-0.6rem) rotate(90deg); }
+.ray-3 { transform: translate(-50%, -100%) translateY(-0.6rem) rotate(180deg); }
+.ray-4 { transform: translate(-50%, -100%) translateY(-0.6rem) rotate(270deg); }
 
 /* Sun states */
 .sun-none {
@@ -495,8 +495,8 @@ body::before {
 }
 
 .sun-none .sun-core {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: 1rem;
+    height: 1rem;
 }
 
 .sun-low {
@@ -505,7 +505,7 @@ body::before {
 
 .sun-low .sun-ray {
     opacity: 0.3;
-    height: 0.2rem;
+    height: 0.4rem;
 }
 
 .sun-moderate {
@@ -514,32 +514,32 @@ body::before {
 
 .sun-moderate .sun-ray {
     opacity: 0.6;
-    height: 0.25rem;
+    height: 0.5rem;
 }
 
 .sun-good {
     color: #fbbf24;
-    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4));
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
 }
 
 .sun-good .sun-ray {
     opacity: 0.9;
-    height: 0.35rem;
+    height: 0.7rem;
 }
 
 .sun-strong {
     color: #fb923c;
-    filter: drop-shadow(0 0 6px rgba(251, 146, 60, 0.5));
+    filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.5));
 }
 
 .sun-strong .sun-core {
-    width: 0.7rem;
-    height: 0.7rem;
+    width: 1.4rem;
+    height: 1.4rem;
 }
 
 .sun-strong .sun-ray {
     opacity: 1;
-    height: 0.4rem;
+    height: 0.8rem;
 }
 
 .sunpower-value {
