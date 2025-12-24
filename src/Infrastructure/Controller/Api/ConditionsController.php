@@ -43,20 +43,34 @@ final class ConditionsController extends AbstractController
         ];
 
         $water = $conditions['water'];
+        $waveHeightBuoy = $conditions['waveHeightBuoy'] ?? null;
+
         if (null !== $water) {
             $result['water'] = [
+                'location' => [
+                    'id' => $water->getLocation()->getId(),
+                    'name' => $water->getLocation()->getName(),
+                ],
                 'temperature' => $water->getTemperature()->getCelsius(),
-                'waveHeight' => $water->getWaveHeight()->getMeters(),
+                'waveHeight' => (null !== $waveHeightBuoy ? $waveHeightBuoy['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters(),
+                'waveHeightBuoy' => $waveHeightBuoy,
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
                 'quality' => $water->getQuality()->value,
                 'qualityLabel' => $water->getQuality()->getLabel(),
+                'windSpeed' => $water->getWindSpeed()?->getKilometersPerHour(),
+                'windDirection' => $water->getWindDirection(),
                 'measuredAt' => $water->getMeasuredAt()->format('c'),
             ];
         }
 
         $weather = $conditions['weather'];
         if (null !== $weather) {
+            $station = $weather->getStation();
             $result['weather'] = [
+                'station' => null !== $station ? [
+                    'code' => $station->getCode(),
+                    'name' => $station->getName(),
+                ] : null,
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getKilometersPerHour(),
                 'windDirection' => $weather->getWindDirection(),
@@ -68,7 +82,12 @@ final class ConditionsController extends AbstractController
 
         $tides = $conditions['tides'] ?? null;
         if (null !== $tides) {
-            $result['tides'] = [];
+            $result['tides'] = [
+                'location' => null !== $water ? [
+                    'id' => $water->getLocation()->getId(),
+                    'name' => $water->getLocation()->getName(),
+                ] : null,
+            ];
 
             $prevTide = $tides->getPreviousTide();
             if (null !== $prevTide) {

@@ -445,6 +445,19 @@ body::before {
     border-bottom: 5px solid #ffffff;
 }
 
+/* Info tooltip icon */
+.info-icon {
+    margin-left: 0.4rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    cursor: help;
+    transition: color 0.2s ease;
+}
+
+.info-icon:hover {
+    color: var(--color-accent);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .header h1 {

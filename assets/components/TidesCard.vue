@@ -1,6 +1,9 @@
 <template>
     <div class="conditions-card tides">
-        <h2>Tides</h2>
+        <h2>
+            Tides
+            <span v-if="data.location" v-tooltip="locationTooltip" class="info-icon">ⓘ</span>
+        </h2>
         <dl class="conditions-list">
             <div v-if="data.previous" class="condition-item">
                 <dt>Previous {{ data.previous.typeLabel }}</dt>
@@ -44,6 +47,12 @@ export default {
         measuredAt: {
             type: String,
             default: null,
+        },
+    },
+    computed: {
+        locationTooltip() {
+            if (!this.data.location) return '';
+            return `RWS station: ${this.data.location.name} (${this.data.location.id})`;
         },
     },
     methods: {

@@ -1,6 +1,9 @@
 <template>
     <div class="conditions-card weather">
-        <h2>Weather Conditions</h2>
+        <h2>
+            Weather Conditions
+            <span v-if="data.station" v-tooltip="stationTooltip" class="info-icon">ⓘ</span>
+        </h2>
         <dl class="conditions-list">
             <div class="condition-item">
                 <dt>Air Temperature</dt>
@@ -41,6 +44,10 @@ export default {
         },
     },
     computed: {
+        stationTooltip() {
+            if (!this.data.station) return '';
+            return `Buienradar station: ${this.data.station.name} (${this.data.station.code})`;
+        },
         beaufortClass() {
             if (this.data.windSpeed === null) return '';
             const bft = this.getBeaufort(this.data.windSpeed);

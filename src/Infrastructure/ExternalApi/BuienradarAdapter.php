@@ -72,7 +72,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             return null;
         }
 
-        $conditions = $this->mapToEntity($location, $data);
+        $conditions = $this->mapToEntity($location, $data, $station);
 
         $cacheItem->set($conditions);
         $cacheItem->expiresAfter($this->cacheTtl);
@@ -90,7 +90,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
     /**
      * @param array<string, mixed> $data
      */
-    private function mapToEntity(Location $location, array $data): WeatherConditions
+    private function mapToEntity(Location $location, array $data, \Seaswim\Domain\ValueObject\BuienradarStation $station): WeatherConditions
     {
         return new WeatherConditions(
             location: $location,
@@ -99,6 +99,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             windDirection: $data['windDirection'] ?? null,
             uvIndex: UVIndex::fromValue(null), // UV not available in Buienradar feed
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
+            station: $station,
         );
     }
 
@@ -111,6 +112,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             windDirection: $conditions->getWindDirection(),
             uvIndex: $conditions->getUvIndex(),
             measuredAt: $conditions->getMeasuredAt(),
+            station: $conditions->getStation(),
         );
     }
 }

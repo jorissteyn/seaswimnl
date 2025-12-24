@@ -12,6 +12,7 @@ use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
+use Seaswim\Domain\ValueObject\WindSpeed;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
 final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
@@ -83,6 +84,8 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
             waterHeight: WaterHeight::fromMeters($data['waterHeight'] ?? null),
             quality: $this->mapQuality($data['quality'] ?? null),
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
+            windSpeed: isset($data['windSpeed']) ? WindSpeed::fromMetersPerSecond($data['windSpeed']) : null,
+            windDirection: $data['windDirection'] ?? null,
         );
     }
 

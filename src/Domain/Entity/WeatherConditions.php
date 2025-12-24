@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Entity;
 
+use Seaswim\Domain\ValueObject\BuienradarStation;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\UVIndex;
@@ -18,6 +19,7 @@ final readonly class WeatherConditions
         private ?string $windDirection,
         private UVIndex $uvIndex,
         private \DateTimeImmutable $measuredAt,
+        private ?BuienradarStation $station = null,
     ) {
     }
 
@@ -49,5 +51,10 @@ final readonly class WeatherConditions
     public function getMeasuredAt(): \DateTimeImmutable
     {
         return $this->measuredAt;
+    }
+
+    public function getStation(): ?BuienradarStation
+    {
+        return $this->station;
     }
 }

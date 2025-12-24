@@ -9,6 +9,7 @@ use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaterQuality;
 use Seaswim\Domain\ValueObject\WaveHeight;
+use Seaswim\Domain\ValueObject\WindSpeed;
 
 final readonly class WaterConditions
 {
@@ -19,6 +20,8 @@ final readonly class WaterConditions
         private WaterHeight $waterHeight,
         private WaterQuality $quality,
         private \DateTimeImmutable $measuredAt,
+        private ?WindSpeed $windSpeed = null,
+        private ?string $windDirection = null,
     ) {
     }
 
@@ -50,5 +53,15 @@ final readonly class WaterConditions
     public function getMeasuredAt(): \DateTimeImmutable
     {
         return $this->measuredAt;
+    }
+
+    public function getWindSpeed(): ?WindSpeed
+    {
+        return $this->windSpeed;
+    }
+
+    public function getWindDirection(): ?string
+    {
+        return $this->windDirection;
     }
 }

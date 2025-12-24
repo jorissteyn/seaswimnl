@@ -65,6 +65,18 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         'Grootheid' => ['Code' => 'Hm0'],
                     ],
                 ],
+                [
+                    'AquoMetadata' => [
+                        'Compartiment' => ['Code' => 'LT'],
+                        'Grootheid' => ['Code' => 'WINDSHD'],
+                    ],
+                ],
+                [
+                    'AquoMetadata' => [
+                        'Compartiment' => ['Code' => 'LT'],
+                        'Grootheid' => ['Code' => 'WINDRTG'],
+                    ],
+                ],
             ],
         ];
 
@@ -227,6 +239,8 @@ final class RwsHttpClient implements RwsHttpClientInterface
             'waterTemperature' => null,
             'waterHeight' => null,
             'waveHeight' => null,
+            'windSpeed' => null,
+            'windDirection' => null,
             'timestamp' => null,
         ];
 
@@ -235,6 +249,8 @@ final class RwsHttpClient implements RwsHttpClientInterface
             'waterTemperature' => null,
             'waterHeight' => null,
             'waveHeight' => null,
+            'windSpeed' => null,
+            'windDirection' => null,
         ];
 
         $observations = $data['WaarnemingenLijst'] ?? [];
@@ -284,11 +300,36 @@ final class RwsHttpClient implements RwsHttpClientInterface
                             $timestamps['waveHeight'] = $timestamp;
                         }
                         break;
+                    case 'WINDSHD':
+                        // Wind speed in m/s, pick most recent
+                        if (null === $timestamps['windSpeed'] || $timestamp > $timestamps['windSpeed']) {
+                            $result['windSpeed'] = $value;
+                            $timestamps['windSpeed'] = $timestamp;
+                        }
+                        break;
+                    case 'WINDRTG':
+                        // Wind direction in degrees, convert to compass direction
+                        if (null === $timestamps['windDirection'] || $timestamp > $timestamps['windDirection']) {
+                            $result['windDirection'] = $this->degreesToCompass((int) $value);
+                            $timestamps['windDirection'] = $timestamp;
+                        }
+                        break;
                 }
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Convert degrees to compass direction.
+     */
+    private function degreesToCompass(int $degrees): string
+    {
+        $directions = ['N', 'NNO', 'NO', 'ONO', 'O', 'OZO', 'ZO', 'ZZO', 'Z', 'ZZW', 'ZW', 'WZW', 'W', 'WNW', 'NW', 'NNW'];
+        $index = (int) round($degrees / 22.5) % 16;
+
+        return $directions[$index];
     }
 
     /**
