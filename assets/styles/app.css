@@ -299,10 +299,7 @@ body::before {
     }
 }
 
-/* Swim Metrics special styling */
-.metrics-card {
-    grid-column: 1 / -1;
-}
+/* Swim Metrics styling */
 
 .safety-badge {
     display: inline-flex;
