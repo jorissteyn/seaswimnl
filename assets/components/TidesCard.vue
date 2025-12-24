@@ -146,7 +146,8 @@ export default {
             const progress = this.currentProgress;
             // For rising tide: start at bottom (low), end at top (high)
             // For falling tide: start at top (high), end at bottom (low)
-            const phase = this.isRising ? Math.PI : 0;
+            // cos(0)=1 maps to lowTideY (bottom), cos(π)=-1 maps to highTideY (top)
+            const phase = this.isRising ? 0 : Math.PI;
             const waveY = Math.cos(progress * Math.PI + phase);
             // Map from [-1, 1] to [highTideY, lowTideY]
             const midY = (this.highTideY + this.lowTideY) / 2;
@@ -159,8 +160,8 @@ export default {
             for (let i = 0; i <= steps; i++) {
                 const progress = i / steps;
                 const x = progress * this.graphWidth;
-                // Cosine wave
-                const phase = this.isRising ? Math.PI : 0;
+                // Cosine wave - phase determines direction
+                const phase = this.isRising ? 0 : Math.PI;
                 const waveY = Math.cos(progress * Math.PI + phase);
                 const midY = (this.highTideY + this.lowTideY) / 2;
                 const amplitude = (this.lowTideY - this.highTideY) / 2;
@@ -171,12 +172,14 @@ export default {
         },
     },
     methods: {
-        // Map height in cm to Y position
+        // Map height in cm to Y position, clamped within wave bounds
         heightToY(heightCm) {
             const range = this.highTideHeight - this.lowTideHeight;
             if (range === 0) return this.graphHeight / 2;
             const normalized = (heightCm - this.lowTideHeight) / range;
-            return this.lowTideY - normalized * (this.lowTideY - this.highTideY);
+            const y = this.lowTideY - normalized * (this.lowTideY - this.highTideY);
+            // Clamp to stay within the wave bounds
+            return Math.max(this.highTideY, Math.min(this.lowTideY, y));
         },
         formatHeight(cm) {
             return `${cm > 0 ? '+' : ''}${Math.round(cm)} cm`;
