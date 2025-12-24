@@ -89,7 +89,7 @@ final class ConditionsCommand extends Command
                     ['Air Temperature', null !== $weather->getAirTemperature()->getCelsius() ? $weather->getAirTemperature()->getCelsius().'°C' : 'N/A'],
                     ['Wind Speed', $this->formatWindSpeed($weather->getWindSpeed())],
                     ['Wind Direction', $weather->getWindDirection() ?? 'N/A'],
-                    ['UV Index', null !== $weather->getUvIndex()->getValue() ? $weather->getUvIndex()->getValue().' ('.$weather->getUvIndex()->getLevel().')' : 'N/A'],
+                    ['Sunpower', null !== $weather->getSunpower()->getValue() ? round($weather->getSunpower()->getValue()).' W/m² ('.$weather->getSunpower()->getLevel().')' : 'N/A'],
                     ['Measured At', $weather->getMeasuredAt()->format('Y-m-d H:i:s')],
                 ],
             );
@@ -203,7 +203,7 @@ final class ConditionsCommand extends Command
                 'windBeaufort' => $weather->getWindSpeed()->getBeaufort(),
                 'windBeaufortLabel' => $weather->getWindSpeed()->getBeaufortLabel(),
                 'windDirection' => $weather->getWindDirection(),
-                'uvIndex' => $weather->getUvIndex()->getValue(),
+                'sunpower' => $weather->getSunpower()->getValue(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
         }

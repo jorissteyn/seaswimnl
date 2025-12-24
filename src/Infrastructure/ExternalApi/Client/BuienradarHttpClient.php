@@ -166,6 +166,11 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
             ? (int) $station['humidity']
             : null;
 
+        // Sunpower is in W/m²
+        $sunpower = isset($station['sunpower']) && '' !== $station['sunpower']
+            ? (float) $station['sunpower']
+            : null;
+
         // Parse timestamp (format: "2025-12-23T23:20:00")
         $timestamp = new \DateTimeImmutable();
         if (isset($station['timestamp']) && '' !== $station['timestamp']) {
@@ -181,6 +186,7 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
             'windSpeed' => $windSpeed,
             'windDirection' => $windDirection,
             'humidity' => $humidity,
+            'sunpower' => $sunpower,
             'timestamp' => $timestamp->format('c'),
         ];
     }

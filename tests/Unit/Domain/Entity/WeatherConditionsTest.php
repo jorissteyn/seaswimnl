@@ -7,8 +7,8 @@ namespace Seaswim\Tests\Unit\Domain\Entity;
 use PHPUnit\Framework\TestCase;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
-use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WindSpeed;
 
 final class WeatherConditionsTest extends TestCase
@@ -19,7 +19,7 @@ final class WeatherConditionsTest extends TestCase
         $airTemp = Temperature::fromCelsius(22.0);
         $windSpeed = WindSpeed::fromMetersPerSecond(5.0);
         $windDirection = 'NW';
-        $uvIndex = UVIndex::fromValue(6);
+        $sunpower = Sunpower::fromWattsPerSquareMeter(450.0);
         $measuredAt = new \DateTimeImmutable('2024-12-20T10:00:00+01:00');
 
         $conditions = new WeatherConditions(
@@ -27,7 +27,7 @@ final class WeatherConditionsTest extends TestCase
             $airTemp,
             $windSpeed,
             $windDirection,
-            $uvIndex,
+            $sunpower,
             $measuredAt,
         );
 
@@ -35,7 +35,7 @@ final class WeatherConditionsTest extends TestCase
         $this->assertSame($airTemp, $conditions->getAirTemperature());
         $this->assertSame($windSpeed, $conditions->getWindSpeed());
         $this->assertSame($windDirection, $conditions->getWindDirection());
-        $this->assertSame($uvIndex, $conditions->getUvIndex());
+        $this->assertSame($sunpower, $conditions->getSunpower());
         $this->assertSame($measuredAt, $conditions->getMeasuredAt());
     }
 
@@ -47,7 +47,7 @@ final class WeatherConditionsTest extends TestCase
             Temperature::fromCelsius(22.0),
             WindSpeed::fromMetersPerSecond(5.0),
             null,
-            UVIndex::fromValue(6),
+            Sunpower::fromWattsPerSquareMeter(450.0),
             new \DateTimeImmutable(),
         );
 
@@ -62,12 +62,12 @@ final class WeatherConditionsTest extends TestCase
             Temperature::unknown(),
             WindSpeed::unknown(),
             null,
-            UVIndex::unknown(),
+            Sunpower::unknown(),
             new \DateTimeImmutable(),
         );
 
         $this->assertFalse($conditions->getAirTemperature()->isKnown());
         $this->assertFalse($conditions->getWindSpeed()->isKnown());
-        $this->assertFalse($conditions->getUvIndex()->isKnown());
+        $this->assertFalse($conditions->getSunpower()->isKnown());
     }
 }

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\ValueObject;
 
-final readonly class UVIndex
+/**
+ * Solar radiation intensity in W/m² (watts per square meter).
+ */
+final readonly class Sunpower
 {
     private function __construct(
-        private ?int $value,
+        private ?float $value,
     ) {
     }
 
-    public static function fromValue(?int $value): self
+    public static function fromWattsPerSquareMeter(?float $value): self
     {
         return new self($value);
     }
@@ -21,7 +24,7 @@ final readonly class UVIndex
         return new self(null);
     }
 
-    public function getValue(): ?int
+    public function getValue(): ?float
     {
         return $this->value;
     }
@@ -31,6 +34,9 @@ final readonly class UVIndex
         return null !== $this->value;
     }
 
+    /**
+     * Get a human-readable level description.
+     */
     public function getLevel(): string
     {
         if (null === $this->value) {
@@ -38,11 +44,11 @@ final readonly class UVIndex
         }
 
         return match (true) {
-            $this->value <= 2 => 'Low',
-            $this->value <= 5 => 'Moderate',
-            $this->value <= 7 => 'High',
-            $this->value <= 10 => 'Very High',
-            default => 'Extreme',
+            $this->value < 1 => 'None',
+            $this->value < 200 => 'Low',
+            $this->value < 400 => 'Moderate',
+            $this->value < 700 => 'Good',
+            default => 'Strong',
         };
     }
 }

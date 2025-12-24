@@ -10,8 +10,8 @@ final readonly class WeatherConditionsOutput
         public ?float $airTemperature,
         public ?float $windSpeed,
         public ?string $windDirection,
-        public ?int $uvIndex,
-        public string $uvLevel,
+        public ?float $sunpower,
+        public string $sunpowerLevel,
         public string $measuredAt,
     ) {
     }

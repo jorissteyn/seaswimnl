@@ -26,8 +26,8 @@
                 </dd>
             </div>
             <div class="condition-item">
-                <dt>UV Index</dt>
-                <dd>{{ formatUV(data.uvIndex, data.uvLevel) }}</dd>
+                <dt>Sunpower</dt>
+                <dd>{{ formatSunpower(data.sunpower, data.sunpowerLevel) }}</dd>
             </div>
         </dl>
         <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
@@ -94,9 +94,9 @@ export default {
             if (ms < 32.7) return 11;
             return 12;
         },
-        formatUV(value, level) {
+        formatSunpower(value, level) {
             if (value === null) return 'N/A';
-            return `${value} (${level})`;
+            return `${Math.round(value)} W/m² (${level})`;
         },
         formatTime(isoString) {
             if (!isoString) return 'N/A';

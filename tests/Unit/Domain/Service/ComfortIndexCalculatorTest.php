@@ -9,8 +9,8 @@ use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
 use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
-use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Domain\ValueObject\WindSpeed;
@@ -29,7 +29,7 @@ final class ComfortIndexCalculatorTest extends TestCase
     public function testHighComfortWithOptimalConditions(): void
     {
         $water = $this->createWaterConditions(20.0, 0.2);
-        $weather = $this->createWeatherConditions(22.0, 2.0, 4);
+        $weather = $this->createWeatherConditions(22.0, 2.0, 400.0);
 
         $index = $this->calculator->calculate($water, $weather);
 
@@ -40,7 +40,7 @@ final class ComfortIndexCalculatorTest extends TestCase
     public function testMediumComfortWithSuboptimalConditions(): void
     {
         $water = $this->createWaterConditions(14.0, 0.8);
-        $weather = $this->createWeatherConditions(18.0, 6.0, 7);
+        $weather = $this->createWeatherConditions(18.0, 6.0, 50.0);
 
         $index = $this->calculator->calculate($water, $weather);
 
@@ -51,7 +51,7 @@ final class ComfortIndexCalculatorTest extends TestCase
     public function testLowComfortWithPoorConditions(): void
     {
         $water = $this->createWaterConditions(10.0, 1.8);
-        $weather = $this->createWeatherConditions(10.0, 12.0, 10);
+        $weather = $this->createWeatherConditions(10.0, 12.0, 10.0);
 
         $index = $this->calculator->calculate($water, $weather);
 
@@ -70,7 +70,7 @@ final class ComfortIndexCalculatorTest extends TestCase
         // Same conditions except water temperature
         $waterWarm = $this->createWaterConditions(20.0, 0.5);
         $waterCold = $this->createWaterConditions(10.0, 0.5);
-        $weather = $this->createWeatherConditions(22.0, 2.0, 4);
+        $weather = $this->createWeatherConditions(22.0, 2.0, 400.0);
 
         $indexWarm = $this->calculator->calculate($waterWarm, $weather);
         $indexCold = $this->calculator->calculate($waterCold, $weather);
@@ -83,7 +83,7 @@ final class ComfortIndexCalculatorTest extends TestCase
     {
         // Even with very poor conditions, index should be at least 1
         $water = $this->createWaterConditions(5.0, 3.0);
-        $weather = $this->createWeatherConditions(5.0, 15.0, 12);
+        $weather = $this->createWeatherConditions(5.0, 15.0, 5.0);
 
         $index = $this->calculator->calculate($water, $weather);
 
@@ -102,14 +102,14 @@ final class ComfortIndexCalculatorTest extends TestCase
         );
     }
 
-    private function createWeatherConditions(float $airTemp, float $windSpeedMs, int $uvIndex): WeatherConditions
+    private function createWeatherConditions(float $airTemp, float $windSpeedMs, float $sunpower): WeatherConditions
     {
         return new WeatherConditions(
             $this->location,
             Temperature::fromCelsius($airTemp),
             WindSpeed::fromMetersPerSecond($windSpeedMs),
             'N',
-            UVIndex::fromValue($uvIndex),
+            Sunpower::fromWattsPerSquareMeter($sunpower),
             new \DateTimeImmutable(),
         );
     }

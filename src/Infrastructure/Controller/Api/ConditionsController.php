@@ -72,8 +72,8 @@ final class ConditionsController extends AbstractController
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
                 'windSpeed' => $weather->getWindSpeed()->getKilometersPerHour(),
                 'windDirection' => $weather->getWindDirection(),
-                'uvIndex' => $weather->getUvIndex()->getValue(),
-                'uvLevel' => $weather->getUvIndex()->getLevel(),
+                'sunpower' => $weather->getSunpower()->getValue(),
+                'sunpowerLevel' => $weather->getSunpower()->getLevel(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];
         }

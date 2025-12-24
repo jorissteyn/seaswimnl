@@ -10,8 +10,8 @@ use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Domain\ValueObject\SafetyScore;
+use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
-use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaveHeight;
 use Seaswim\Domain\ValueObject\WindSpeed;
@@ -135,7 +135,7 @@ final class SafetyScoreCalculatorTest extends TestCase
             Temperature::fromCelsius(20.0),
             WindSpeed::fromMetersPerSecond($windSpeedMs),
             'N',
-            UVIndex::fromValue(5),
+            Sunpower::fromWattsPerSquareMeter(400.0),
             new \DateTimeImmutable(),
         );
     }

@@ -9,8 +9,8 @@ use Seaswim\Application\Port\WeatherConditionsProviderInterface;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\BuienradarStationMatcher;
 use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
-use Seaswim\Domain\ValueObject\UVIndex;
 use Seaswim\Domain\ValueObject\WindSpeed;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 
@@ -97,7 +97,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             airTemperature: Temperature::fromCelsius($data['temperature'] ?? null),
             windSpeed: WindSpeed::fromMetersPerSecond($data['windSpeed'] ?? null),
             windDirection: $data['windDirection'] ?? null,
-            uvIndex: UVIndex::fromValue(null), // UV not available in Buienradar feed
+            sunpower: Sunpower::fromWattsPerSquareMeter($data['sunpower'] ?? null),
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
             station: $station,
         );
@@ -110,7 +110,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             airTemperature: $conditions->getAirTemperature(),
             windSpeed: $conditions->getWindSpeed(),
             windDirection: $conditions->getWindDirection(),
-            uvIndex: $conditions->getUvIndex(),
+            sunpower: $conditions->getSunpower(),
             measuredAt: $conditions->getMeasuredAt(),
             station: $conditions->getStation(),
         );

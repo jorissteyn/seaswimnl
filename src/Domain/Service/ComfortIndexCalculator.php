@@ -13,7 +13,7 @@ final class ComfortIndexCalculator
     private const float WATER_TEMP_WEIGHT = 0.4;
     private const float AIR_TEMP_WEIGHT = 0.2;
     private const float WIND_SPEED_WEIGHT = 0.2;
-    private const float UV_INDEX_WEIGHT = 0.1;
+    private const float SUNPOWER_WEIGHT = 0.1;
     private const float WAVE_HEIGHT_WEIGHT = 0.1;
 
     public function calculate(?WaterConditions $water, ?WeatherConditions $weather): ComfortIndex
@@ -48,10 +48,10 @@ final class ComfortIndexCalculator
                 $weights[] = self::WIND_SPEED_WEIGHT;
             }
 
-            $uvIndex = $weather->getUvIndex()->getValue();
-            if (null !== $uvIndex) {
-                $scores[] = $this->scoreUvIndex($uvIndex);
-                $weights[] = self::UV_INDEX_WEIGHT;
+            $sunpower = $weather->getSunpower()->getValue();
+            if (null !== $sunpower) {
+                $scores[] = $this->scoreSunpower($sunpower);
+                $weights[] = self::SUNPOWER_WEIGHT;
             }
         }
 
@@ -126,18 +126,22 @@ final class ComfortIndexCalculator
         return 2;
     }
 
-    private function scoreUvIndex(int $uv): float
+    /**
+     * Score sunpower (solar radiation) for swimming comfort.
+     * Ideal: 300-600 W/m² (pleasant sunny weather).
+     */
+    private function scoreSunpower(float $wpm2): float
     {
-        if ($uv >= 3 && $uv <= 5) {
+        if ($wpm2 >= 300 && $wpm2 <= 600) {
             return 10;
         }
-        if ($uv >= 2 && $uv <= 6) {
+        if ($wpm2 >= 200 && $wpm2 <= 800) {
             return 8;
         }
-        if ($uv <= 7) {
+        if ($wpm2 >= 100 && $wpm2 <= 900) {
             return 6;
         }
-        if ($uv <= 9) {
+        if ($wpm2 >= 50) {
             return 4;
         }
 
