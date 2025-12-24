@@ -403,6 +403,16 @@ Only add complexity with:
 - Prefer verb-led prefixes: `add-`, `update-`, `remove-`, `refactor-`
 - Ensure uniqueness; if taken, append `-2`, `-3`, etc.
 
+## Project Build Commands
+
+| Command | Use Case |
+|---------|----------|
+| `make dev` | Fast frontend build for testing (~4s) |
+| `make build` | Production frontend build (~15s) |
+| `make watch` | Continuous rebuild on file changes |
+
+**Always use `make dev` when testing changes during development.** Only use `make build` for final production builds or CI.
+
 ## Tool Selection Guide
 
 | Task | Tool | Why |
