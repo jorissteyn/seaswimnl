@@ -343,7 +343,8 @@ body::after {
 }
 
 /* Wind display with Beaufort badge */
-.wind-display {
+.wind-display,
+.wave-direction-display {
     display: flex;
     align-items: center;
     gap: 0.6rem;
