@@ -33,7 +33,8 @@
                             <span class="sunpower-fill" :style="{ width: sunpowerPercent + '%' }"></span>
                             <span class="sunpower-marker" :style="{ left: sunpowerPercent + '%' }"></span>
                         </span>
-                        <span class="sunpower-value">{{ Math.round(data.sunpower) }}</span>
+                        <span class="sun-icon">☀</span>
+                        <span class="sunpower-value">{{ Math.round(data.sunpower) }} W/m²</span>
                     </template>
                     <template v-else>N/A</template>
                 </dd>

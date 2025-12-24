@@ -491,9 +491,14 @@ body::before {
     transition: left 0.3s ease;
 }
 
+.sun-icon {
+    font-size: 1rem;
+    color: #fde047;
+    text-shadow: 0 0 6px rgba(253, 224, 71, 0.5);
+}
+
 .sunpower-value {
     font-weight: 600;
-    min-width: 2.5rem;
 }
 
 /* Info tooltip icon */
