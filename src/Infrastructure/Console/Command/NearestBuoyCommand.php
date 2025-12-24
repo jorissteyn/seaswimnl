@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Console\Command;
 
-use Seaswim\Application\Port\LocationRepositoryInterface;
-use Seaswim\Domain\Service\NearestStationFinder;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Domain\Service\NearestRwsLocationFinder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,8 +22,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class NearestBuoyCommand extends Command
 {
     public function __construct(
-        private readonly LocationRepositoryInterface $locationRepository,
-        private readonly NearestStationFinder $stationFinder,
+        private readonly RwsLocationRepositoryInterface $locationRepository,
+        private readonly NearestRwsLocationFinder $rwsLocationFinder,
     ) {
         parent::__construct();
     }
@@ -50,7 +50,7 @@ final class NearestBuoyCommand extends Command
         }
 
         $allLocations = $this->locationRepository->findAll();
-        $result = $this->stationFinder->findNearest($location, $allLocations, $capability);
+        $result = $this->rwsLocationFinder->findNearest($location, $allLocations, $capability);
 
         if (null === $result) {
             $io->warning(sprintf('No locations with %s capability found', $capability));

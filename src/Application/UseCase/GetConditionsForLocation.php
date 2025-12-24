@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Application\UseCase;
 
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Application\Port\TidalInfoProviderInterface;
 use Seaswim\Application\Port\WaterConditionsProviderInterface;
 use Seaswim\Application\Port\WeatherConditionsProviderInterface;
@@ -12,7 +12,7 @@ use Seaswim\Domain\Entity\CalculatedMetrics;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
-use Seaswim\Domain\Service\NearestStationFinder;
+use Seaswim\Domain\Service\NearestRwsLocationFinder;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
 use Seaswim\Domain\ValueObject\TideInfo;
 
@@ -23,13 +23,13 @@ final readonly class GetConditionsForLocation
     private const CAPABILITY_WAVE_DIRECTION = 'Th3';
 
     public function __construct(
-        private LocationRepositoryInterface $locationRepository,
+        private RwsLocationRepositoryInterface $locationRepository,
         private WaterConditionsProviderInterface $waterProvider,
         private WeatherConditionsProviderInterface $weatherProvider,
         private TidalInfoProviderInterface $tidalProvider,
         private SafetyScoreCalculator $safetyCalculator,
         private ComfortIndexCalculator $comfortCalculator,
-        private NearestStationFinder $stationFinder,
+        private NearestRwsLocationFinder $rwsLocationFinder,
     ) {
     }
 
@@ -102,7 +102,7 @@ final readonly class GetConditionsForLocation
     private function fetchFromNearestStation(WaterConditions $water, string $capability): ?array
     {
         $allLocations = $this->locationRepository->findAll();
-        $stationResult = $this->stationFinder->findNearest($water->getLocation(), $allLocations, $capability);
+        $stationResult = $this->rwsLocationFinder->findNearest($water->getLocation(), $allLocations, $capability);
 
         if (null === $stationResult) {
             return null;

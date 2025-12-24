@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Console\Command;
 
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Domain\Service\BuienradarStationMatcher;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class LocationsMatchCommand extends Command
 {
     public function __construct(
-        private readonly LocationRepositoryInterface $locationRepository,
+        private readonly RwsLocationRepositoryInterface $locationRepository,
         private readonly BuienradarStationMatcher $stationMatcher,
     ) {
         parent::__construct();

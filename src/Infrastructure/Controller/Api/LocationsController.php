@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Controller\Api;
 
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LocationsController extends AbstractController
 {
     public function __construct(
-        private readonly LocationRepositoryInterface $locationRepository,
+        private readonly RwsLocationRepositoryInterface $locationRepository,
     ) {
     }
 

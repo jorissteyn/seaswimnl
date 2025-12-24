@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Application\UseCase;
 
 use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Domain\ValueObject\BuienradarStation;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
@@ -14,7 +14,7 @@ use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 final readonly class RefreshLocations
 {
     public function __construct(
-        private LocationRepositoryInterface $locationRepository,
+        private RwsLocationRepositoryInterface $locationRepository,
         private RwsHttpClientInterface $rwsClient,
         private BuienradarStationRepositoryInterface $buienradarStationRepository,
         private BuienradarHttpClientInterface $buienradarClient,

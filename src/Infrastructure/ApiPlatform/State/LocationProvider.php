@@ -6,7 +6,7 @@ namespace Seaswim\Infrastructure\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Domain\ValueObject\Location;
 use Seaswim\Infrastructure\ApiPlatform\Dto\LocationOutput;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final readonly class LocationProvider implements ProviderInterface
 {
     public function __construct(
-        private LocationRepositoryInterface $locationRepository,
+        private RwsLocationRepositoryInterface $locationRepository,
     ) {
     }
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Repository;
 
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Domain\ValueObject\Location;
 
-final class JsonFileLocationRepository implements LocationRepositoryInterface
+final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterface
 {
     private string $filePath;
 

@@ -60,12 +60,12 @@ services:
         alias: Seaswim\Infrastructure\ExternalApi\RijkswaterstaatTidalAdapter
 
     # Repositories
-    Seaswim\Infrastructure\Repository\JsonFileLocationRepository:
+    Seaswim\Infrastructure\Repository\JsonFileRwsLocationRepository:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    Seaswim\Application\Port\LocationRepositoryInterface:
-        alias: Seaswim\Infrastructure\Repository\JsonFileLocationRepository
+    Seaswim\Application\Port\RwsLocationRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\JsonFileRwsLocationRepository
 
     Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository:
         arguments:

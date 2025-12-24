@@ -6,7 +6,7 @@ namespace Seaswim\Tests\Unit\Application\UseCase;
 
 use PHPUnit\Framework\TestCase;
 use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Application\Port\LocationRepositoryInterface;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
 use Seaswim\Application\UseCase\RefreshLocations;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
@@ -15,7 +15,7 @@ final class RefreshLocationsTest extends TestCase
 {
     public function testExecuteRefreshesLocationsAndStations(): void
     {
-        $locationRepository = $this->createMock(LocationRepositoryInterface::class);
+        $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
         $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
@@ -51,7 +51,7 @@ final class RefreshLocationsTest extends TestCase
 
     public function testExecuteReturnsMinusOneOnRwsApiFailure(): void
     {
-        $locationRepository = $this->createMock(LocationRepositoryInterface::class);
+        $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
         $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
@@ -78,7 +78,7 @@ final class RefreshLocationsTest extends TestCase
 
     public function testExecuteReturnsMinusOneOnBuienradarApiFailure(): void
     {
-        $locationRepository = $this->createMock(LocationRepositoryInterface::class);
+        $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
         $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);

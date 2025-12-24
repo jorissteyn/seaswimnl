@@ -17,7 +17,7 @@ use Seaswim\Domain\ValueObject\Location;
  * Distance is calculated using the Haversine formula for accurate great-circle
  * distance between two points on Earth given their latitude and longitude.
  */
-final readonly class NearestStationFinder
+final readonly class NearestRwsLocationFinder
 {
     private const EARTH_RADIUS_KM = 6371.0;
 

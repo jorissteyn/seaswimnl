@@ -6,7 +6,7 @@ namespace Seaswim\Application\Port;
 
 use Seaswim\Domain\ValueObject\Location;
 
-interface LocationRepositoryInterface
+interface RwsLocationRepositoryInterface
 {
     /**
      * @return Location[]
