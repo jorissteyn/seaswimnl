@@ -274,30 +274,71 @@ export default {
     right: 0;
     max-height: 280px;
     overflow-y: auto;
+    overflow-x: hidden;
     margin: 0;
     padding: 0.5rem;
     list-style: none;
-    background: rgba(26, 54, 93, 0.95);
+    background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-card-border);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 119, 182, 0.15);
     z-index: 100;
 }
 
+.dropdown-list::before,
+.dropdown-list::after {
+    content: '';
+    position: absolute;
+    left: -100%;
+    right: -100%;
+    top: -100%;
+    bottom: -100%;
+    pointer-events: none;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+.dropdown-list::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath fill='none' stroke='rgba(135,206,235,0.3)' stroke-width='1.5' d='M0,50 Q50,25 100,50 T200,50'/%3E%3C/svg%3E") repeat;
+    background-size: 220px 110px;
+    transform: rotate(-12deg);
+    animation: dropdown-wave-1 18s linear infinite;
+}
+
+.dropdown-list::after {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Cpath fill='none' stroke='rgba(135,206,235,0.2)' stroke-width='1.5' d='M0,60 Q60,90 120,60 T240,60'/%3E%3C/svg%3E") repeat;
+    background-size: 260px 130px;
+    transform: rotate(-8deg);
+    animation: dropdown-wave-2 25s linear infinite;
+}
+
+@keyframes dropdown-wave-1 {
+    0% { background-position: 0 0; }
+    100% { background-position: 220px 110px; }
+}
+
+@keyframes dropdown-wave-2 {
+    0% { background-position: 260px 0; }
+    100% { background-position: 0 130px; }
+}
+
 .dropdown-list li {
+    position: relative;
     padding: 0.75rem 1rem;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.15s ease;
-    color: rgba(255, 255, 255, 0.9);
+    transition: all 0.25s ease;
+    color: var(--color-text);
 }
 
 .dropdown-list li:hover,
 .dropdown-list li.highlighted {
-    background: rgba(144, 224, 239, 0.2);
-    color: #ffffff;
+    background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 119, 182, 0.25) 100%);
+    color: var(--color-primary);
+    transform: translateX(4px);
+    box-shadow: inset 0 0 0 1px rgba(0, 150, 199, 0.2);
 }
 
 .dropdown-empty {
@@ -307,12 +348,12 @@ export default {
     right: 0;
     padding: 1rem;
     text-align: center;
-    background: rgba(26, 54, 93, 0.95);
+    background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-card-border);
     border-radius: 16px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--color-text-light);
     z-index: 100;
 }
 
@@ -326,11 +367,11 @@ export default {
 }
 
 .dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 100, 150, 0.25);
     border-radius: 3px;
 }
 
 .dropdown-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 100, 150, 0.4);
 }
 </style>
