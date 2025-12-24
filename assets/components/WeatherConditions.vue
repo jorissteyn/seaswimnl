@@ -56,7 +56,7 @@ export default {
     computed: {
         stationTooltip() {
             if (!this.data.station) return '';
-            const distance = this.data.station.distanceKm !== null ? `, ${this.data.station.distanceKm} km away` : '';
+            const distance = this.data.station.distanceKm !== null && this.data.station.distanceKm >= 2 ? `, ${this.data.station.distanceKm} km away` : '';
             return `Buienradar station: ${this.data.station.name} (${this.data.station.code})${distance}`;
         },
         beaufortClass() {
