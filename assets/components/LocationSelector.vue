@@ -96,7 +96,7 @@ export default {
     },
     computed: {
         placeholder() {
-            return this.loading ? 'Loading locations...' : 'Type to search...';
+            return this.loading ? 'Loading locations...' : 'Type to jump to...';
         },
         simplifiedLocations() {
             if (!this.locations.length) return [];
@@ -146,14 +146,7 @@ export default {
             return this.showAllLocations ? this.locations : this.simplifiedLocations;
         },
         filteredLocations() {
-            const locations = this.activeLocations;
-            if (!this.searchText.trim()) {
-                return locations;
-            }
-            const search = this.searchText.toLowerCase();
-            return locations.filter(loc =>
-                loc.name.toLowerCase().includes(search)
-            );
+            return this.activeLocations;
         },
     },
     watch: {
@@ -162,6 +155,10 @@ export default {
             handler(newVal) {
                 this.searchText = newVal?.name || '';
             },
+        },
+        searchText(newVal) {
+            if (!newVal.trim() || !this.isOpen) return;
+            this.scrollToMatch(newVal);
         },
     },
     methods: {
@@ -243,6 +240,16 @@ export default {
                     highlighted.scrollIntoView({ block: 'nearest' });
                 }
             });
+        },
+        scrollToMatch(searchText) {
+            const search = searchText.toLowerCase();
+            const index = this.filteredLocations.findIndex(loc =>
+                loc.name.toLowerCase().startsWith(search)
+            );
+            if (index !== -1) {
+                this.highlightedIndex = index;
+                this.scrollToHighlighted();
+            }
         },
         extractBaseName(name) {
             // Extract base name before comma or common suffixes
