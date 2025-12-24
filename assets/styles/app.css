@@ -445,6 +445,107 @@ body::before {
     border-bottom: 5px solid #ffffff;
 }
 
+/* Sunpower display */
+.sunpower-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sun-indicator {
+    position: relative;
+    width: 1.6rem;
+    height: 1.6rem;
+    flex-shrink: 0;
+}
+
+.sun-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+    transition: all 0.3s ease;
+}
+
+.sun-ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 0.35rem;
+    background: currentColor;
+    border-radius: 1px;
+    transform-origin: center bottom;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.ray-1 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(0deg); }
+.ray-2 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(90deg); }
+.ray-3 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(180deg); }
+.ray-4 { transform: translate(-50%, -100%) translateY(-0.3rem) rotate(270deg); }
+
+/* Sun states */
+.sun-none {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.sun-none .sun-core {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+.sun-low {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.sun-low .sun-ray {
+    opacity: 0.3;
+    height: 0.2rem;
+}
+
+.sun-moderate {
+    color: #fbbf24;
+}
+
+.sun-moderate .sun-ray {
+    opacity: 0.6;
+    height: 0.25rem;
+}
+
+.sun-good {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4));
+}
+
+.sun-good .sun-ray {
+    opacity: 0.9;
+    height: 0.35rem;
+}
+
+.sun-strong {
+    color: #fb923c;
+    filter: drop-shadow(0 0 6px rgba(251, 146, 60, 0.5));
+}
+
+.sun-strong .sun-core {
+    width: 0.7rem;
+    height: 0.7rem;
+}
+
+.sun-strong .sun-ray {
+    opacity: 1;
+    height: 0.4rem;
+}
+
+.sunpower-value {
+    font-weight: 600;
+}
+
 /* Info tooltip icon */
 .info-icon {
     margin-left: 0.4rem;

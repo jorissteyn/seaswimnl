@@ -27,7 +27,19 @@
             </div>
             <div class="condition-item">
                 <dt>Sunpower</dt>
-                <dd>{{ formatSunpower(data.sunpower, data.sunpowerLevel) }}</dd>
+                <dd class="sunpower-display">
+                    <template v-if="data.sunpower !== null">
+                        <span class="sun-indicator" :class="sunClass">
+                            <span class="sun-core"></span>
+                            <span class="sun-ray ray-1"></span>
+                            <span class="sun-ray ray-2"></span>
+                            <span class="sun-ray ray-3"></span>
+                            <span class="sun-ray ray-4"></span>
+                        </span>
+                        <span class="sunpower-value">{{ Math.round(data.sunpower) }} W/m²</span>
+                    </template>
+                    <template v-else>N/A</template>
+                </dd>
             </div>
         </dl>
         <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
@@ -55,6 +67,15 @@ export default {
             if (bft <= 5) return 'bft-moderate';
             if (bft <= 7) return 'bft-strong';
             return 'bft-severe';
+        },
+        sunClass() {
+            if (this.data.sunpower === null) return 'sun-none';
+            const sp = this.data.sunpower;
+            if (sp < 1) return 'sun-none';
+            if (sp < 200) return 'sun-low';
+            if (sp < 400) return 'sun-moderate';
+            if (sp < 700) return 'sun-good';
+            return 'sun-strong';
         },
     },
     methods: {
@@ -93,10 +114,6 @@ export default {
             if (ms < 28.5) return 10;
             if (ms < 32.7) return 11;
             return 12;
-        },
-        formatSunpower(value, level) {
-            if (value === null) return 'N/A';
-            return `${Math.round(value)} W/m² (${level})`;
         },
         formatTime(isoString) {
             if (!isoString) return 'N/A';
