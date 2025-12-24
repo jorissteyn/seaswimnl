@@ -169,8 +169,13 @@ export default {
                 this.searchText = '';
             }
         },
-        onBlur() {
+        onBlur(event) {
             setTimeout(() => {
+                // Don't close if focus moved to something inside the dropdown
+                const container = this.$refs.container;
+                if (container && container.contains(document.activeElement)) {
+                    return;
+                }
                 this.isOpen = false;
                 if (this.selected) {
                     this.searchText = this.selected.name;
