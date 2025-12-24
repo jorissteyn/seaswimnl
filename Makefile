@@ -1,4 +1,4 @@
-.PHONY: help start stop install test lint analyse build ci clean
+.PHONY: help start stop install test lint analyse dev build watch ci clean
 
 .DEFAULT_GOAL := help
 
@@ -37,7 +37,10 @@ analyse: ## Run Psalm static analysis
 
 ## —— Frontend ———————————————————————————————————————————————————————————————————
 
-build: ## Build frontend assets
+dev: ## Build frontend assets (fast, for development)
+	ddev npm run dev
+
+build: ## Build frontend assets (production)
 	ddev npm run build
 
 watch: ## Watch frontend assets for changes
