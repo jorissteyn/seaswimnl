@@ -10,13 +10,6 @@
                 <dd>{{ formatTemp(data.temperature) }}</dd>
             </div>
             <div class="condition-item">
-                <dt>Wave Height</dt>
-                <dd>
-                    {{ formatMeters(data.waveHeight) }}
-                    <span v-if="data.waveHeightBuoy" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
-                </dd>
-            </div>
-            <div class="condition-item">
                 <dt>Wind on water</dt>
                 <dd class="wind-display">
                     <template v-if="data.windSpeed !== null">
@@ -33,6 +26,13 @@
                         </span>
                     </template>
                     <template v-else>N/A</template>
+                </dd>
+            </div>
+            <div class="condition-item">
+                <dt>Wave Height</dt>
+                <dd>
+                    {{ formatMeters(data.waveHeight) }}
+                    <span v-if="data.waveHeightBuoy" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
         </dl>
