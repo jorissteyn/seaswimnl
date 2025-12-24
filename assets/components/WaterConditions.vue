@@ -10,7 +10,7 @@
                 <dd>{{ formatTemp(data.temperature) }}</dd>
             </div>
             <div class="condition-item">
-                <dt>Wind on water</dt>
+                <dt>Wind on water <span v-if="data.location" v-tooltip="locationTooltip" class="info-icon">ⓘ</span></dt>
                 <dd class="wind-display">
                     <template v-if="data.windSpeed !== null">
                         <span :class="['beaufort-badge', beaufortClass]">
