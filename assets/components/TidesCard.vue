@@ -26,12 +26,12 @@
                     r="6"
                     class="current-position"
                 />
-                <!-- Time labels -->
+                <!-- Time labels - bottom corners -->
                 <text :x="5" :y="graphHeight - 5" class="tide-label">{{ previousTimeLabel }}</text>
                 <text :x="graphWidth - 5" :y="graphHeight - 5" class="tide-label" text-anchor="end">{{ nextTimeLabel }}</text>
-                <!-- Height labels - position based on wave direction -->
-                <text :x="isRising ? 5 : graphWidth - 5" :y="lowTideY + 4" class="tide-label" :text-anchor="isRising ? 'start' : 'end'">{{ formatHeight(lowTideHeight) }}</text>
-                <text :x="isRising ? graphWidth - 5 : 5" :y="highTideY + 4" class="tide-label" :text-anchor="isRising ? 'end' : 'start'">{{ formatHeight(highTideHeight) }}</text>
+                <!-- Height labels - outside wave area based on wave direction -->
+                <text :x="isRising ? waveLeft - 5 : waveRight + 5" :y="lowTideY + 4" class="tide-label" :text-anchor="isRising ? 'end' : 'start'">{{ formatHeight(lowTideHeight) }}</text>
+                <text :x="isRising ? waveRight + 5 : waveLeft - 5" :y="highTideY + 4" class="tide-label" :text-anchor="isRising ? 'start' : 'end'">{{ formatHeight(highTideHeight) }}</text>
             </svg>
         </div>
         <dl class="conditions-list">
@@ -83,8 +83,10 @@ export default {
         return {
             graphWidth: 300,
             graphHeight: 105,
-            padding: 15,
+            topPadding: 15,
             bottomPadding: 25,
+            leftPadding: 45,
+            rightPadding: 45,
         };
     },
     computed: {
@@ -119,11 +121,21 @@ export default {
             if (!this.data.previous || !this.data.next) return 0;
             return this.isRising ? this.data.next.heightCm : this.data.previous.heightCm;
         },
+        // Wave area boundaries
+        waveLeft() {
+            return this.leftPadding;
+        },
+        waveRight() {
+            return this.graphWidth - this.rightPadding;
+        },
+        waveWidth() {
+            return this.waveRight - this.waveLeft;
+        },
         lowTideY() {
             return this.graphHeight - this.bottomPadding;
         },
         highTideY() {
-            return this.padding;
+            return this.topPadding;
         },
         currentHeightY() {
             if (this.waterHeight === null) return this.graphHeight / 2;
@@ -139,7 +151,7 @@ export default {
             return Math.max(0, Math.min(1, elapsed / totalDuration));
         },
         currentPositionX() {
-            return this.currentProgress * this.graphWidth;
+            return this.waveLeft + this.currentProgress * this.waveWidth;
         },
         currentPositionY() {
             // Use cosine for smooth wave, phase depends on rising/falling
@@ -159,7 +171,7 @@ export default {
             const steps = 50;
             for (let i = 0; i <= steps; i++) {
                 const progress = i / steps;
-                const x = progress * this.graphWidth;
+                const x = this.waveLeft + progress * this.waveWidth;
                 // Cosine wave - phase determines direction
                 const phase = this.isRising ? 0 : Math.PI;
                 const waveY = Math.cos(progress * Math.PI + phase);

@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <header class="header">
-            <h1>Seaswim</h1>
+            <h1>Seaswim NL</h1>
             <p>Water conditions for sea swimming in the Netherlands</p>
         </header>
 
