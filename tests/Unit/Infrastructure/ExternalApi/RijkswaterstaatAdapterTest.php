@@ -29,7 +29,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
                 'waterTemperature' => 18.5,
                 'waterHeight' => 0.45,
                 'waveHeight' => 0.8,
-                'timestamp' => '2024-12-20T10:00:00+01:00',
+                'timestamp' => (new \DateTimeImmutable())->format('c'),
             ]);
 
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
@@ -67,7 +67,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
                 'waterTemperature' => 18.5,
                 'waterHeight' => 0.45,
                 'waveHeight' => 0.8,
-                'timestamp' => '2024-12-20T10:00:00+01:00',
+                'timestamp' => (new \DateTimeImmutable())->format('c'),
             ]);
 
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
@@ -97,7 +97,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
                     'waterTemperature' => 18.5,
                     'waterHeight' => 0.45,
                     'waveHeight' => 0.8,
-                    'timestamp' => '2024-12-20T10:00:00+01:00',
+                    'timestamp' => (new \DateTimeImmutable())->format('c'),
                 ],
                 null, // Second call fails
             );

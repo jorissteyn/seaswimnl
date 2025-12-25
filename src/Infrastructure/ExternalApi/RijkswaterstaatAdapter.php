@@ -58,6 +58,13 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
             return null;
         }
 
+        // Reject data that is not from today (RWS can return very old data for inactive stations)
+        if (!$this->isFromToday($data['timestamp'] ?? null)) {
+            $this->lastError = 'RWS data is outdated (not from today)';
+
+            return null;
+        }
+
         $conditions = $this->mapToEntity($location, $data);
 
         $cacheItem->set($conditions);
@@ -71,6 +78,25 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
         $this->cache->save($staleItem);
 
         return $conditions;
+    }
+
+    /**
+     * Check if the timestamp is from today.
+     */
+    private function isFromToday(?string $timestamp): bool
+    {
+        if (null === $timestamp) {
+            return false;
+        }
+
+        try {
+            $date = new \DateTimeImmutable($timestamp);
+            $today = new \DateTimeImmutable('today');
+
+            return $date->format('Y-m-d') === $today->format('Y-m-d');
+        } catch (\Exception) {
+            return false;
+        }
     }
 
     /**
