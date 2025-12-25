@@ -38,16 +38,20 @@ final class LocationsRefreshCommand extends Command
             $hasError = true;
         } else {
             $locations = $result['locations'];
-            $io->text(sprintf(
-                'Filtering locations on required grootheden: %s',
-                implode(', ', $result['requiredGrootheden'])
-            ));
-            $io->success(sprintf(
-                'Imported %d RWS locations (%d filtered out of %d total)',
-                $locations['imported'],
-                $locations['filtered'],
-                $locations['total']
-            ));
+
+            $io->text(sprintf('Total locations from RWS API: %d', $locations['total']));
+            $io->newLine();
+
+            $io->text('Filtering by required grootheden:');
+            $previous = $locations['total'];
+            foreach ($locations['filterSteps'] as $code => $remaining) {
+                $filtered = $previous - $remaining;
+                $io->text(sprintf('  %s: %d remaining (-%d)', $code, $remaining, $filtered));
+                $previous = $remaining;
+            }
+            $io->newLine();
+
+            $io->success(sprintf('Imported %d RWS locations', $locations['imported']));
         }
 
         if ($result['stations'] < 0) {

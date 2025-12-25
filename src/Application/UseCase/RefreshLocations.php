@@ -47,7 +47,7 @@ final readonly class RefreshLocations
     ];
 
     /**
-     * @return array{imported: int, filtered: int, total: int}|int Returns -1 on error
+     * @return array{imported: int, total: int, filterSteps: array<string, int>}|int Returns -1 on error
      */
     private function refreshRwsLocations(): array|int
     {
@@ -58,22 +58,30 @@ final readonly class RefreshLocations
         }
 
         $total = count($data);
+
+        // Track remaining locations after each filter step
+        $filterSteps = [];
+        $remaining = $data;
+
+        foreach (self::REQUIRED_GROOTHEDEN as $required) {
+            $remaining = array_filter($remaining, function (array $item) use ($required): bool {
+                $grootheden = $item['grootheden'] ?? [];
+
+                return \in_array($required, $grootheden, true);
+            });
+            $filterSteps[$required] = count($remaining);
+        }
+
+        // Build final location list from the filtered data
         $locations = [];
-        foreach ($data as $item) {
-            $grootheden = $item['grootheden'] ?? [];
-
-            // Only include locations that have all required capabilities
-            if (!$this->hasRequiredCapabilities($grootheden)) {
-                continue;
-            }
-
+        foreach ($remaining as $item) {
             $locations[] = new Location(
                 $item['code'],
                 $item['name'],
                 $item['latitude'],
                 $item['longitude'],
                 $item['compartimenten'] ?? [],
-                $grootheden,
+                $item['grootheden'] ?? [],
             );
         }
 
@@ -81,8 +89,8 @@ final readonly class RefreshLocations
 
         return [
             'imported' => count($locations),
-            'filtered' => $total - count($locations),
             'total' => $total,
+            'filterSteps' => $filterSteps,
         ];
     }
 
