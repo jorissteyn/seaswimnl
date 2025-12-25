@@ -132,17 +132,27 @@ final readonly class GetConditionsForLocation
             'distanceKm' => $stationResult['distanceKm'],
         ];
 
+        $rawMeasurements = $stationConditions->getRawMeasurements();
+
         switch ($capability) {
             case self::CAPABILITY_WAVE_HEIGHT:
                 $value = $stationConditions->getWaveHeight()->getMeters();
 
-                return null === $value ? null : [...$baseResult, 'waveHeight' => $value];
+                return null === $value ? null : [
+                    ...$baseResult,
+                    'waveHeight' => $value,
+                    'raw' => $rawMeasurements['waveHeight'] ?? null,
+                ];
 
             case self::CAPABILITY_WAVE_PERIOD:
                 $wavePeriod = $stationConditions->getWavePeriod();
                 $value = $wavePeriod?->getSeconds();
 
-                return null === $value ? null : [...$baseResult, 'wavePeriod' => $value];
+                return null === $value ? null : [
+                    ...$baseResult,
+                    'wavePeriod' => $value,
+                    'raw' => $rawMeasurements['wavePeriod'] ?? null,
+                ];
 
             case self::CAPABILITY_WAVE_DIRECTION:
                 $waveDirection = $stationConditions->getWaveDirection();
@@ -155,6 +165,7 @@ final readonly class GetConditionsForLocation
                     ...$baseResult,
                     'waveDirection' => $value,
                     'waveDirectionCompass' => $waveDirection->getCompassDirection(),
+                    'raw' => $rawMeasurements['waveDirection'] ?? null,
                 ];
 
             default:

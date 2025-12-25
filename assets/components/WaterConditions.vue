@@ -95,7 +95,7 @@ export default {
             if (this.data.waveHeightBuoy) {
                 const buoy = this.data.waveHeightBuoy;
                 let tooltip = `[RWS] ${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
-                const raw = this.data.waveHeightRaw;
+                const raw = buoy.raw || this.data.waveHeightRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
                 }
@@ -107,7 +107,7 @@ export default {
             if (this.data.wavePeriodStation) {
                 const station = this.data.wavePeriodStation;
                 let tooltip = `[RWS] ${station.name} (${station.id}), ${station.distanceKm} km away`;
-                const raw = this.data.wavePeriodRaw;
+                const raw = station.raw || this.data.wavePeriodRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
                 }
@@ -119,7 +119,7 @@ export default {
             if (this.data.waveDirectionStation) {
                 const station = this.data.waveDirectionStation;
                 let tooltip = `[RWS] ${station.name} (${station.id}), ${station.distanceKm} km away`;
-                const raw = this.data.waveDirectionRaw;
+                const raw = station.raw || this.data.waveDirectionRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
                 }
