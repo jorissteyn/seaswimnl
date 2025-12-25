@@ -109,9 +109,9 @@ export default {
             if (!this.data.location) return '';
             const station = this.data.station;
             if (station && station.distanceKm >= 2) {
-                return `${this.data.location.name} (${this.data.location.id}), ${station.distanceKm} km away`;
+                return `[RWS] ${this.data.location.name} (${this.data.location.id}), ${station.distanceKm} km away`;
             }
-            return `${this.data.location.name} (${this.data.location.id})`;
+            return `[RWS] ${this.data.location.name} (${this.data.location.id})`;
         },
         previousTideTooltip() {
             if (!this.data.previous) return '';

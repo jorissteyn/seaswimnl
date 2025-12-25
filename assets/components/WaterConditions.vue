@@ -82,7 +82,7 @@ export default {
             const dirRaw = this.data.windDirectionRaw;
             const location = this.data.location;
             if (!location) return '';
-            let tooltip = `${location.name} (${location.id})`;
+            let tooltip = `[RWS] ${location.name} (${location.id})`;
             if (speedRaw) {
                 tooltip += `\n\n${speedRaw.code} | ${speedRaw.compartiment} | ${speedRaw.value} ${speedRaw.unit}`;
             }
@@ -94,7 +94,7 @@ export default {
         waveHeightTooltip() {
             if (this.data.waveHeightBuoy) {
                 const buoy = this.data.waveHeightBuoy;
-                let tooltip = `${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
+                let tooltip = `[RWS] ${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
                 const raw = this.data.waveHeightRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
@@ -106,7 +106,7 @@ export default {
         wavePeriodTooltip() {
             if (this.data.wavePeriodStation) {
                 const station = this.data.wavePeriodStation;
-                let tooltip = `${station.name} (${station.id}), ${station.distanceKm} km away`;
+                let tooltip = `[RWS] ${station.name} (${station.id}), ${station.distanceKm} km away`;
                 const raw = this.data.wavePeriodRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
@@ -118,7 +118,7 @@ export default {
         waveDirectionTooltip() {
             if (this.data.waveDirectionStation) {
                 const station = this.data.waveDirectionStation;
-                let tooltip = `${station.name} (${station.id}), ${station.distanceKm} km away`;
+                let tooltip = `[RWS] ${station.name} (${station.id}), ${station.distanceKm} km away`;
                 const raw = this.data.waveDirectionRaw;
                 if (raw) {
                     tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
@@ -139,7 +139,7 @@ export default {
     methods: {
         buildTooltip(location, raw) {
             if (!location) return '';
-            let tooltip = `${location.name} (${location.id})`;
+            let tooltip = `[RWS] ${location.name} (${location.id})`;
             if (raw) {
                 tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
             }

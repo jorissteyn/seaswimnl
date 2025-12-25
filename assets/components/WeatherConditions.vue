@@ -59,7 +59,7 @@ export default {
         stationLine() {
             if (!this.data.station) return '';
             const distance = this.data.station.distanceKm !== null && this.data.station.distanceKm >= 2 ? `, ${this.data.station.distanceKm} km away` : '';
-            return `${this.data.station.name} (${this.data.station.code})${distance}`;
+            return `[BR] ${this.data.station.name} (${this.data.station.code})${distance}`;
         },
         temperatureTooltip() {
             return this.buildTooltip(this.data.airTemperatureRaw);
