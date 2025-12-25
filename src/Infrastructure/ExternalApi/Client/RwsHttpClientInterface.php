@@ -28,6 +28,13 @@ interface RwsHttpClientInterface
     public function fetchTidalPredictions(string $locationCode, \DateTimeImmutable $start, \DateTimeImmutable $end): ?array;
 
     /**
+     * Fetch all available raw measurements for a location.
+     *
+     * @return array<int, array{grootheid: string, compartiment: string, value: float, timestamp: string}>|null
+     */
+    public function fetchRawMeasurements(string $locationCode): ?array;
+
+    /**
      * Get the last error message from a failed API call.
      */
     public function getLastError(): ?string;

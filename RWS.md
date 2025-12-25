@@ -38,23 +38,159 @@ First, retrieve the catalog to see what measurements exist and where.
 - `LocatieLijst` - Measurement locations
 - `AquoMetadataLocatieLijst` - Links metadata to locations
 
-**Key codes to know:**
+---
 
-| Compartiment (where) | Code |
-|---------------------|------|
-| Surface water | `OW` |
-| Air | `LT` |
-| Sediment/soil | `BS` |
-| Suspended matter | `ZS` |
+## Aquo Standard Codes
 
-| Grootheid (what) | Code |
-|-----------------|------|
-| Water height | `WATHTE` |
-| Temperature | `T` |
-| Wave height | `Hm0` |
-| Flow/discharge | `Q` |
-| Concentration | `CONCTTE` |
-| Mass fraction | `MASSFTE` |
+The RWS API uses the [Aquo standard](https://www.aquo.nl/) for water data exchange. Two key concepts:
+
+- **Compartiment**: Where the measurement is taken (e.g., surface water, air)
+- **Grootheid**: What is being measured (e.g., water height, temperature)
+
+### Compartimenten (Measurement Environment)
+
+| Code | Dutch | English | Description |
+|------|-------|---------|-------------|
+| `OW` | Oppervlaktewater | Surface water | Water in rivers, lakes, seas, canals |
+| `LT` | Lucht | Air | Atmospheric measurements |
+| `BS` | Bodem/Sediment | Soil/Sediment | Bottom sediment or soil |
+| `ZS` | Zwevende Stof | Suspended matter | Particles suspended in water |
+| `OE` | Oever | Shore/Bank | Riverbank or shore measurements |
+| `OR` | Organisme | Organism | Biota/organism samples |
+| `NVT` | Niet Van Toepassing | Not applicable | No compartment applies |
+| `NT` | Niet Te Bepalen | Not determined | Cannot be determined |
+| `PM` | Particulate Matter | Particulate matter | Air quality particles |
+
+### Grootheden (Measurement Types)
+
+#### Water Level & Tides
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `WATHTE` | Waterhoogte | Water height | cm | Water level relative to NAP |
+| `GGH` | Gemiddeld Getij Hoogwater | Mean high water | cm | Average high tide level |
+| `GGT` | Gemiddeld Getij | Mean tide | cm | Average tide level |
+| `HH` | Hoogste Hoogwater | Highest high water | cm | Maximum recorded high water |
+| `HHT` | Hoogste Hoogwater Tijd | Highest high water time | - | Time of highest high water |
+| `LG` | Laagste Laagwater | Lowest low water | cm | Minimum recorded low water |
+| `NG` | Normaal Getij | Normal tide | cm | Normal tide level |
+| `NGWTTL` | Normaal Getij Waterstand | Normal tide water level | cm | Normal tidal water level |
+| `SLOTGHW` | Slotgemiddeld Hoogwater | Final mean high water | cm | Computed mean high water |
+| `SLOTGLW` | Slotgemiddeld Laagwater | Final mean low water | cm | Computed mean low water |
+| `SLOTGWAT` | Slotgemiddeld Water | Final mean water | cm | Computed mean water level |
+| `SPGH` | Spring Hoogwater | Spring high water | cm | Spring tide high water |
+| `SPGT` | Spring Getij | Spring tide | cm | Spring tide level |
+| `HOOGWTDG` | Hoogwater Dag | High water day | - | Daily high water |
+| `HOOGWTNT` | Hoogwater Nacht | High water night | - | Nightly high water |
+| `LAAGWTDG` | Laagwater Dag | Low water day | - | Daily low water |
+| `GETVVG` | Getijverschuiving | Tidal shift | min | Tidal time difference |
+
+#### Waves
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `Hm0` | Spectrale golfhoogte | Significant wave height | cm | From energy spectrum 30-500 mHz (4×σ) |
+| `Hmax` | Maximale golfhoogte | Maximum wave height | cm | Highest individual wave |
+| `H1/3` | Significante golfhoogte | Significant wave height | cm | Average of highest 1/3 of waves (~7% < Hm0) |
+| `H1/10` | Golfhoogte 1/10 | Wave height 1/10 | cm | Average of highest 1/10 of waves |
+| `H1/50` | Golfhoogte 1/50 | Wave height 1/50 | cm | Average of highest 1/50 of waves |
+| `GOLFHTE` | Golfhoogte | Wave height | cm | General wave height |
+| `HTE3` | Laagfrequentie golfhoogte | Low-freq wave height | cm | From energy spectrum 30-100 mHz |
+| `Tm02` | Gemiddelde golfperiode | Mean wave period | s | Zero-crossing period from spectrum |
+| `Tm01` | Gemiddelde golfperiode | Mean wave period | s | First moment wave period |
+| `Tm-10` | Golfperiode | Energy wave period | s | Energy period (-1/0 spectral moment) |
+| `Tmax` | Maximale golfperiode | Maximum wave period | s | Longest wave period |
+| `T1/3` | Significante golfperiode | Significant wave period | s | Average period of highest 1/3 |
+| `T_H1/3` | Periode bij H1/3 | Period at H1/3 | s | Period associated with H1/3 |
+| `T_Hmax` | Periode bij Hmax | Period at Hmax | s | Period of the maximum wave |
+| `Th0` | Gemiddelde golfrichting | Mean wave direction | ° | Spectral mean direction (from true N) |
+| `Th3` | Golfrichting | Wave direction | ° | Mean direction of H1/3 waves (from true N) |
+| `Fp` | Piekfrequentie | Peak frequency | Hz | Dominant wave frequency |
+
+#### Temperature
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `T` | Temperatuur | Temperature | °C | Water or air temperature |
+| `TE` | Temperatuur extern | External temperature | °C | External sensor temperature |
+| `TE3` | Temperatuur 3m | Temperature at 3m | °C | Temperature at 3 meter depth |
+
+#### Wind
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `WINDSHD` | Windsnelheid | Wind speed | m/s | Wind speed |
+| `WINDRTG` | Windrichting | Wind direction | ° | Direction wind comes from (0=N) |
+| `WINDST` | Windstoot | Wind gust | m/s | Maximum gust speed |
+| `WINDSHD_SD` | Windsnelheid SD | Wind speed std dev | m/s | Standard deviation of wind speed |
+| `WINDRTG_SD` | Windrichting SD | Wind direction std dev | ° | Standard deviation of direction |
+| `WS1` | Windsnelheid 1 | Wind speed 1 | m/s | Wind speed sensor 1 |
+| `WS10` | Windsnelheid 10m | Wind speed 10m | m/s | Wind speed at 10m height |
+| `WR1` | Windrichting 1 | Wind direction 1 | ° | Wind direction sensor 1 |
+
+#### Current & Flow
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `STROOMSHD` | Stroomsnelheid | Current speed | m/s | Water current velocity |
+| `STROOMRTG` | Stroomrichting | Current direction | ° | Direction current flows to |
+| `Q` | Debiet | Discharge | m³/s | Water flow rate |
+| `Qo` | Debiet oppervlak | Surface discharge | m³/s | Surface layer discharge |
+| `Qs` | Debiet sediment | Sediment discharge | kg/s | Sediment transport rate |
+
+#### Water Quality
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `SALNTT` | Saliniteit | Salinity | g/kg | Salt concentration |
+| `CONCTTE` | Concentratie | Concentration | mg/l | General concentration |
+| `TROEBHD` | Troebelheid | Turbidity | NTU | Water clarity/turbidity |
+| `pH` | Zuurgraad | pH value | - | Acidity/alkalinity |
+| `ZICHT` | Zicht | Visibility | m | Secchi depth / visibility |
+| `GELDHD` | Geleidbaarheid | Conductivity | mS/cm | Electrical conductivity |
+| `DICHTHD` | Dichtheid | Density | kg/m³ | Water density |
+| `FLUORCTE` | Fluorescentie | Fluorescence | - | Chlorophyll fluorescence |
+| `WATOZT` | Watertemperatuur zout | Salt water temp | °C | Saline water temperature |
+
+#### Atmospheric
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `LUCHTDK` | Luchtdruk | Air pressure | hPa | Atmospheric pressure |
+
+#### Physical Dimensions
+
+| Code | Dutch | English | Unit | Description |
+|------|-------|---------|------|-------------|
+| `HOOGTE` | Hoogte | Height | m | General height measurement |
+| `DIKTE` | Dikte | Thickness | m | Layer thickness |
+| `LENGTE` | Lengte | Length | m | Length measurement |
+| `BREEDTE` | Breedte | Width | m | Width measurement |
+| `WATDTE` | Waterdiepte | Water depth | m | Depth of water |
+| `HEFHTE` | Hefhoogte | Lift height | m | Vertical lift/rise |
+| `KRUINHTE` | Kruinhoogte | Crest height | m | Crest/top height |
+
+#### Statistics & Percentiles
+
+| Code | Dutch | English | Description |
+|------|-------|---------|-------------|
+| `50%_L` | 50% lijn | 50th percentile | Median value |
+| `70%_L` | 70% lijn | 70th percentile | 70th percentile |
+| `80%_L` | 80% lijn | 80th percentile | 80th percentile |
+| `90%_L` | 90% lijn | 90th percentile | 90th percentile |
+| `D10`-`D90` | Doorval | Grain size | Particle size distribution |
+
+#### Other / Technical
+
+| Code | Dutch | English | Description |
+|------|-------|---------|-------------|
+| `NVT` | Niet Van Toepassing | Not applicable | No measurement type applies |
+| `ECHO` | Echo | Echo | Sonar/echo measurement |
+| `VERSIE` | Versie | Version | Data version |
+| `INDCTOPDT` | Indicator opdat | Update indicator | Data update flag |
+| `ISI` | ISI | ISI | Imposex index (biota) |
+| `VDSI` | VDSI | VDSI | Vas deferens sequence index |
+| `RPSI` | RPSI | RPSI | Relative penis size index |
 
 ---
 

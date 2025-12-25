@@ -27,10 +27,16 @@
             :water-height="conditions.water?.waterHeight"
             :measured-at="conditions.water?.measuredAt"
         />
+
+        <MeasurementsCard
+            v-if="locationId"
+            :location-id="locationId"
+        />
     </div>
 </template>
 
 <script>
+import MeasurementsCard from './MeasurementsCard.vue';
 import SwimMetrics from './SwimMetrics.vue';
 import TidesCard from './TidesCard.vue';
 import WaterConditions from './WaterConditions.vue';
@@ -39,6 +45,7 @@ import WeatherConditions from './WeatherConditions.vue';
 export default {
     name: 'ConditionsPanel',
     components: {
+        MeasurementsCard,
         SwimMetrics,
         TidesCard,
         WaterConditions,
@@ -52,6 +59,10 @@ export default {
         loading: {
             type: Boolean,
             default: false,
+        },
+        locationId: {
+            type: String,
+            default: null,
         },
     },
 };

@@ -448,6 +448,122 @@ final class RwsHttpClient implements RwsHttpClientInterface
     }
 
     /**
+     * Fetch all available raw measurements for a location.
+     *
+     * @return array<int, array{grootheid: string, compartiment: string, value: float, timestamp: string}>|null
+     */
+    public function fetchRawMeasurements(string $locationCode): ?array
+    {
+        $this->lastError = null;
+
+        // Fetch all grootheden that might be available
+        $grootheden = [
+            'T', 'WATHTE', 'Hm0', 'Hmax', 'Tm02', 'Tm01', 'Th3', 'Th0', 'Fp',
+            'WINDSHD', 'WINDRTG', 'WINDST', 'STROOMSHD', 'STROOMRTG',
+            'SALNTT', 'GELDHD', 'LUCHTDK', 'Q',
+        ];
+        $compartimenten = ['OW', 'LT'];
+
+        $metadataList = [];
+        foreach ($compartimenten as $comp) {
+            foreach ($grootheden as $groot) {
+                $metadataList[] = [
+                    'AquoMetadata' => [
+                        'Compartiment' => ['Code' => $comp],
+                        'Grootheid' => ['Code' => $groot],
+                    ],
+                ];
+            }
+        }
+
+        $payload = [
+            'LocatieLijst' => [
+                ['Code' => $locationCode],
+            ],
+            'AquoPlusWaarnemingMetadataLijst' => $metadataList,
+        ];
+
+        try {
+            $response = $this->httpClient->request('POST', $this->baseUrl.self::LATEST_OBSERVATIONS_PATH, [
+                'json' => $payload,
+                'timeout' => $this->timeout,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+
+            if (204 === $response->getStatusCode()) {
+                $this->lastError = 'No measurement data available for this location';
+
+                return null;
+            }
+
+            $data = $response->toArray();
+
+            return $this->normalizeRawMeasurements($data);
+        } catch (\Throwable $e) {
+            $this->lastError = 'RWS API error: '.$e->getMessage();
+            $this->logger->error('RWS API raw measurements request failed', [
+                'location' => $locationCode,
+                'exception' => $e,
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Normalize raw measurements from the API response.
+     *
+     * Returns one entry per grootheid/compartiment combination with the most recent value.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return array<int, array{grootheid: string, compartiment: string, value: float, timestamp: string}>
+     */
+    private function normalizeRawMeasurements(array $data): array
+    {
+        // Use a map to keep only the most recent value per grootheid/compartiment
+        $resultMap = [];
+        $observations = $data['WaarnemingenLijst'] ?? [];
+
+        foreach ($observations as $observation) {
+            $metadata = $observation['AquoMetadata'] ?? [];
+            $measurements = $observation['MetingenLijst'] ?? [];
+            $grootheid = $metadata['Grootheid']['Code'] ?? null;
+            $compartiment = $metadata['Compartiment']['Code'] ?? null;
+
+            if (null === $grootheid || null === $compartiment || [] === $measurements) {
+                continue;
+            }
+
+            $key = $grootheid.'|'.$compartiment;
+
+            // Get the most recent measurement from this observation
+            foreach ($measurements as $measurement) {
+                $value = $measurement['Meetwaarde']['Waarde_Numeriek'] ?? null;
+                $timestamp = $measurement['Tijdstip'] ?? null;
+
+                if (null === $value || null === $timestamp) {
+                    continue;
+                }
+
+                // Only keep if newer than existing entry for this key
+                if (!isset($resultMap[$key]) || $timestamp > $resultMap[$key]['timestamp']) {
+                    $resultMap[$key] = [
+                        'grootheid' => $grootheid,
+                        'compartiment' => $compartiment,
+                        'value' => (float) $value,
+                        'timestamp' => $timestamp,
+                    ];
+                }
+            }
+        }
+
+        return array_values($resultMap);
+    }
+
+    /**
      * Normalize tidal predictions from the observations response.
      *
      * @param array<string, mixed> $data

@@ -22,6 +22,7 @@
                 v-if="selectedLocation && conditions"
                 :conditions="conditions"
                 :loading="loadingConditions"
+                :location-id="selectedLocation.id"
             />
 
             <div v-else-if="selectedLocation && loadingConditions" class="loading">
