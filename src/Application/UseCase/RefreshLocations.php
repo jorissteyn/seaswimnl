@@ -42,7 +42,6 @@ final readonly class RefreshLocations
     private const REQUIRED_GROOTHEDEN = [
         'WINDSHD',  // Wind speed
         'WINDRTG',  // Wind direction
-        'Hm0',      // Wave height
     ];
 
     /**
