@@ -22,16 +22,17 @@ final readonly class RefreshLocations
     }
 
     /**
-     * @return array{locations: int, stations: int}
+     * @return array{locations: array{imported: int, filtered: int, total: int}|int, stations: int, requiredGrootheden: array<string>}
      */
     public function execute(): array
     {
-        $locationsCount = $this->refreshRwsLocations();
+        $locationsResult = $this->refreshRwsLocations();
         $stationsCount = $this->refreshBuienradarStations();
 
         return [
-            'locations' => $locationsCount,
+            'locations' => $locationsResult,
             'stations' => $stationsCount,
+            'requiredGrootheden' => self::REQUIRED_GROOTHEDEN,
         ];
     }
 
@@ -45,7 +46,10 @@ final readonly class RefreshLocations
         'Hm0',      // Wave height
     ];
 
-    private function refreshRwsLocations(): int
+    /**
+     * @return array{imported: int, filtered: int, total: int}|int Returns -1 on error
+     */
+    private function refreshRwsLocations(): array|int
     {
         $data = $this->rwsClient->fetchLocations();
 
@@ -53,6 +57,7 @@ final readonly class RefreshLocations
             return -1; // Error
         }
 
+        $total = count($data);
         $locations = [];
         foreach ($data as $item) {
             $grootheden = $item['grootheden'] ?? [];
@@ -74,7 +79,11 @@ final readonly class RefreshLocations
 
         $this->locationRepository->saveAll($locations);
 
-        return count($locations);
+        return [
+            'imported' => count($locations),
+            'filtered' => $total - count($locations),
+            'total' => $total,
+        ];
     }
 
     /**

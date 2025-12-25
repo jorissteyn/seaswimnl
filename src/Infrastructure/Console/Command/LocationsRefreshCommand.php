@@ -33,11 +33,21 @@ final class LocationsRefreshCommand extends Command
 
         $hasError = false;
 
-        if ($result['locations'] < 0) {
+        if (-1 === $result['locations']) {
             $io->error('Failed to refresh RWS locations. API may be unavailable.');
             $hasError = true;
         } else {
-            $io->success(sprintf('Refreshed %d RWS locations', $result['locations']));
+            $locations = $result['locations'];
+            $io->text(sprintf(
+                'Filtering locations on required grootheden: %s',
+                implode(', ', $result['requiredGrootheden'])
+            ));
+            $io->success(sprintf(
+                'Imported %d RWS locations (%d filtered out of %d total)',
+                $locations['imported'],
+                $locations['filtered'],
+                $locations['total']
+            ));
         }
 
         if ($result['stations'] < 0) {
