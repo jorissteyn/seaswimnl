@@ -80,10 +80,9 @@ final readonly class GetConditionsForLocation
         $tides = $this->tidalProvider->getTidalInfo($location);
         if (null === $tides) {
             // Try to get tidal data from the nearest station with tidal data
-            $tidalResult = $this->fetchTidesFromNearestStation($location);
-            if (null !== $tidalResult) {
-                $tides = $tidalResult['tides'];
-                $tidalStation = $tidalResult['station'];
+            $tidalStation = $this->fetchFromNearestStation($location, self::CAPABILITY_TIDES);
+            if (null !== $tidalStation) {
+                $tides = $tidalStation['tides'];
             } else {
                 $errors['tides'] = $this->tidalProvider->getLastError() ?? 'Failed to fetch tidal data';
             }
@@ -110,27 +109,40 @@ final readonly class GetConditionsForLocation
      *
      * @return array<string, mixed>|null
      */
-    private function fetchFromNearestStation(WaterConditions $water, string $capability): ?array
+    private function fetchFromNearestStation(Location|WaterConditions $source, string $capability): ?array
     {
+        $location = $source instanceof WaterConditions ? $source->getLocation() : $source;
         $allLocations = $this->locationRepository->findAll();
-        $stationResult = $this->rwsLocationFinder->findNearest($water->getLocation(), $allLocations, $capability);
+        $stationResult = $this->rwsLocationFinder->findNearest($location, $allLocations, $capability);
 
         if (null === $stationResult) {
             return null;
         }
 
         $station = $stationResult['location'];
-        $stationConditions = $this->waterProvider->getConditions($station);
-
-        if (null === $stationConditions) {
-            return null;
-        }
 
         $baseResult = [
             'id' => $station->getId(),
             'name' => $station->getName(),
             'distanceKm' => $stationResult['distanceKm'],
         ];
+
+        // Tidal data uses the tidal provider, not water conditions
+        if (self::CAPABILITY_TIDES === $capability) {
+            $tides = $this->tidalProvider->getTidalInfo($station);
+
+            return null === $tides ? null : [
+                ...$baseResult,
+                'tides' => $tides,
+            ];
+        }
+
+        // Wave data uses the water conditions provider
+        $stationConditions = $this->waterProvider->getConditions($station);
+
+        if (null === $stationConditions) {
+            return null;
+        }
 
         $rawMeasurements = $stationConditions->getRawMeasurements();
 
@@ -171,37 +183,5 @@ final readonly class GetConditionsForLocation
             default:
                 return null;
         }
-    }
-
-    /**
-     * Fetch tidal data from the nearest station that has tidal predictions.
-     *
-     * Tries multiple stations in order of distance until one returns valid data,
-     * since having WATHTE capability doesn't guarantee tidal predictions are available.
-     *
-     * @return array{tides: TideInfo, station: array<string, mixed>}|null
-     */
-    private function fetchTidesFromNearestStation(Location $location): ?array
-    {
-        $allLocations = $this->locationRepository->findAll();
-        $candidates = $this->rwsLocationFinder->findNearestCandidates($location, $allLocations, self::CAPABILITY_TIDES, 5);
-
-        foreach ($candidates as $stationResult) {
-            $station = $stationResult['location'];
-            $tides = $this->tidalProvider->getTidalInfo($station);
-
-            if (null !== $tides) {
-                return [
-                    'tides' => $tides,
-                    'station' => [
-                        'id' => $station->getId(),
-                        'name' => $station->getName(),
-                        'distanceKm' => $stationResult['distanceKm'],
-                    ],
-                ];
-            }
-        }
-
-        return null;
     }
 }

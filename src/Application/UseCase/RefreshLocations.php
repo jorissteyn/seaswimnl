@@ -22,7 +22,7 @@ final readonly class RefreshLocations
     }
 
     /**
-     * @return array{locations: array{imported: int, filtered: int, total: int}|int, stations: int, requiredGrootheden: array<string>}
+     * @return array{locations: array{imported: int, total: int, filterSteps: array<string, int>}|int, stations: int, requiredGrootheden: array<string>}
      */
     public function execute(): array
     {
