@@ -74,6 +74,11 @@ services:
     Seaswim\Application\Port\BuienradarStationRepositoryInterface:
         alias: Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository
 
+    # Services
+    Seaswim\Infrastructure\Service\LocationBlacklist:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
     # Use Cases
     Seaswim\Application\UseCase\ClearCache:
         arguments:

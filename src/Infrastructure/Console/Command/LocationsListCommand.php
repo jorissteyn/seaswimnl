@@ -6,6 +6,7 @@ namespace Seaswim\Infrastructure\Console\Command;
 
 use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Infrastructure\Service\LocationBlacklist;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,6 +23,7 @@ final class LocationsListCommand extends Command
     public function __construct(
         private readonly RwsLocationRepositoryInterface $locationRepository,
         private readonly BuienradarStationRepositoryInterface $buienradarStationRepository,
+        private readonly LocationBlacklist $blacklist,
     ) {
         parent::__construct();
     }
@@ -55,6 +57,7 @@ final class LocationsListCommand extends Command
                     'longitude' => $loc->getLongitude(),
                     'compartimenten' => $loc->getCompartimenten(),
                     'grootheden' => $loc->getGrootheden(),
+                    'blacklisted' => $this->blacklist->isBlacklisted($loc->getId()),
                 ];
             }
         }
@@ -69,6 +72,7 @@ final class LocationsListCommand extends Command
                     'longitude' => $station->getLongitude(),
                     'compartimenten' => [],
                     'grootheden' => [],
+                    'blacklisted' => false,
                 ];
             }
         }
@@ -112,11 +116,12 @@ final class LocationsListCommand extends Command
                 sprintf('%.4f', $item['longitude']),
                 implode(', ', $item['compartimenten']),
                 implode(', ', $item['grootheden']),
+                $item['blacklisted'] ? '<fg=red>blacklisted</>' : '',
             ],
             array_values($items),
         );
 
-        $io->table(['Source', 'ID', 'Name', 'Latitude', 'Longitude', 'Compartimenten', 'Grootheden'], $rows);
+        $io->table(['Source', 'ID', 'Name', 'Latitude', 'Longitude', 'Compartimenten', 'Grootheden', 'Status'], $rows);
 
         return Command::SUCCESS;
     }
