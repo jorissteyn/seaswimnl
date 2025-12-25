@@ -23,12 +23,8 @@ final class RefreshLocationsTest extends TestCase
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
             ->willReturn([
-                // Has both required grootheden (WINDSHD, WINDRTG)
-                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE', 'WINDSHD', 'WINDRTG']],
-                // Has both required grootheden (WINDSHD, WINDRTG)
-                ['code' => 'hoekvanholland', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE', 'Hm0', 'WINDSHD', 'WINDRTG']],
-                // Missing WINDSHD - will be filtered out
-                ['code' => 'ijmuiden', 'name' => 'IJmuiden', 'latitude' => 52.46, 'longitude' => 4.55, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WINDRTG']],
+                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE']],
+                ['code' => 'hoekvanholland', 'name' => 'Hoek van Holland', 'latitude' => 51.98, 'longitude' => 4.12, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE', 'Hm0']],
             ]);
 
         $buienradarClient->expects($this->once())
@@ -49,10 +45,7 @@ final class RefreshLocationsTest extends TestCase
         $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
-        $this->assertIsArray($result['locations']);
-        $this->assertSame(2, $result['locations']['imported']);
-        $this->assertSame(3, $result['locations']['total']);
-        $this->assertArrayHasKey('filterSteps', $result['locations']);
+        $this->assertSame(2, $result['locations']);
         $this->assertSame(2, $result['stations']);
     }
 
@@ -93,8 +86,7 @@ final class RefreshLocationsTest extends TestCase
         $rwsClient->expects($this->once())
             ->method('fetchLocations')
             ->willReturn([
-                // Has both required grootheden (WINDSHD, WINDRTG)
-                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE', 'WINDSHD', 'WINDRTG']],
+                ['code' => 'vlissingen', 'name' => 'Vlissingen', 'latitude' => 51.44, 'longitude' => 3.60, 'compartimenten' => ['OW'], 'grootheden' => ['T', 'WATHTE']],
             ]);
 
         $buienradarClient->expects($this->once())
@@ -107,8 +99,7 @@ final class RefreshLocationsTest extends TestCase
         $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
-        $this->assertIsArray($result['locations']);
-        $this->assertSame(1, $result['locations']['imported']);
+        $this->assertSame(1, $result['locations']);
         $this->assertSame(-1, $result['stations']);
     }
 }

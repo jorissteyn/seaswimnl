@@ -83,3 +83,8 @@ services:
     Seaswim\Application\UseCase\ClearCache:
         arguments:
             $cache: '@api.cache'
+
+    # Console Commands
+    Seaswim\Infrastructure\Console\Command\LocationsScanStaleCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

@@ -22,57 +22,29 @@ final readonly class RefreshLocations
     }
 
     /**
-     * @return array{locations: array{imported: int, total: int, filterSteps: array<string, int>}|int, stations: int, requiredGrootheden: array<string>}
+     * @return array{locations: int, stations: int}
      */
     public function execute(): array
     {
-        $locationsResult = $this->refreshRwsLocations();
-        $stationsCount = $this->refreshBuienradarStations();
-
         return [
-            'locations' => $locationsResult,
-            'stations' => $stationsCount,
-            'requiredGrootheden' => self::REQUIRED_GROOTHEDEN,
+            'locations' => $this->refreshRwsLocations(),
+            'stations' => $this->refreshBuienradarStations(),
         ];
     }
 
     /**
-     * Required grootheden for a location to be included in the dashboard.
+     * @return int Number of locations imported, or -1 on error
      */
-    private const REQUIRED_GROOTHEDEN = [
-        'WINDSHD',  // Wind speed
-        'WINDRTG',  // Wind direction
-    ];
-
-    /**
-     * @return array{imported: int, total: int, filterSteps: array<string, int>}|int Returns -1 on error
-     */
-    private function refreshRwsLocations(): array|int
+    private function refreshRwsLocations(): int
     {
         $data = $this->rwsClient->fetchLocations();
 
         if (null === $data) {
-            return -1; // Error
+            return -1;
         }
 
-        $total = count($data);
-
-        // Track remaining locations after each filter step
-        $filterSteps = [];
-        $remaining = $data;
-
-        foreach (self::REQUIRED_GROOTHEDEN as $required) {
-            $remaining = array_filter($remaining, function (array $item) use ($required): bool {
-                $grootheden = $item['grootheden'] ?? [];
-
-                return \in_array($required, $grootheden, true);
-            });
-            $filterSteps[$required] = count($remaining);
-        }
-
-        // Build final location list from the filtered data
         $locations = [];
-        foreach ($remaining as $item) {
+        foreach ($data as $item) {
             $locations[] = new Location(
                 $item['code'],
                 $item['name'],
@@ -85,35 +57,18 @@ final readonly class RefreshLocations
 
         $this->locationRepository->saveAll($locations);
 
-        return [
-            'imported' => count($locations),
-            'total' => $total,
-            'filterSteps' => $filterSteps,
-        ];
+        return count($locations);
     }
 
     /**
-     * Check if the location has all required grootheden.
-     *
-     * @param array<string> $grootheden
+     * @return int Number of stations imported, or -1 on error
      */
-    private function hasRequiredCapabilities(array $grootheden): bool
-    {
-        foreach (self::REQUIRED_GROOTHEDEN as $required) {
-            if (!\in_array($required, $grootheden, true)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private function refreshBuienradarStations(): int
     {
         $data = $this->buienradarClient->fetchStations();
 
         if (null === $data) {
-            return -1; // Error
+            return -1;
         }
 
         $stations = [];
