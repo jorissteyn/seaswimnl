@@ -35,6 +35,16 @@ final readonly class RefreshLocations
         ];
     }
 
+    /**
+     * Required grootheden for a location to be included in the dashboard.
+     */
+    private const REQUIRED_GROOTHEDEN = [
+        'WATHTE',   // Tides (water height)
+        'WINDSHD',  // Wind speed
+        'WINDRTG',  // Wind direction
+        'Hm0',      // Wave height
+    ];
+
     private function refreshRwsLocations(): int
     {
         $data = $this->rwsClient->fetchLocations();
@@ -45,19 +55,42 @@ final readonly class RefreshLocations
 
         $locations = [];
         foreach ($data as $item) {
+            $grootheden = $item['grootheden'] ?? [];
+
+            // Only include locations that have all required capabilities
+            if (!$this->hasRequiredCapabilities($grootheden)) {
+                continue;
+            }
+
             $locations[] = new Location(
                 $item['code'],
                 $item['name'],
                 $item['latitude'],
                 $item['longitude'],
                 $item['compartimenten'] ?? [],
-                $item['grootheden'] ?? [],
+                $grootheden,
             );
         }
 
         $this->locationRepository->saveAll($locations);
 
         return count($locations);
+    }
+
+    /**
+     * Check if the location has all required grootheden.
+     *
+     * @param array<string> $grootheden
+     */
+    private function hasRequiredCapabilities(array $grootheden): bool
+    {
+        foreach (self::REQUIRED_GROOTHEDEN as $required) {
+            if (!\in_array($required, $grootheden, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function refreshBuienradarStations(): int
