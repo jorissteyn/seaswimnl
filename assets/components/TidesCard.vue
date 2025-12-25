@@ -140,8 +140,29 @@ export default {
         highTideY() {
             return this.topPadding;
         },
-        // Calculate current position on the wave (0 to 1)
+        // Calculate current position on the wave (0 to 1) based on water height
         currentProgress() {
+            // Use water height to determine position on the cosine curve
+            if (this.waterHeight !== null) {
+                const waterHeightCm = this.waterHeight * 100;
+                const midHeight = (this.lowTideHeight + this.highTideHeight) / 2;
+                const halfRange = (this.highTideHeight - this.lowTideHeight) / 2;
+                if (halfRange === 0) return 0.5;
+
+                // Normalize height to [-1, 1] and clamp
+                const normalized = Math.max(-1, Math.min(1, (waterHeightCm - midHeight) / halfRange));
+
+                // Invert cosine to find progress on curve
+                // Rising: progress 0→1 as height goes low→high (normalized -1→1)
+                // Falling: progress 0→1 as height goes high→low (normalized 1→-1)
+                if (this.isRising) {
+                    return Math.acos(-normalized) / Math.PI;
+                } else {
+                    return Math.acos(normalized) / Math.PI;
+                }
+            }
+
+            // Fall back to time-based progress
             if (!this.previousTime || !this.nextTime) return 0.5;
             const now = new Date();
             const totalDuration = this.nextTime - this.previousTime;
@@ -152,17 +173,31 @@ export default {
             return this.waveLeft + this.currentProgress * this.waveWidth;
         },
         currentPositionY() {
-            // Use cosine for smooth wave, phase depends on rising/falling
-            const progress = this.currentProgress;
-            // For rising tide: start at bottom (low), end at top (high)
-            // For falling tide: start at top (high), end at bottom (low)
-            // cos(0)=1 maps to lowTideY (bottom), cos(π)=-1 maps to highTideY (top)
-            const phase = this.isRising ? 0 : Math.PI;
-            const waveY = Math.cos(progress * Math.PI + phase);
-            // Map from [-1, 1] to [highTideY, lowTideY]
-            const midY = (this.highTideY + this.lowTideY) / 2;
-            const amplitude = (this.lowTideY - this.highTideY) / 2;
-            return midY + waveY * amplitude;
+            const midY = this.graphHeight / 2; // NAP reference (0 cm)
+
+            // Fall back to wave-based position if no water height
+            if (this.waterHeight === null) {
+                const progress = this.currentProgress;
+                const phase = this.isRising ? 0 : Math.PI;
+                const waveY = Math.cos(progress * Math.PI + phase);
+                const amplitude = (this.lowTideY - this.highTideY) / 2;
+                return (this.highTideY + this.lowTideY) / 2 + waveY * amplitude;
+            }
+
+            // Position based on actual water height, centered at NAP (0)
+            const waterHeightCm = this.waterHeight * 100;
+
+            if (waterHeightCm <= 0) {
+                // Below NAP: scale toward lowTideY
+                if (this.lowTideHeight >= 0) return midY;
+                const ratio = waterHeightCm / this.lowTideHeight;
+                return midY + ratio * (this.lowTideY - midY);
+            } else {
+                // Above NAP: scale toward highTideY
+                if (this.highTideHeight <= 0) return midY;
+                const ratio = waterHeightCm / this.highTideHeight;
+                return midY - ratio * (midY - this.highTideY);
+            }
         },
         wavePath() {
             const points = [];

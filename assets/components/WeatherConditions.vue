@@ -10,7 +10,7 @@
                 <dd>{{ formatTemp(data.airTemperature) }}</dd>
             </div>
             <div class="condition-item">
-                <dt>Wind <span v-if="data.station" v-tooltip="stationTooltip" class="info-icon">ⓘ</span></dt>
+                <dt>Wind</dt>
                 <dd class="wind-display">
                     <span v-if="data.windSpeed !== null" :class="['beaufort-badge', beaufortClass]">
                         Bft {{ getBeaufort(data.windSpeed) }}
@@ -23,6 +23,7 @@
                         <span class="compass-letter compass-w">W</span>
                         <span class="compass-arrow" :style="{ transform: `rotate(${getWindDegrees(data.windDirection)}deg)` }"></span>
                     </span>
+                    <span v-if="data.station" v-tooltip="stationTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
