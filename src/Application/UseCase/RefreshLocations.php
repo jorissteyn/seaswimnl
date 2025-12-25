@@ -40,7 +40,6 @@ final readonly class RefreshLocations
      * Required grootheden for a location to be included in the dashboard.
      */
     private const REQUIRED_GROOTHEDEN = [
-        'WATHTE',   // Tides (water height)
         'WINDSHD',  // Wind speed
         'WINDRTG',  // Wind direction
         'Hm0',      // Wave height
