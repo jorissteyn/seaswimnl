@@ -12,6 +12,9 @@ use Seaswim\Domain\ValueObject\WindSpeed;
 
 final readonly class WeatherConditions
 {
+    /**
+     * @param array<string, array{field: string, value: mixed, unit: string}|null>|null $rawMeasurements
+     */
     public function __construct(
         private Location $location,
         private Temperature $airTemperature,
@@ -21,6 +24,7 @@ final readonly class WeatherConditions
         private \DateTimeImmutable $measuredAt,
         private ?BuienradarStation $station = null,
         private ?float $stationDistanceKm = null,
+        private ?array $rawMeasurements = null,
     ) {
     }
 
@@ -62,5 +66,13 @@ final readonly class WeatherConditions
     public function getStationDistanceKm(): ?float
     {
         return $this->stationDistanceKm;
+    }
+
+    /**
+     * @return array<string, array{field: string, value: mixed, unit: string}|null>|null
+     */
+    public function getRawMeasurements(): ?array
+    {
+        return $this->rawMeasurements;
     }
 }

@@ -188,6 +188,29 @@ final class BuienradarHttpClient implements BuienradarHttpClientInterface
             'humidity' => $humidity,
             'sunpower' => $sunpower,
             'timestamp' => $timestamp->format('c'),
+            // Raw measurement metadata for tooltips
+            'raw' => [
+                'temperature' => null !== $temperature ? [
+                    'field' => 'temperature',
+                    'value' => $temperature,
+                    'unit' => '°C',
+                ] : null,
+                'windSpeed' => null !== $windSpeed ? [
+                    'field' => 'windspeed',
+                    'value' => $windSpeed,
+                    'unit' => 'm/s',
+                ] : null,
+                'windDirection' => null !== $windDirection ? [
+                    'field' => 'winddirection',
+                    'value' => $windDirection,
+                    'unit' => '',
+                ] : null,
+                'sunpower' => null !== $sunpower ? [
+                    'field' => 'sunpower',
+                    'value' => $sunpower,
+                    'unit' => 'W/m²',
+                ] : null,
+            ],
         ];
     }
 }

@@ -256,6 +256,16 @@ final class RwsHttpClient implements RwsHttpClientInterface
             'windSpeed' => null,
             'windDirection' => null,
             'timestamp' => null,
+            // Raw measurement metadata for tooltips
+            'raw' => [
+                'waterTemperature' => null,
+                'waterHeight' => null,
+                'waveHeight' => null,
+                'wavePeriod' => null,
+                'waveDirection' => null,
+                'windSpeed' => null,
+                'windDirection' => null,
+            ],
         ];
 
         // Track timestamps for each measurement type to pick the most recent
@@ -299,6 +309,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                                 $result['waterTemperature'] = $value;
                                 $timestamps['waterTemperature'] = $timestamp;
                                 $result['timestamp'] = $timestamp;
+                                $result['raw']['waterTemperature'] = [
+                                    'code' => $grootheid,
+                                    'compartiment' => $compartiment,
+                                    'value' => $value,
+                                    'unit' => '°C',
+                                ];
                             }
                         }
                         break;
@@ -307,6 +323,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['waterHeight'] || $timestamp > $timestamps['waterHeight']) {
                             $result['waterHeight'] = $value / 100.0;
                             $timestamps['waterHeight'] = $timestamp;
+                            $result['raw']['waterHeight'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => 'cm',
+                            ];
                         }
                         break;
                     case 'Hm0':
@@ -314,6 +336,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['waveHeight'] || $timestamp > $timestamps['waveHeight']) {
                             $result['waveHeight'] = $value / 100.0;
                             $timestamps['waveHeight'] = $timestamp;
+                            $result['raw']['waveHeight'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => 'cm',
+                            ];
                         }
                         break;
                     case 'WINDSHD':
@@ -321,6 +349,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['windSpeed'] || $timestamp > $timestamps['windSpeed']) {
                             $result['windSpeed'] = $value;
                             $timestamps['windSpeed'] = $timestamp;
+                            $result['raw']['windSpeed'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => 'm/s',
+                            ];
                         }
                         break;
                     case 'WINDRTG':
@@ -328,6 +362,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['windDirection'] || $timestamp > $timestamps['windDirection']) {
                             $result['windDirection'] = $this->degreesToCompass((int) $value);
                             $timestamps['windDirection'] = $timestamp;
+                            $result['raw']['windDirection'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => '°',
+                            ];
                         }
                         break;
                     case 'Tm02':
@@ -335,6 +375,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['wavePeriod'] || $timestamp > $timestamps['wavePeriod']) {
                             $result['wavePeriod'] = $value;
                             $timestamps['wavePeriod'] = $timestamp;
+                            $result['raw']['wavePeriod'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => 's',
+                            ];
                         }
                         break;
                     case 'Th3':
@@ -342,6 +388,12 @@ final class RwsHttpClient implements RwsHttpClientInterface
                         if (null === $timestamps['waveDirection'] || $timestamp > $timestamps['waveDirection']) {
                             $result['waveDirection'] = $value;
                             $timestamps['waveDirection'] = $timestamp;
+                            $result['raw']['waveDirection'] = [
+                                'code' => $grootheid,
+                                'compartiment' => $compartiment,
+                                'value' => $value,
+                                'unit' => '°',
+                            ];
                         }
                         break;
                 }

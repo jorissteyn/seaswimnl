@@ -48,22 +48,30 @@ final class ConditionsController extends AbstractController
         $waveDirectionStation = $conditions['waveDirectionStation'] ?? null;
 
         if (null !== $water) {
+            $rawMeasurements = $water->getRawMeasurements();
             $result['water'] = [
                 'location' => [
                     'id' => $water->getLocation()->getId(),
                     'name' => $water->getLocation()->getName(),
                 ],
                 'temperature' => $water->getTemperature()->getCelsius(),
+                'temperatureRaw' => $rawMeasurements['waterTemperature'] ?? null,
                 'waveHeight' => (null !== $waveHeightStation ? $waveHeightStation['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters(),
+                'waveHeightRaw' => $rawMeasurements['waveHeight'] ?? null,
                 'waveHeightBuoy' => $waveHeightStation,
                 'wavePeriod' => (null !== $wavePeriodStation ? $wavePeriodStation['wavePeriod'] : null) ?? $water->getWavePeriod()?->getSeconds(),
+                'wavePeriodRaw' => $rawMeasurements['wavePeriod'] ?? null,
                 'wavePeriodStation' => $wavePeriodStation,
                 'waveDirection' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirection'] : null) ?? $water->getWaveDirection()?->getDegrees(),
                 'waveDirectionCompass' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirectionCompass'] : null) ?? $water->getWaveDirection()?->getCompassDirection(),
+                'waveDirectionRaw' => $rawMeasurements['waveDirection'] ?? null,
                 'waveDirectionStation' => $waveDirectionStation,
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
+                'waterHeightRaw' => $rawMeasurements['waterHeight'] ?? null,
                 'windSpeed' => $water->getWindSpeed()?->getKilometersPerHour(),
+                'windSpeedRaw' => $rawMeasurements['windSpeed'] ?? null,
                 'windDirection' => $water->getWindDirection(),
+                'windDirectionRaw' => $rawMeasurements['windDirection'] ?? null,
                 'measuredAt' => $water->getMeasuredAt()->format('c'),
             ];
         }
@@ -71,6 +79,7 @@ final class ConditionsController extends AbstractController
         $weather = $conditions['weather'];
         if (null !== $weather) {
             $station = $weather->getStation();
+            $weatherRaw = $weather->getRawMeasurements();
             $result['weather'] = [
                 'station' => null !== $station ? [
                     'code' => $station->getCode(),
@@ -78,9 +87,13 @@ final class ConditionsController extends AbstractController
                     'distanceKm' => $weather->getStationDistanceKm(),
                 ] : null,
                 'airTemperature' => $weather->getAirTemperature()->getCelsius(),
+                'airTemperatureRaw' => $weatherRaw['temperature'] ?? null,
                 'windSpeed' => $weather->getWindSpeed()->getKilometersPerHour(),
+                'windSpeedRaw' => $weatherRaw['windSpeed'] ?? null,
                 'windDirection' => $weather->getWindDirection(),
+                'windDirectionRaw' => $weatherRaw['windDirection'] ?? null,
                 'sunpower' => $weather->getSunpower()->getValue(),
+                'sunpowerRaw' => $weatherRaw['sunpower'] ?? null,
                 'sunpowerLevel' => $weather->getSunpower()->getLevel(),
                 'measuredAt' => $weather->getMeasuredAt()->format('c'),
             ];

@@ -114,6 +114,7 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
             windDirection: $data['windDirection'] ?? null,
             wavePeriod: isset($data['wavePeriod']) ? WavePeriod::fromSeconds($data['wavePeriod']) : null,
             waveDirection: isset($data['waveDirection']) ? WaveDirection::fromDegrees($data['waveDirection']) : null,
+            rawMeasurements: $data['raw'] ?? null,
         );
     }
 }

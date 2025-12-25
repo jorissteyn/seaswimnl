@@ -104,6 +104,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             measuredAt: new \DateTimeImmutable($data['timestamp'] ?? 'now'),
             station: $station,
             stationDistanceKm: $distanceKm,
+            rawMeasurements: $data['raw'] ?? null,
         );
     }
 
@@ -118,6 +119,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
             measuredAt: $conditions->getMeasuredAt(),
             station: $conditions->getStation(),
             stationDistanceKm: $conditions->getStationDistanceKm(),
+            rawMeasurements: $conditions->getRawMeasurements(),
         );
     }
 }

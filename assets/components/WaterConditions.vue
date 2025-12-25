@@ -1,13 +1,13 @@
 <template>
     <div class="conditions-card water">
-        <h2>
-            Water Conditions
-            <span v-if="data.location" v-tooltip="locationTooltip" class="info-icon">ⓘ</span>
-        </h2>
+        <h2>Water Conditions</h2>
         <dl class="conditions-list">
             <div class="condition-item">
                 <dt>Temperature</dt>
-                <dd>{{ formatTemp(data.temperature) }}</dd>
+                <dd>
+                    {{ formatTemp(data.temperature) }}
+                    <span v-tooltip="temperatureTooltip" class="info-icon">ⓘ</span>
+                </dd>
             </div>
             <div class="condition-item">
                 <dt>Wind on water</dt>
@@ -24,7 +24,7 @@
                             <span class="compass-letter compass-w">W</span>
                             <span class="compass-arrow" :style="{ transform: `rotate(${getWindDegrees(data.windDirection)}deg)` }"></span>
                         </span>
-                        <span v-if="data.location" v-tooltip="locationTooltip" class="info-icon">ⓘ</span>
+                        <span v-tooltip="windTooltip" class="info-icon">ⓘ</span>
                     </template>
                     <template v-else>N/A</template>
                 </dd>
@@ -33,14 +33,14 @@
                 <dt>Wave Height</dt>
                 <dd>
                     {{ formatWaveHeight(data.waveHeight) }}
-                    <span v-if="data.waveHeightBuoy" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
+                    <span v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
                 <dt>Wave Period</dt>
                 <dd>
                     {{ formatSeconds(data.wavePeriod) }}
-                    <span v-if="data.wavePeriodStation" v-tooltip="wavePeriodTooltip" class="info-icon">ⓘ</span>
+                    <span v-tooltip="wavePeriodTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
@@ -54,7 +54,7 @@
                             <span class="compass-letter compass-w">W</span>
                             <span class="compass-arrow" :style="{ transform: `rotate(${data.waveDirection}deg)` }"></span>
                         </span>
-                        <span v-if="data.waveDirectionStation" v-tooltip="waveDirectionTooltip" class="info-icon">ⓘ</span>
+                        <span v-tooltip="waveDirectionTooltip" class="info-icon">ⓘ</span>
                     </template>
                     <template v-else>N/A</template>
                 </dd>
@@ -74,24 +74,58 @@ export default {
         },
     },
     computed: {
-        locationTooltip() {
-            if (!this.data.location) return '';
-            return `RWS station: ${this.data.location.name} (${this.data.location.id})`;
+        temperatureTooltip() {
+            return this.buildTooltip(this.data.location, this.data.temperatureRaw);
+        },
+        windTooltip() {
+            const speedRaw = this.data.windSpeedRaw;
+            const dirRaw = this.data.windDirectionRaw;
+            const location = this.data.location;
+            if (!location) return '';
+            let tooltip = `${location.name} (${location.id})`;
+            if (speedRaw) {
+                tooltip += `\n\n${speedRaw.code} | ${speedRaw.compartiment} | ${speedRaw.value} ${speedRaw.unit}`;
+            }
+            if (dirRaw) {
+                tooltip += `\n${dirRaw.code} | ${dirRaw.compartiment} | ${dirRaw.value} ${dirRaw.unit}`;
+            }
+            return tooltip;
         },
         waveHeightTooltip() {
-            if (!this.data.waveHeightBuoy) return '';
-            const buoy = this.data.waveHeightBuoy;
-            return `Measured at ${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
+            if (this.data.waveHeightBuoy) {
+                const buoy = this.data.waveHeightBuoy;
+                let tooltip = `${buoy.name} (${buoy.id}), ${buoy.distanceKm} km away`;
+                const raw = this.data.waveHeightRaw;
+                if (raw) {
+                    tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
+                }
+                return tooltip;
+            }
+            return this.buildTooltip(this.data.location, this.data.waveHeightRaw);
         },
         wavePeriodTooltip() {
-            if (!this.data.wavePeriodStation) return '';
-            const station = this.data.wavePeriodStation;
-            return `Measured at ${station.name} (${station.id}), ${station.distanceKm} km away`;
+            if (this.data.wavePeriodStation) {
+                const station = this.data.wavePeriodStation;
+                let tooltip = `${station.name} (${station.id}), ${station.distanceKm} km away`;
+                const raw = this.data.wavePeriodRaw;
+                if (raw) {
+                    tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
+                }
+                return tooltip;
+            }
+            return this.buildTooltip(this.data.location, this.data.wavePeriodRaw);
         },
         waveDirectionTooltip() {
-            if (!this.data.waveDirectionStation) return '';
-            const station = this.data.waveDirectionStation;
-            return `Measured at ${station.name} (${station.id}), ${station.distanceKm} km away`;
+            if (this.data.waveDirectionStation) {
+                const station = this.data.waveDirectionStation;
+                let tooltip = `${station.name} (${station.id}), ${station.distanceKm} km away`;
+                const raw = this.data.waveDirectionRaw;
+                if (raw) {
+                    tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
+                }
+                return tooltip;
+            }
+            return this.buildTooltip(this.data.location, this.data.waveDirectionRaw);
         },
         beaufortClass() {
             if (this.data.windSpeed === null) return '';
@@ -103,6 +137,14 @@ export default {
         },
     },
     methods: {
+        buildTooltip(location, raw) {
+            if (!location) return '';
+            let tooltip = `${location.name} (${location.id})`;
+            if (raw) {
+                tooltip += `\n\n${raw.code} | ${raw.compartiment} | ${raw.value} ${raw.unit}`;
+            }
+            return tooltip;
+        },
         formatTemp(value) {
             return value !== null ? `${value}°C` : 'N/A';
         },

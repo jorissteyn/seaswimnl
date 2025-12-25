@@ -14,6 +14,9 @@ use Seaswim\Domain\ValueObject\WindSpeed;
 
 final readonly class WaterConditions
 {
+    /**
+     * @param array<string, array{code: string, compartiment: string, value: float, unit: string}|null>|null $rawMeasurements
+     */
     public function __construct(
         private Location $location,
         private Temperature $temperature,
@@ -24,6 +27,7 @@ final readonly class WaterConditions
         private ?string $windDirection = null,
         private ?WavePeriod $wavePeriod = null,
         private ?WaveDirection $waveDirection = null,
+        private ?array $rawMeasurements = null,
     ) {
     }
 
@@ -70,5 +74,13 @@ final readonly class WaterConditions
     public function getWaveDirection(): ?WaveDirection
     {
         return $this->waveDirection;
+    }
+
+    /**
+     * @return array<string, array{code: string, compartiment: string, value: float, unit: string}|null>|null
+     */
+    public function getRawMeasurements(): ?array
+    {
+        return $this->rawMeasurements;
     }
 }

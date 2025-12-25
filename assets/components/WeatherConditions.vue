@@ -1,13 +1,13 @@
 <template>
     <div class="conditions-card weather">
-        <h2>
-            Weather Conditions
-            <span v-if="data.station" v-tooltip="stationTooltip" class="info-icon">ⓘ</span>
-        </h2>
+        <h2>Weather Conditions</h2>
         <dl class="conditions-list">
             <div class="condition-item">
                 <dt>Air Temperature</dt>
-                <dd>{{ formatTemp(data.airTemperature) }}</dd>
+                <dd>
+                    {{ formatTemp(data.airTemperature) }}
+                    <span v-tooltip="temperatureTooltip" class="info-icon">ⓘ</span>
+                </dd>
             </div>
             <div class="condition-item">
                 <dt>Wind</dt>
@@ -23,7 +23,7 @@
                         <span class="compass-letter compass-w">W</span>
                         <span class="compass-arrow" :style="{ transform: `rotate(${getWindDegrees(data.windDirection)}deg)` }"></span>
                     </span>
-                    <span v-if="data.station" v-tooltip="stationTooltip" class="info-icon">ⓘ</span>
+                    <span v-tooltip="windTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
@@ -36,6 +36,7 @@
                         </span>
                         <span class="sun-icon">☀</span>
                         <span class="sunpower-value">{{ Math.round(data.sunpower) }} W/m²</span>
+                        <span v-tooltip="sunpowerTooltip" class="info-icon">ⓘ</span>
                     </template>
                     <template v-else>N/A</template>
                 </dd>
@@ -55,10 +56,28 @@ export default {
         },
     },
     computed: {
-        stationTooltip() {
+        stationLine() {
             if (!this.data.station) return '';
             const distance = this.data.station.distanceKm !== null && this.data.station.distanceKm >= 2 ? `, ${this.data.station.distanceKm} km away` : '';
-            return `Buienradar station: ${this.data.station.name} (${this.data.station.code})${distance}`;
+            return `${this.data.station.name} (${this.data.station.code})${distance}`;
+        },
+        temperatureTooltip() {
+            return this.buildTooltip(this.data.airTemperatureRaw);
+        },
+        windTooltip() {
+            const speedRaw = this.data.windSpeedRaw;
+            const dirRaw = this.data.windDirectionRaw;
+            let tooltip = this.stationLine;
+            if (speedRaw) {
+                tooltip += `\n\n${speedRaw.field} | ${speedRaw.value} ${speedRaw.unit}`;
+            }
+            if (dirRaw) {
+                tooltip += `\n${dirRaw.field} | ${dirRaw.value}`;
+            }
+            return tooltip;
+        },
+        sunpowerTooltip() {
+            return this.buildTooltip(this.data.sunpowerRaw);
         },
         beaufortClass() {
             if (this.data.windSpeed === null) return '';
@@ -75,6 +94,13 @@ export default {
         },
     },
     methods: {
+        buildTooltip(raw) {
+            let tooltip = this.stationLine;
+            if (raw) {
+                tooltip += `\n\n${raw.field} | ${raw.value} ${raw.unit}`;
+            }
+            return tooltip;
+        },
         formatTemp(value) {
             return value !== null ? `${value}°C` : 'N/A';
         },
