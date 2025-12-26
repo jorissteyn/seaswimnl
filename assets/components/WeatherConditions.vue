@@ -42,7 +42,12 @@
                 </dd>
             </div>
         </dl>
-        <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
+        <div v-if="data.station" class="sources">
+            <span class="sources-label">Source:</span>
+            <span class="source-item">
+                {{ data.station.name }} ({{ formatTime(data.measuredAt) }})
+            </span>
+        </div>
     </div>
 </template>
 

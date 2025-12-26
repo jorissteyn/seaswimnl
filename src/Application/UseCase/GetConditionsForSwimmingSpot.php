@@ -198,6 +198,7 @@ final readonly class GetConditionsForSwimmingSpot
                     ...$baseResult,
                     'waveHeight' => $value,
                     'raw' => $rawMeasurements['waveHeight'] ?? null,
+                    'measuredAt' => $stationConditions->getMeasuredAt(),
                 ];
 
             case self::CAPABILITY_WAVE_PERIOD:
@@ -208,6 +209,7 @@ final readonly class GetConditionsForSwimmingSpot
                     ...$baseResult,
                     'wavePeriod' => $value,
                     'raw' => $rawMeasurements['wavePeriod'] ?? null,
+                    'measuredAt' => $stationConditions->getMeasuredAt(),
                 ];
 
             case self::CAPABILITY_WAVE_DIRECTION:
@@ -222,6 +224,7 @@ final readonly class GetConditionsForSwimmingSpot
                     'waveDirection' => $value,
                     'waveDirectionCompass' => $waveDirection->getCompassDirection(),
                     'raw' => $rawMeasurements['waveDirection'] ?? null,
+                    'measuredAt' => $stationConditions->getMeasuredAt(),
                 ];
 
             default:

@@ -238,6 +238,34 @@ body::after {
     font-style: italic;
 }
 
+/* Sources footer */
+.sources {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 100, 150, 0.1);
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+}
+
+.sources-label {
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.source-item {
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.source-item:last-child {
+    margin-right: 0;
+}
+
+.source-note {
+    font-style: italic;
+    opacity: 0.8;
+}
+
 /* States */
 .loading, .prompt, .unavailable {
     text-align: center;

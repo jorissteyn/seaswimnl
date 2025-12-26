@@ -60,7 +60,12 @@
                 </dd>
             </div>
         </dl>
-        <p class="timestamp">Last updated: {{ formatTime(data.measuredAt) }}</p>
+        <div v-if="sources.length > 0" class="sources">
+            <span class="sources-label">Sources:</span>
+            <span v-for="source in sources" :key="source.id" class="source-item">
+                {{ source.name }} ({{ formatTime(source.measuredAt) }})
+            </span>
+        </div>
     </div>
 </template>
 
@@ -134,6 +139,33 @@ export default {
             if (bft <= 5) return 'bft-moderate';
             if (bft <= 7) return 'bft-strong';
             return 'bft-severe';
+        },
+        sources() {
+            const sourcesMap = {};
+            // Primary location
+            if (this.data.location && this.data.measuredAt) {
+                sourcesMap[this.data.location.id] = {
+                    id: this.data.location.id,
+                    name: this.data.location.name,
+                    measuredAt: this.data.measuredAt,
+                };
+            }
+            // Fallback stations
+            const fallbacks = [
+                this.data.waveHeightBuoy,
+                this.data.wavePeriodStation,
+                this.data.waveDirectionStation,
+            ];
+            for (const station of fallbacks) {
+                if (station && station.id && station.measuredAt) {
+                    sourcesMap[station.id] = {
+                        id: station.id,
+                        name: station.name,
+                        measuredAt: station.measuredAt,
+                    };
+                }
+            }
+            return Object.values(sourcesMap);
         },
     },
     methods: {

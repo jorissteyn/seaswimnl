@@ -67,9 +67,13 @@
                 </dd>
             </div>
         </dl>
-        <p class="timestamp">
-            Heights relative to NAP<span v-if="measuredAt"> · Last updated: {{ formatTime(measuredAt) }}</span>
-        </p>
+        <div class="sources">
+            <span class="sources-label">Source:</span>
+            <span v-if="data.location" class="source-item">
+                {{ data.location.name }}<span v-if="measuredAt"> ({{ formatTime(measuredAt) }})</span>
+            </span>
+            <span class="source-note">· Heights relative to NAP</span>
+        </div>
     </div>
 </template>
 

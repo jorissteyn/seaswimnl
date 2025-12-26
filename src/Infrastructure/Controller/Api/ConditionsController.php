@@ -78,14 +78,14 @@ final class ConditionsController extends AbstractController
                 'temperatureRaw' => $rawMeasurements['waterTemperature'] ?? null,
                 'waveHeight' => (null !== $waveHeightStation ? $waveHeightStation['waveHeight'] : null) ?? $water->getWaveHeight()->getMeters(),
                 'waveHeightRaw' => $rawMeasurements['waveHeight'] ?? null,
-                'waveHeightBuoy' => $waveHeightStation,
+                'waveHeightBuoy' => $this->formatFallbackStation($waveHeightStation),
                 'wavePeriod' => (null !== $wavePeriodStation ? $wavePeriodStation['wavePeriod'] : null) ?? $water->getWavePeriod()?->getSeconds(),
                 'wavePeriodRaw' => $rawMeasurements['wavePeriod'] ?? null,
-                'wavePeriodStation' => $wavePeriodStation,
+                'wavePeriodStation' => $this->formatFallbackStation($wavePeriodStation),
                 'waveDirection' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirection'] : null) ?? $water->getWaveDirection()?->getDegrees(),
                 'waveDirectionCompass' => (null !== $waveDirectionStation ? $waveDirectionStation['waveDirectionCompass'] : null) ?? $water->getWaveDirection()?->getCompassDirection(),
                 'waveDirectionRaw' => $rawMeasurements['waveDirection'] ?? null,
-                'waveDirectionStation' => $waveDirectionStation,
+                'waveDirectionStation' => $this->formatFallbackStation($waveDirectionStation),
                 'waterHeight' => $water->getWaterHeight()->getMeters(),
                 'waterHeightRaw' => $rawMeasurements['waterHeight'] ?? null,
                 'windSpeed' => $water->getWindSpeed()?->getKilometersPerHour(),
@@ -184,5 +184,19 @@ final class ConditionsController extends AbstractController
         ];
 
         return $result;
+    }
+
+    private function formatFallbackStation(?array $station): ?array
+    {
+        if (null === $station) {
+            return null;
+        }
+
+        return [
+            'id' => $station['id'],
+            'name' => $station['name'],
+            'distanceKm' => $station['distanceKm'],
+            'measuredAt' => $station['measuredAt']?->format('c'),
+        ];
     }
 }

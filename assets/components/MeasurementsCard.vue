@@ -44,7 +44,12 @@
             </table>
         </div>
 
-        <p v-if="lastUpdated" class="timestamp">Last updated: {{ formatTime(lastUpdated) }}</p>
+        <div v-if="locationSources.length > 0" class="sources">
+            <span class="sources-label">Sources:</span>
+            <span v-for="source in locationSources" :key="source.id" class="source-item">
+                {{ source.name }} ({{ formatTime(source.timestamp) }})
+            </span>
+        </div>
     </div>
 </template>
 
@@ -66,13 +71,22 @@ export default {
         };
     },
     computed: {
-        lastUpdated() {
-            if (this.measurements.length === 0) return null;
-            // Find the most recent timestamp
-            return this.measurements.reduce((latest, m) => {
-                if (!latest || m.timestamp > latest) return m.timestamp;
-                return latest;
-            }, null);
+        locationSources() {
+            if (this.measurements.length === 0) return [];
+            // Group by location and find latest timestamp per location
+            const byLocation = {};
+            for (const m of this.measurements) {
+                if (!m.location) continue;
+                const id = m.location.id;
+                if (!byLocation[id] || m.timestamp > byLocation[id].timestamp) {
+                    byLocation[id] = {
+                        id,
+                        name: m.location.name,
+                        timestamp: m.timestamp,
+                    };
+                }
+            }
+            return Object.values(byLocation);
         },
     },
     watch: {
