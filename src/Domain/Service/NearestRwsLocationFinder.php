@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Domain\Service;
 
 use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Infrastructure\Service\LocationBlacklist;
 
 /**
  * Finds the nearest location with a specific measurement capability.
@@ -20,6 +21,11 @@ use Seaswim\Domain\ValueObject\RwsLocation;
 final readonly class NearestRwsLocationFinder
 {
     private const EARTH_RADIUS_KM = 6371.0;
+
+    public function __construct(
+        private LocationBlacklist $blacklist,
+    ) {
+    }
 
     /**
      * Find the nearest location with the specified measurement capability.
@@ -54,6 +60,11 @@ final readonly class NearestRwsLocationFinder
         foreach ($allLocations as $candidate) {
             // Skip the same location
             if ($candidate->getId() === $location->getId()) {
+                continue;
+            }
+
+            // Skip blacklisted locations (stale data)
+            if ($this->blacklist->isBlacklisted($candidate->getId())) {
                 continue;
             }
 
