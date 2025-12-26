@@ -119,6 +119,10 @@ body::after {
     .conditions-panel {
         grid-template-columns: 1fr 1fr;
     }
+
+    .conditions-panel .conditions-card.measurements {
+        grid-column: 1 / -1;
+    }
 }
 
 /* Glassmorphism Cards */
