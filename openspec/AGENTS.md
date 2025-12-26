@@ -407,11 +407,11 @@ Only add complexity with:
 
 | Command | Use Case |
 |---------|----------|
-| `make dev` | Fast frontend build for testing (~4s) |
-| `make build` | Production frontend build (~15s) |
+| `make dev` | Fast frontend build for testing (~4s) - **USE THIS** |
+| `make build` | Production frontend build (~26s) - CI only |
 | `make watch` | Continuous rebuild on file changes |
 
-**Always use `make dev` when testing changes during development.** Only use `make build` for final production builds or CI.
+**IMPORTANT:** Always use `make dev` for testing changes during development. Do NOT use `make build` unless explicitly requested or for final production/CI builds.
 
 ## Tool Selection Guide
 
