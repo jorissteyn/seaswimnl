@@ -95,3 +95,7 @@ services:
     Seaswim\Infrastructure\Console\Command\LocationsScanStaleCommand:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    Seaswim\Infrastructure\Console\Command\RwsDebugCommand:
+        arguments:
+            $rwsApiUrl: '%seaswim.apis.rijkswaterstaat.base_url%'
