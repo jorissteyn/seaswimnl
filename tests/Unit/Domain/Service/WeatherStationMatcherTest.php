@@ -5,26 +5,26 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Domain\Service;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Domain\Service\BuienradarStationMatcher;
-use Seaswim\Domain\ValueObject\BuienradarStation;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
+use Seaswim\Domain\Service\WeatherStationMatcher;
+use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Domain\ValueObject\WeatherStation;
 
-final class BuienradarStationMatcherTest extends TestCase
+final class WeatherStationMatcherTest extends TestCase
 {
-    private BuienradarStationMatcher $matcher;
-    private BuienradarStationRepositoryInterface $repository;
+    private WeatherStationMatcher $matcher;
+    private WeatherStationRepositoryInterface $repository;
 
     protected function setUp(): void
     {
-        $this->repository = $this->createMock(BuienradarStationRepositoryInterface::class);
-        $this->matcher = new BuienradarStationMatcher($this->repository);
+        $this->repository = $this->createMock(WeatherStationRepositoryInterface::class);
+        $this->matcher = new WeatherStationMatcher($this->repository);
     }
 
     public function testFindsNearestStation(): void
     {
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
-        $deBiltStation = new BuienradarStation('6260', 'De Bilt', 52.10, 5.18);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
+        $deBiltStation = new WeatherStation('6260', 'De Bilt', 52.10, 5.18);
 
         $this->repository->method('findAll')->willReturn([
             $deBiltStation,
@@ -32,7 +32,7 @@ final class BuienradarStationMatcherTest extends TestCase
         ]);
 
         // RWS location near Vlissingen
-        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.45, 3.61, [], []);
+        $location = new RwsLocation('vlissingen', 'Vlissingen havenmond', 51.45, 3.61, [], []);
 
         $result = $this->matcher->findNearestStation($location);
 
@@ -43,12 +43,12 @@ final class BuienradarStationMatcherTest extends TestCase
 
     public function testReturnsDistanceInKilometers(): void
     {
-        $station = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $station = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
 
         $this->repository->method('findAll')->willReturn([$station]);
 
         // Location about 10km away
-        $location = new Location('test', 'Test Location', 51.50, 3.70, [], []);
+        $location = new RwsLocation('test', 'Test Location', 51.50, 3.70, [], []);
 
         $result = $this->matcher->findNearestStation($location);
 
@@ -59,9 +59,9 @@ final class BuienradarStationMatcherTest extends TestCase
 
     public function testFindsClosestOfMultipleStations(): void
     {
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
-        $deBiltStation = new BuienradarStation('6260', 'De Bilt', 52.10, 5.18);
-        $rotterdamStation = new BuienradarStation('6344', 'Rotterdam', 51.96, 4.45);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
+        $deBiltStation = new WeatherStation('6260', 'De Bilt', 52.10, 5.18);
+        $rotterdamStation = new WeatherStation('6344', 'Rotterdam', 51.96, 4.45);
 
         $this->repository->method('findAll')->willReturn([
             $deBiltStation,
@@ -70,7 +70,7 @@ final class BuienradarStationMatcherTest extends TestCase
         ]);
 
         // Location near Rotterdam
-        $location = new Location('hoekvanholland', 'Hoek van Holland', 51.98, 4.12, [], []);
+        $location = new RwsLocation('hoekvanholland', 'Hoek van Holland', 51.98, 4.12, [], []);
 
         $result = $this->matcher->findNearestStation($location);
 
@@ -82,7 +82,7 @@ final class BuienradarStationMatcherTest extends TestCase
     {
         $this->repository->method('findAll')->willReturn([]);
 
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60, [], []);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60, [], []);
 
         $result = $this->matcher->findNearestStation($location);
 
@@ -91,11 +91,11 @@ final class BuienradarStationMatcherTest extends TestCase
 
     public function testDistanceIsRoundedToOneDecimal(): void
     {
-        $station = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $station = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
 
         $this->repository->method('findAll')->willReturn([$station]);
 
-        $location = new Location('test', 'Test', 51.50, 3.70, [], []);
+        $location = new RwsLocation('test', 'Test', 51.50, 3.70, [], []);
 
         $result = $this->matcher->findNearestStation($location);
 

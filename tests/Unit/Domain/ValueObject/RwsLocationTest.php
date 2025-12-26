@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Domain\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 
-final class LocationTest extends TestCase
+final class RwsLocationTest extends TestCase
 {
     public function testConstruction(): void
     {
-        $location = new Location(
+        $location = new RwsLocation(
             'vlissingen',
             'Vlissingen',
             51.4424,
@@ -28,7 +28,7 @@ final class LocationTest extends TestCase
 
     public function testConstructionWithCompartimentenAndGrootheden(): void
     {
-        $location = new Location(
+        $location = new RwsLocation(
             'europlatform',
             'Europlatform',
             52.0000,

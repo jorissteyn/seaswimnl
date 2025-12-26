@@ -13,7 +13,7 @@ use Seaswim\Infrastructure\ApiPlatform\State\ConditionsProvider;
     shortName: 'Conditions',
     operations: [
         new Get(
-            uriTemplate: '/v1/conditions/{location}',
+            uriTemplate: '/v1/conditions/{swimmingSpot}',
             provider: ConditionsProvider::class,
         ),
     ],

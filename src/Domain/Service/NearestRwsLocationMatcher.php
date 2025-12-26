@@ -4,53 +4,60 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Service;
 
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Domain\ValueObject\BuienradarStation;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Domain\ValueObject\SwimmingSpot;
+use Seaswim\Infrastructure\Service\LocationBlacklist;
 
 /**
- * Finds the nearest Buienradar weather station for a given RWS location.
+ * Finds the nearest RWS location for a given swimming spot.
  *
  * Uses the Haversine formula to calculate the great-circle distance
- * between the RWS location and all Buienradar stations, returning
- * the closest one along with the distance.
+ * between the swimming spot and all RWS locations, returning
+ * the closest non-blacklisted one along with the distance.
  */
-final readonly class BuienradarStationMatcher
+final readonly class NearestRwsLocationMatcher
 {
     private const EARTH_RADIUS_KM = 6371.0;
 
     public function __construct(
-        private BuienradarStationRepositoryInterface $stationRepository,
+        private RwsLocationRepositoryInterface $locationRepository,
+        private LocationBlacklist $blacklist,
     ) {
     }
 
     /**
-     * Find the nearest Buienradar station to the given location.
+     * Find the nearest RWS location to the given swimming spot.
      *
-     * @return array{station: BuienradarStation, distanceKm: float}|null
+     * @return array{location: RwsLocation, distanceKm: float}|null
      */
-    public function findNearestStation(Location $location): ?array
+    public function findNearestLocation(SwimmingSpot $spot): ?array
     {
-        $stations = $this->stationRepository->findAll();
+        $locations = $this->locationRepository->findAll();
 
-        if ([] === $stations) {
+        if ([] === $locations) {
             return null;
         }
 
         $nearest = null;
         $minDistance = PHP_FLOAT_MAX;
 
-        foreach ($stations as $station) {
+        foreach ($locations as $location) {
+            // Skip blacklisted locations
+            if ($this->blacklist->isBlacklisted($location->getId())) {
+                continue;
+            }
+
             $distance = $this->calculateDistance(
+                $spot->getLatitude(),
+                $spot->getLongitude(),
                 $location->getLatitude(),
-                $location->getLongitude(),
-                $station->getLatitude(),
-                $station->getLongitude()
+                $location->getLongitude()
             );
 
             if ($distance < $minDistance) {
                 $minDistance = $distance;
-                $nearest = $station;
+                $nearest = $location;
             }
         }
 
@@ -59,7 +66,7 @@ final readonly class BuienradarStationMatcher
         }
 
         return [
-            'station' => $nearest,
+            'location' => $nearest,
             'distanceKm' => round($minDistance, 1),
         ];
     }

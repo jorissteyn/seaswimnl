@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Application\UseCase;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
 use Seaswim\Application\UseCase\RefreshLocations;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
@@ -17,7 +17,7 @@ final class RefreshLocationsTest extends TestCase
     {
         $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $weatherStationRepository = $this->createMock(WeatherStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
@@ -38,11 +38,11 @@ final class RefreshLocationsTest extends TestCase
             ->method('saveAll')
             ->with($this->callback(fn ($locations) => 2 === \count($locations)));
 
-        $buienradarStationRepository->expects($this->once())
+        $weatherStationRepository->expects($this->once())
             ->method('saveAll')
             ->with($this->callback(fn ($stations) => 2 === \count($stations)));
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $weatherStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(2, $result['locations']);
@@ -53,7 +53,7 @@ final class RefreshLocationsTest extends TestCase
     {
         $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $weatherStationRepository = $this->createMock(WeatherStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
@@ -69,7 +69,7 @@ final class RefreshLocationsTest extends TestCase
         $locationRepository->expects($this->never())
             ->method('saveAll');
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $weatherStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(-1, $result['locations']);
@@ -80,7 +80,7 @@ final class RefreshLocationsTest extends TestCase
     {
         $locationRepository = $this->createMock(RwsLocationRepositoryInterface::class);
         $rwsClient = $this->createMock(RwsHttpClientInterface::class);
-        $buienradarStationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
+        $weatherStationRepository = $this->createMock(WeatherStationRepositoryInterface::class);
         $buienradarClient = $this->createMock(BuienradarHttpClientInterface::class);
 
         $rwsClient->expects($this->once())
@@ -93,10 +93,10 @@ final class RefreshLocationsTest extends TestCase
             ->method('fetchStations')
             ->willReturn(null);
 
-        $buienradarStationRepository->expects($this->never())
+        $weatherStationRepository->expects($this->never())
             ->method('saveAll');
 
-        $useCase = new RefreshLocations($locationRepository, $rwsClient, $buienradarStationRepository, $buienradarClient);
+        $useCase = new RefreshLocations($locationRepository, $rwsClient, $weatherStationRepository, $buienradarClient);
         $result = $useCase->execute();
 
         $this->assertSame(1, $result['locations']);

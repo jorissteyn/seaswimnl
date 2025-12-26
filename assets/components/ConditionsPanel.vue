@@ -30,8 +30,8 @@
         />
 
         <MeasurementsCard
-            v-if="locationId"
-            :location-id="locationId"
+            v-if="conditions.rwsLocation"
+            :location-id="conditions.rwsLocation.id"
         />
     </div>
 </template>
@@ -61,7 +61,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        locationId: {
+        swimmingSpotId: {
             type: String,
             default: null,
         },

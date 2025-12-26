@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Infrastructure\ExternalApi;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\RijkswaterstaatAdapter;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -33,7 +33,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
             ]);
 
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
 
@@ -51,7 +51,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
             ->willReturn(null);
 
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
 
@@ -71,7 +71,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
             ]);
 
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
 
         // First call should hit the API
         $conditions1 = $adapter->getConditions($location);
@@ -87,7 +87,7 @@ final class RijkswaterstaatAdapterTest extends TestCase
     {
         $client = $this->createMock(RwsHttpClientInterface::class);
         $adapter = new RijkswaterstaatAdapter($client, $this->cache, 900);
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
 
         // First call succeeds
         $client->expects($this->exactly(2))

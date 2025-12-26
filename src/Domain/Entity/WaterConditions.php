@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Entity;
 
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaveDirection;
@@ -18,7 +18,7 @@ final readonly class WaterConditions
      * @param array<string, array{code: string, compartiment: string, value: float, unit: string}|null>|null $rawMeasurements
      */
     public function __construct(
-        private Location $location,
+        private RwsLocation $location,
         private Temperature $temperature,
         private WaveHeight $waveHeight,
         private WaterHeight $waterHeight,
@@ -31,7 +31,7 @@ final readonly class WaterConditions
     ) {
     }
 
-    public function getLocation(): Location
+    public function getLocation(): RwsLocation
     {
         return $this->location;
     }

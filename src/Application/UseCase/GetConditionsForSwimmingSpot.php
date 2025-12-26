@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Application\UseCase;
 
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Application\Port\SwimmingSpotRepositoryInterface;
 use Seaswim\Application\Port\TidalInfoProviderInterface;
 use Seaswim\Application\Port\WaterConditionsProviderInterface;
 use Seaswim\Application\Port\WeatherConditionsProviderInterface;
@@ -13,11 +14,15 @@ use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\ComfortIndexCalculator;
 use Seaswim\Domain\Service\NearestRwsLocationFinder;
+use Seaswim\Domain\Service\NearestRwsLocationMatcher;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\Service\WeatherStationMatcher;
+use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Domain\ValueObject\SwimmingSpot;
 use Seaswim\Domain\ValueObject\TideInfo;
+use Seaswim\Domain\ValueObject\WeatherStation;
 
-final readonly class GetConditionsForLocation
+final readonly class GetConditionsForSwimmingSpot
 {
     private const CAPABILITY_WAVE_HEIGHT = 'Hm0';
     private const CAPABILITY_WAVE_PERIOD = 'Tm02';
@@ -25,24 +30,40 @@ final readonly class GetConditionsForLocation
     private const CAPABILITY_TIDES = 'WATHTE';
 
     public function __construct(
+        private SwimmingSpotRepositoryInterface $swimmingSpotRepository,
         private RwsLocationRepositoryInterface $locationRepository,
         private WaterConditionsProviderInterface $waterProvider,
         private WeatherConditionsProviderInterface $weatherProvider,
         private TidalInfoProviderInterface $tidalProvider,
         private SafetyScoreCalculator $safetyCalculator,
         private ComfortIndexCalculator $comfortCalculator,
+        private NearestRwsLocationMatcher $rwsLocationMatcher,
         private NearestRwsLocationFinder $rwsLocationFinder,
+        private WeatherStationMatcher $weatherStationMatcher,
     ) {
     }
 
     /**
-     * @return array{water: WaterConditions|null, weather: WeatherConditions|null, tides: TideInfo|null, metrics: CalculatedMetrics, errors: array<string, string>, waveHeightStation: array<string, mixed>|null, wavePeriodStation: array<string, mixed>|null, waveDirectionStation: array<string, mixed>|null, tidalStation: array<string, mixed>|null}|null
+     * @return array{
+     *     swimmingSpot: SwimmingSpot,
+     *     rwsLocation: array{location: RwsLocation, distanceKm: float}|null,
+     *     weatherStation: array{station: WeatherStation, distanceKm: float}|null,
+     *     water: WaterConditions|null,
+     *     weather: WeatherConditions|null,
+     *     tides: TideInfo|null,
+     *     metrics: CalculatedMetrics,
+     *     errors: array<string, string>,
+     *     waveHeightStation: array<string, mixed>|null,
+     *     wavePeriodStation: array<string, mixed>|null,
+     *     waveDirectionStation: array<string, mixed>|null,
+     *     tidalStation: array<string, mixed>|null
+     * }|null
      */
-    public function execute(string $locationId): ?array
+    public function execute(string $swimmingSpotId): ?array
     {
-        $location = $this->locationRepository->findById($locationId);
+        $swimmingSpot = $this->swimmingSpotRepository->findById($swimmingSpotId);
 
-        if (null === $location) {
+        if (null === $swimmingSpot) {
             return null;
         }
 
@@ -52,39 +73,60 @@ final readonly class GetConditionsForLocation
         $waveDirectionStation = null;
         $tidalStation = null;
 
-        $water = $this->waterProvider->getConditions($location);
-        if (null === $water) {
-            $errors['water'] = $this->waterProvider->getLastError() ?? 'Failed to fetch water conditions';
+        // Find nearest RWS location for water data
+        $rwsLocationResult = $this->rwsLocationMatcher->findNearestLocation($swimmingSpot);
+        $rwsLocation = $rwsLocationResult['location'] ?? null;
+
+        // Find nearest weather station
+        $weatherStationResult = $this->weatherStationMatcher->findNearestStationForSpot($swimmingSpot);
+
+        // Fetch water conditions from nearest RWS location
+        $water = null;
+        if (null !== $rwsLocation) {
+            $water = $this->waterProvider->getConditions($rwsLocation);
+            if (null === $water) {
+                $errors['water'] = $this->waterProvider->getLastError() ?? 'Failed to fetch water conditions';
+            }
+        } else {
+            $errors['water'] = 'No RWS location found near this swimming spot';
         }
 
-        // If wave height is not available, try to get it from the nearest station
-        if (null !== $water && null === $water->getWaveHeight()->getMeters()) {
-            $waveHeightStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_HEIGHT);
+        // Fetch wave data from nearest stations if not available at primary location
+        if (null !== $water && null !== $rwsLocation) {
+            if (null === $water->getWaveHeight()->getMeters()) {
+                $waveHeightStation = $this->fetchFromNearestStation($rwsLocation, self::CAPABILITY_WAVE_HEIGHT);
+            }
+
+            if (null === $water->getWavePeriod() || null === $water->getWavePeriod()->getSeconds()) {
+                $wavePeriodStation = $this->fetchFromNearestStation($rwsLocation, self::CAPABILITY_WAVE_PERIOD);
+            }
+
+            if (null === $water->getWaveDirection() || null === $water->getWaveDirection()->getDegrees()) {
+                $waveDirectionStation = $this->fetchFromNearestStation($rwsLocation, self::CAPABILITY_WAVE_DIRECTION);
+            }
         }
 
-        // If wave period is not available, try to get it from the nearest station
-        if (null !== $water && (null === $water->getWavePeriod() || null === $water->getWavePeriod()->getSeconds())) {
-            $wavePeriodStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_PERIOD);
+        // Fetch weather conditions - use RWS location for weather lookup (keeps existing behavior)
+        $weather = null;
+        if (null !== $rwsLocation) {
+            $weather = $this->weatherProvider->getConditions($rwsLocation);
+            if (null === $weather) {
+                $errors['weather'] = $this->weatherProvider->getLastError() ?? 'Failed to fetch weather conditions';
+            }
         }
 
-        // If wave direction is not available, try to get it from the nearest station
-        if (null !== $water && (null === $water->getWaveDirection() || null === $water->getWaveDirection()->getDegrees())) {
-            $waveDirectionStation = $this->fetchFromNearestStation($water, self::CAPABILITY_WAVE_DIRECTION);
-        }
-
-        $weather = $this->weatherProvider->getConditions($location);
-        if (null === $weather) {
-            $errors['weather'] = $this->weatherProvider->getLastError() ?? 'Failed to fetch weather conditions';
-        }
-
-        $tides = $this->tidalProvider->getTidalInfo($location);
-        if (null === $tides) {
-            // Try to get tidal data from the nearest station with tidal data
-            $tidalStation = $this->fetchFromNearestStation($location, self::CAPABILITY_TIDES);
-            if (null !== $tidalStation) {
-                $tides = $tidalStation['tides'];
-            } else {
-                $errors['tides'] = $this->tidalProvider->getLastError() ?? 'Failed to fetch tidal data';
+        // Fetch tidal data
+        $tides = null;
+        if (null !== $rwsLocation) {
+            $tides = $this->tidalProvider->getTidalInfo($rwsLocation);
+            if (null === $tides) {
+                // Try to get tidal data from the nearest station with tidal data
+                $tidalStation = $this->fetchFromNearestStation($rwsLocation, self::CAPABILITY_TIDES);
+                if (null !== $tidalStation) {
+                    $tides = $tidalStation['tides'];
+                } else {
+                    $errors['tides'] = $this->tidalProvider->getLastError() ?? 'Failed to fetch tidal data';
+                }
             }
         }
 
@@ -92,6 +134,9 @@ final readonly class GetConditionsForLocation
         $comfortIndex = $this->comfortCalculator->calculate($water, $weather);
 
         return [
+            'swimmingSpot' => $swimmingSpot,
+            'rwsLocation' => $rwsLocationResult,
+            'weatherStation' => $weatherStationResult,
             'water' => $water,
             'weather' => $weather,
             'tides' => $tides,
@@ -109,9 +154,8 @@ final readonly class GetConditionsForLocation
      *
      * @return array<string, mixed>|null
      */
-    private function fetchFromNearestStation(Location|WaterConditions $source, string $capability): ?array
+    private function fetchFromNearestStation(RwsLocation $location, string $capability): ?array
     {
-        $location = $source instanceof WaterConditions ? $source->getLocation() : $source;
         $allLocations = $this->locationRepository->findAll();
         $stationResult = $this->rwsLocationFinder->findNearest($location, $allLocations, $capability);
 

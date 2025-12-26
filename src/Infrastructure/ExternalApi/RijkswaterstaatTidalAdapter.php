@@ -7,7 +7,7 @@ namespace Seaswim\Infrastructure\ExternalApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Seaswim\Application\Port\TidalInfoProviderInterface;
 use Seaswim\Domain\Service\TideCalculator;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\TideInfo;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
@@ -28,7 +28,7 @@ final class RijkswaterstaatTidalAdapter implements TidalInfoProviderInterface
         return $this->lastError;
     }
 
-    public function getTidalInfo(Location $location): ?TideInfo
+    public function getTidalInfo(RwsLocation $location): ?TideInfo
     {
         $this->lastError = null;
         $cacheKey = 'rws_tides_'.$location->getId();

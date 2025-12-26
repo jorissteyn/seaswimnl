@@ -7,8 +7,8 @@ namespace Seaswim\Infrastructure\ExternalApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Seaswim\Application\Port\WeatherConditionsProviderInterface;
 use Seaswim\Domain\Entity\WeatherConditions;
-use Seaswim\Domain\Service\BuienradarStationMatcher;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\Service\WeatherStationMatcher;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WindSpeed;
@@ -20,7 +20,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
 
     public function __construct(
         private readonly BuienradarHttpClientInterface $client,
-        private readonly BuienradarStationMatcher $stationMatcher,
+        private readonly WeatherStationMatcher $stationMatcher,
         private readonly CacheItemPoolInterface $cache,
         private readonly int $cacheTtl,
     ) {
@@ -31,7 +31,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
         return $this->lastError;
     }
 
-    public function getConditions(Location $location): ?WeatherConditions
+    public function getConditions(RwsLocation $location): ?WeatherConditions
     {
         $this->lastError = null;
 
@@ -39,7 +39,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
         $result = $this->stationMatcher->findNearestStation($location);
 
         if (null === $result) {
-            $this->lastError = 'No Buienradar stations available';
+            $this->lastError = 'No weather stations available';
 
             return null;
         }
@@ -93,7 +93,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
     /**
      * @param array<string, mixed> $data
      */
-    private function mapToEntity(Location $location, array $data, \Seaswim\Domain\ValueObject\BuienradarStation $station, float $distanceKm): WeatherConditions
+    private function mapToEntity(RwsLocation $location, array $data, \Seaswim\Domain\ValueObject\WeatherStation $station, float $distanceKm): WeatherConditions
     {
         return new WeatherConditions(
             location: $location,
@@ -108,7 +108,7 @@ final class BuienradarAdapter implements WeatherConditionsProviderInterface
         );
     }
 
-    private function cloneWithLocation(WeatherConditions $conditions, Location $location): WeatherConditions
+    private function cloneWithLocation(WeatherConditions $conditions, RwsLocation $location): WeatherConditions
     {
         return new WeatherConditions(
             location: $location,

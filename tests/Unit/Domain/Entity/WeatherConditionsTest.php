@@ -6,7 +6,7 @@ namespace Seaswim\Tests\Unit\Domain\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Seaswim\Domain\Entity\WeatherConditions;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WindSpeed;
@@ -15,7 +15,7 @@ final class WeatherConditionsTest extends TestCase
 {
     public function testConstruction(): void
     {
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
         $airTemp = Temperature::fromCelsius(22.0);
         $windSpeed = WindSpeed::fromMetersPerSecond(5.0);
         $windDirection = 'NW';
@@ -41,7 +41,7 @@ final class WeatherConditionsTest extends TestCase
 
     public function testWithNullWindDirection(): void
     {
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
         $conditions = new WeatherConditions(
             $location,
             Temperature::fromCelsius(22.0),
@@ -56,7 +56,7 @@ final class WeatherConditionsTest extends TestCase
 
     public function testWithUnknownValues(): void
     {
-        $location = new Location('unknown', 'Unknown', 0.0, 0.0);
+        $location = new RwsLocation('unknown', 'Unknown', 0.0, 0.0);
         $conditions = new WeatherConditions(
             $location,
             Temperature::unknown(),

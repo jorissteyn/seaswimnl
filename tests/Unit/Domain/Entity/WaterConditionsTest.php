@@ -6,7 +6,7 @@ namespace Seaswim\Tests\Unit\Domain\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Seaswim\Domain\Entity\WaterConditions;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaveHeight;
@@ -15,7 +15,7 @@ final class WaterConditionsTest extends TestCase
 {
     public function testConstruction(): void
     {
-        $location = new Location('vlissingen', 'Vlissingen', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen', 51.44, 3.60);
         $temperature = Temperature::fromCelsius(18.5);
         $waveHeight = WaveHeight::fromMeters(0.8);
         $waterHeight = WaterHeight::fromMeters(0.45);
@@ -38,7 +38,7 @@ final class WaterConditionsTest extends TestCase
 
     public function testWithUnknownValues(): void
     {
-        $location = new Location('unknown', 'Unknown', 0.0, 0.0);
+        $location = new RwsLocation('unknown', 'Unknown', 0.0, 0.0);
         $conditions = new WaterConditions(
             $location,
             Temperature::unknown(),

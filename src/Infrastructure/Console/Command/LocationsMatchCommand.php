@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Infrastructure\Console\Command;
 
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
-use Seaswim\Domain\Service\BuienradarStationMatcher;
+use Seaswim\Domain\Service\WeatherStationMatcher;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,13 +15,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'seaswim:locations:match',
-    description: 'Show the nearest Buienradar station for an RWS location',
+    description: 'Show the nearest weather station for an RWS location',
 )]
 final class LocationsMatchCommand extends Command
 {
     public function __construct(
         private readonly RwsLocationRepositoryInterface $locationRepository,
-        private readonly BuienradarStationMatcher $stationMatcher,
+        private readonly WeatherStationMatcher $stationMatcher,
     ) {
         parent::__construct();
     }
@@ -65,7 +65,7 @@ final class LocationsMatchCommand extends Command
         $result = $this->stationMatcher->findNearestStation($location);
 
         if (null === $result) {
-            $io->warning('No Buienradar stations found.');
+            $io->warning('No weather stations found.');
 
             return Command::SUCCESS;
         }
@@ -73,7 +73,7 @@ final class LocationsMatchCommand extends Command
         $station = $result['station'];
         $distanceKm = $result['distanceKm'];
 
-        $io->section('Nearest Buienradar Station');
+        $io->section('Nearest Weather Station');
         $io->table(
             ['Code', 'Name', 'Latitude', 'Longitude', 'Distance'],
             [[$station->getCode(), $station->getName(), $station->getLatitude(), $station->getLongitude(), sprintf('%.1f km', $distanceKm)]],

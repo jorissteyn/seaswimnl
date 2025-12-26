@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Seaswim\Tests\Unit\Infrastructure\ExternalApi;
 
 use PHPUnit\Framework\TestCase;
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Domain\Service\BuienradarStationMatcher;
-use Seaswim\Domain\ValueObject\BuienradarStation;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
+use Seaswim\Domain\Service\WeatherStationMatcher;
+use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Domain\ValueObject\WeatherStation;
 use Seaswim\Infrastructure\ExternalApi\BuienradarAdapter;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -16,14 +16,14 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 final class BuienradarAdapterTest extends TestCase
 {
     private ArrayAdapter $cache;
-    private BuienradarStationMatcher $stationMatcher;
-    private BuienradarStationRepositoryInterface $stationRepository;
+    private WeatherStationMatcher $stationMatcher;
+    private WeatherStationRepositoryInterface $stationRepository;
 
     protected function setUp(): void
     {
         $this->cache = new ArrayAdapter();
-        $this->stationRepository = $this->createMock(BuienradarStationRepositoryInterface::class);
-        $this->stationMatcher = new BuienradarStationMatcher($this->stationRepository);
+        $this->stationRepository = $this->createMock(WeatherStationRepositoryInterface::class);
+        $this->stationMatcher = new WeatherStationMatcher($this->stationRepository);
     }
 
     public function testGetConditionsReturnsWeatherConditions(): void
@@ -40,11 +40,11 @@ final class BuienradarAdapterTest extends TestCase
                 'timestamp' => '2024-12-20T10:00:00+01:00',
             ]);
 
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
         $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
-        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
 
@@ -69,11 +69,11 @@ final class BuienradarAdapterTest extends TestCase
             ]);
 
         $this->stationRepository->method('findAll')->willReturn([
-            new BuienradarStation('6260', 'De Bilt', 52.10, 5.18),
+            new WeatherStation('6260', 'De Bilt', 52.10, 5.18),
         ]);
 
         $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
-        $location = new Location('offshore', 'Offshore platform XYZ', 52.00, 4.00);
+        $location = new RwsLocation('offshore', 'Offshore platform XYZ', 52.00, 4.00);
 
         $conditions = $adapter->getConditions($location);
 
@@ -94,11 +94,11 @@ final class BuienradarAdapterTest extends TestCase
                 'timestamp' => '2024-12-20T10:00:00+01:00',
             ]);
 
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
         $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
-        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         // First call should hit the API
         $conditions1 = $adapter->getConditions($location);
@@ -117,11 +117,11 @@ final class BuienradarAdapterTest extends TestCase
             ->method('fetchWeatherData')
             ->willReturn(null);
 
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
         $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
-        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
 
@@ -138,11 +138,11 @@ final class BuienradarAdapterTest extends TestCase
                 // windSpeed, windDirection, humidity are missing
             ]);
 
-        $vlissingenStation = new BuienradarStation('6310', 'Vlissingen', 51.44, 3.60);
+        $vlissingenStation = new WeatherStation('6310', 'Vlissingen', 51.44, 3.60);
         $this->stationRepository->method('findAll')->willReturn([$vlissingenStation]);
 
         $adapter = new BuienradarAdapter($client, $this->stationMatcher, $this->cache, 1800);
-        $location = new Location('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
+        $location = new RwsLocation('vlissingen', 'Vlissingen havenmond', 51.44, 3.60);
 
         $conditions = $adapter->getConditions($location);
 

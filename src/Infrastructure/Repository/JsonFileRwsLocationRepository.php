@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Seaswim\Infrastructure\Repository;
 
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 
 final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterface
 {
@@ -33,7 +33,7 @@ final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterf
         }
 
         return array_map(
-            fn (array $item) => new Location(
+            fn (array $item) => new RwsLocation(
                 $item['id'],
                 $item['name'],
                 (float) $item['latitude'],
@@ -45,7 +45,7 @@ final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterf
         );
     }
 
-    public function findById(string $id): ?Location
+    public function findById(string $id): ?RwsLocation
     {
         foreach ($this->findAll() as $location) {
             if ($location->getId() === $id) {
@@ -64,7 +64,7 @@ final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterf
         }
 
         $data = array_map(
-            fn (Location $location) => [
+            fn (RwsLocation $location) => [
                 'id' => $location->getId(),
                 'name' => $location->getName(),
                 'latitude' => $location->getLatitude(),

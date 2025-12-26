@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Controller\Api;
 
-use Seaswim\Application\UseCase\GetConditionsForLocation;
+use Seaswim\Application\UseCase\GetConditionsForSwimmingSpot;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,18 +14,18 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ConditionsController extends AbstractController
 {
     public function __construct(
-        private readonly GetConditionsForLocation $getConditions,
+        private readonly GetConditionsForSwimmingSpot $getConditions,
     ) {
     }
 
-    #[Route('/conditions/{location}', name: 'api_conditions', methods: ['GET'])]
-    public function get(string $location): JsonResponse
+    #[Route('/conditions/{swimmingSpot}', name: 'api_conditions', methods: ['GET'])]
+    public function get(string $swimmingSpot): JsonResponse
     {
-        $conditions = $this->getConditions->execute($location);
+        $conditions = $this->getConditions->execute($swimmingSpot);
 
         if (null === $conditions) {
             return $this->json(
-                ['error' => 'Location not found'],
+                ['error' => 'Swimming spot not found'],
                 Response::HTTP_NOT_FOUND,
             );
         }
@@ -35,7 +35,27 @@ final class ConditionsController extends AbstractController
 
     private function formatConditions(array $conditions): array
     {
+        $swimmingSpot = $conditions['swimmingSpot'];
+        $rwsLocationResult = $conditions['rwsLocation'];
+        $weatherStationResult = $conditions['weatherStation'];
+
         $result = [
+            'swimmingSpot' => [
+                'id' => $swimmingSpot->getId(),
+                'name' => $swimmingSpot->getName(),
+                'latitude' => $swimmingSpot->getLatitude(),
+                'longitude' => $swimmingSpot->getLongitude(),
+            ],
+            'rwsLocation' => null !== $rwsLocationResult ? [
+                'id' => $rwsLocationResult['location']->getId(),
+                'name' => $rwsLocationResult['location']->getName(),
+                'distanceKm' => $rwsLocationResult['distanceKm'],
+            ] : null,
+            'weatherStation' => null !== $weatherStationResult ? [
+                'code' => $weatherStationResult['station']->getCode(),
+                'name' => $weatherStationResult['station']->getName(),
+                'distanceKm' => $weatherStationResult['distanceKm'],
+            ] : null,
             'water' => null,
             'weather' => null,
             'tides' => null,

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Console\Command;
 
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
 use Seaswim\Infrastructure\Service\LocationBlacklist;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,7 +22,7 @@ final class LocationsListCommand extends Command
 {
     public function __construct(
         private readonly RwsLocationRepositoryInterface $locationRepository,
-        private readonly BuienradarStationRepositoryInterface $buienradarStationRepository,
+        private readonly WeatherStationRepositoryInterface $weatherStationRepository,
         private readonly LocationBlacklist $blacklist,
     ) {
         parent::__construct();
@@ -33,7 +33,7 @@ final class LocationsListCommand extends Command
         $this
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON')
             ->addOption('search', 's', InputOption::VALUE_REQUIRED, 'Filter locations by name or code')
-            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, buienradar (default: both)')
+            ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, weather (default: both)')
             ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter RWS locations by grootheid code (e.g., Hm0 for wave height, T for temperature, WATHTE for water height)');
     }
 
@@ -62,10 +62,10 @@ final class LocationsListCommand extends Command
             }
         }
 
-        if (null === $source || 'buienradar' === $source) {
-            foreach ($this->buienradarStationRepository->findAll() as $station) {
+        if (null === $source || 'weather' === $source) {
+            foreach ($this->weatherStationRepository->findAll() as $station) {
                 $items[] = [
-                    'source' => 'buienradar',
+                    'source' => 'weather',
                     'id' => $station->getCode(),
                     'name' => $station->getName(),
                     'latitude' => $station->getLatitude(),

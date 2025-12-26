@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Seaswim\Application\Port;
 
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 
 interface RwsLocationRepositoryInterface
 {
     /**
-     * @return Location[]
+     * @return RwsLocation[]
      */
     public function findAll(): array;
 
-    public function findById(string $id): ?Location;
+    public function findById(string $id): ?RwsLocation;
 
     /**
-     * @param Location[] $locations
+     * @param RwsLocation[] $locations
      */
     public function saveAll(array $locations): void;
 }

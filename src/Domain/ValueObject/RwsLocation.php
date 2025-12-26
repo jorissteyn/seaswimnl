@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\ValueObject;
 
-final readonly class Location
+final readonly class RwsLocation
 {
     /**
      * @param array<string> $compartimenten RWS compartment codes (e.g., 'OW' for surface water)

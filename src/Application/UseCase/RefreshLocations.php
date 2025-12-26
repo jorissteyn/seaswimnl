@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Seaswim\Application\UseCase;
 
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
-use Seaswim\Domain\ValueObject\BuienradarStation;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
+use Seaswim\Domain\ValueObject\RwsLocation;
+use Seaswim\Domain\ValueObject\WeatherStation;
 use Seaswim\Infrastructure\ExternalApi\Client\BuienradarHttpClientInterface;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 
@@ -16,7 +16,7 @@ final readonly class RefreshLocations
     public function __construct(
         private RwsLocationRepositoryInterface $locationRepository,
         private RwsHttpClientInterface $rwsClient,
-        private BuienradarStationRepositoryInterface $buienradarStationRepository,
+        private WeatherStationRepositoryInterface $weatherStationRepository,
         private BuienradarHttpClientInterface $buienradarClient,
     ) {
     }
@@ -28,7 +28,7 @@ final readonly class RefreshLocations
     {
         return [
             'locations' => $this->refreshRwsLocations(),
-            'stations' => $this->refreshBuienradarStations(),
+            'stations' => $this->refreshWeatherStations(),
         ];
     }
 
@@ -45,7 +45,7 @@ final readonly class RefreshLocations
 
         $locations = [];
         foreach ($data as $item) {
-            $locations[] = new Location(
+            $locations[] = new RwsLocation(
                 $item['code'],
                 $item['name'],
                 $item['latitude'],
@@ -63,7 +63,7 @@ final readonly class RefreshLocations
     /**
      * @return int Number of stations imported, or -1 on error
      */
-    private function refreshBuienradarStations(): int
+    private function refreshWeatherStations(): int
     {
         $data = $this->buienradarClient->fetchStations();
 
@@ -73,7 +73,7 @@ final readonly class RefreshLocations
 
         $stations = [];
         foreach ($data as $item) {
-            $stations[] = new BuienradarStation(
+            $stations[] = new WeatherStation(
                 $item['code'],
                 $item['name'],
                 $item['latitude'],
@@ -81,7 +81,7 @@ final readonly class RefreshLocations
             );
         }
 
-        $this->buienradarStationRepository->saveAll($stations);
+        $this->weatherStationRepository->saveAll($stations);
 
         return count($stations);
     }

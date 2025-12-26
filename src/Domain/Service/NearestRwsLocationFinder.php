@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Service;
 
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 
 /**
  * Finds the nearest location with a specific measurement capability.
@@ -24,13 +24,13 @@ final readonly class NearestRwsLocationFinder
     /**
      * Find the nearest location with the specified measurement capability.
      *
-     * @param Location   $location     The location to find the nearest station for
-     * @param Location[] $allLocations All available RWS locations
-     * @param string     $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3')
+     * @param RwsLocation   $location     The location to find the nearest station for
+     * @param RwsLocation[] $allLocations All available RWS locations
+     * @param string        $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3')
      *
-     * @return array{location: Location, distanceKm: float}|null The nearest station and distance, or null if none found
+     * @return array{location: RwsLocation, distanceKm: float}|null The nearest station and distance, or null if none found
      */
-    public function findNearest(Location $location, array $allLocations, string $capability): ?array
+    public function findNearest(RwsLocation $location, array $allLocations, string $capability): ?array
     {
         $candidates = $this->findNearestCandidates($location, $allLocations, $capability, 1);
 
@@ -40,14 +40,14 @@ final readonly class NearestRwsLocationFinder
     /**
      * Find the nearest locations with the specified measurement capability, sorted by distance.
      *
-     * @param Location   $location     The location to find the nearest stations for
-     * @param Location[] $allLocations All available RWS locations
-     * @param string     $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3', 'WATHTE')
-     * @param int        $limit        Maximum number of candidates to return
+     * @param RwsLocation   $location     The location to find the nearest stations for
+     * @param RwsLocation[] $allLocations All available RWS locations
+     * @param string        $capability   The grootheid code to search for (e.g., 'Hm0', 'Tm02', 'Th3', 'WATHTE')
+     * @param int           $limit        Maximum number of candidates to return
      *
-     * @return array<int, array{location: Location, distanceKm: float}> Stations sorted by distance
+     * @return array<int, array{location: RwsLocation, distanceKm: float}> Stations sorted by distance
      */
-    public function findNearestCandidates(Location $location, array $allLocations, string $capability, int $limit = 5): array
+    public function findNearestCandidates(RwsLocation $location, array $allLocations, string $capability, int $limit = 5): array
     {
         $candidates = [];
 

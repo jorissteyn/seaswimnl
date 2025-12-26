@@ -6,11 +6,11 @@
         </header>
 
         <main class="main">
-            <LocationSelector
-                :locations="locations"
-                :selected="selectedLocation"
-                :loading="loadingLocations"
-                @select="selectLocation"
+            <SwimmingSpotSelector
+                :swimming-spots="swimmingSpots"
+                :selected="selectedSpot"
+                :loading="loadingSpots"
+                @select="selectSpot"
             />
 
             <div v-if="error" class="error">
@@ -19,87 +19,87 @@
             </div>
 
             <ConditionsPanel
-                v-if="selectedLocation && conditions"
+                v-if="selectedSpot && conditions"
                 :conditions="conditions"
                 :loading="loadingConditions"
-                :location-id="selectedLocation.id"
+                :swimming-spot-id="selectedSpot.id"
             />
 
-            <div v-else-if="selectedLocation && loadingConditions" class="loading">
+            <div v-else-if="selectedSpot && loadingConditions" class="loading">
                 Loading conditions...
             </div>
 
-            <div v-else-if="!selectedLocation" class="prompt">
-                Select a location to view conditions
+            <div v-else-if="!selectedSpot" class="prompt">
+                Select a swimming spot to view conditions
             </div>
         </main>
     </div>
 </template>
 
 <script>
-import LocationSelector from './LocationSelector.vue';
+import SwimmingSpotSelector from './SwimmingSpotSelector.vue';
 import ConditionsPanel from './ConditionsPanel.vue';
 
 export default {
     name: 'App',
     components: {
-        LocationSelector,
+        SwimmingSpotSelector,
         ConditionsPanel,
     },
     data() {
         return {
-            locations: [],
-            selectedLocation: null,
+            swimmingSpots: [],
+            selectedSpot: null,
             conditions: null,
-            loadingLocations: true,
+            loadingSpots: true,
             loadingConditions: false,
             error: null,
         };
     },
     async mounted() {
-        await this.fetchLocations();
+        await this.fetchSwimmingSpots();
     },
     methods: {
-        async fetchLocations() {
-            this.loadingLocations = true;
+        async fetchSwimmingSpots() {
+            this.loadingSpots = true;
             this.error = null;
             try {
-                const response = await fetch('/api/locations');
-                if (!response.ok) throw new Error('Failed to fetch locations');
-                this.locations = await response.json();
-                this.restoreSavedLocation();
+                const response = await fetch('/api/swimming-spots');
+                if (!response.ok) throw new Error('Failed to fetch swimming spots');
+                this.swimmingSpots = await response.json();
+                this.restoreSavedSpot();
             } catch (e) {
-                this.error = 'Failed to load locations. Please check your connection.';
+                this.error = 'Failed to load swimming spots. Please check your connection.';
             } finally {
-                this.loadingLocations = false;
+                this.loadingSpots = false;
             }
         },
-        restoreSavedLocation() {
-            const savedId = localStorage.getItem('seaswim:selectedLocationId');
+        restoreSavedSpot() {
+            const savedId = localStorage.getItem('seaswim:selectedSpotId');
             if (!savedId) return;
 
-            const location = this.locations.find(loc => loc.id === savedId);
-            if (location) {
-                this.selectLocation(location);
+            const spot = this.swimmingSpots.find(s => s.id === savedId);
+            if (spot) {
+                this.selectSpot(spot);
             } else {
-                localStorage.removeItem('seaswim:selectedLocationId');
+                localStorage.removeItem('seaswim:selectedSpotId');
             }
         },
-        async selectLocation(location) {
-            this.selectedLocation = location;
+        async selectSpot(spot) {
+            this.selectedSpot = spot;
             this.conditions = null;
             this.error = null;
 
-            if (!location) {
-                localStorage.removeItem('seaswim:selectedLocationId');
+            if (!spot) {
+                localStorage.removeItem('seaswim:selectedSpotId');
                 return;
             }
 
-            localStorage.setItem('seaswim:selectedLocationId', location.id);
+            localStorage.setItem('seaswim:selectedSpotId', spot.id);
 
             this.loadingConditions = true;
             try {
-                const response = await fetch(`/api/conditions/${location.id}`);
+                const response = await fetch(`/api/conditions/${spot.id}`);
                 if (!response.ok) throw new Error('Failed to fetch conditions');
                 this.conditions = await response.json();
             } catch (e) {
@@ -109,10 +109,10 @@ export default {
             }
         },
         retry() {
-            if (this.selectedLocation) {
-                this.selectLocation(this.selectedLocation);
+            if (this.selectedSpot) {
+                this.selectSpot(this.selectedSpot);
             } else {
-                this.fetchLocations();
+                this.fetchSwimmingSpots();
             }
         },
     },

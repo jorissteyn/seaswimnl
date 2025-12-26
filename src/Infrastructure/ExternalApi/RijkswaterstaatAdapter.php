@@ -7,7 +7,7 @@ namespace Seaswim\Infrastructure\ExternalApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Seaswim\Application\Port\WaterConditionsProviderInterface;
 use Seaswim\Domain\Entity\WaterConditions;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Temperature;
 use Seaswim\Domain\ValueObject\WaterHeight;
 use Seaswim\Domain\ValueObject\WaveDirection;
@@ -32,7 +32,7 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
         return $this->lastError;
     }
 
-    public function getConditions(Location $location): ?WaterConditions
+    public function getConditions(RwsLocation $location): ?WaterConditions
     {
         $this->lastError = null;
         $cacheKey = 'rws_water_'.$location->getId();
@@ -102,7 +102,7 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
     /**
      * @param array<string, mixed> $data
      */
-    private function mapToEntity(Location $location, array $data): WaterConditions
+    private function mapToEntity(RwsLocation $location, array $data): WaterConditions
     {
         return new WaterConditions(
             location: $location,

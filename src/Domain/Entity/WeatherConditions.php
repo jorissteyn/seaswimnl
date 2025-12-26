@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Seaswim\Domain\Entity;
 
-use Seaswim\Domain\ValueObject\BuienradarStation;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
+use Seaswim\Domain\ValueObject\WeatherStation;
 use Seaswim\Domain\ValueObject\WindSpeed;
 
 final readonly class WeatherConditions
@@ -16,19 +16,19 @@ final readonly class WeatherConditions
      * @param array<string, array{field: string, value: mixed, unit: string}|null>|null $rawMeasurements
      */
     public function __construct(
-        private Location $location,
+        private RwsLocation $location,
         private Temperature $airTemperature,
         private WindSpeed $windSpeed,
         private ?string $windDirection,
         private Sunpower $sunpower,
         private \DateTimeImmutable $measuredAt,
-        private ?BuienradarStation $station = null,
+        private ?WeatherStation $station = null,
         private ?float $stationDistanceKm = null,
         private ?array $rawMeasurements = null,
     ) {
     }
 
-    public function getLocation(): Location
+    public function getLocation(): RwsLocation
     {
         return $this->location;
     }
@@ -58,7 +58,7 @@ final readonly class WeatherConditions
         return $this->measuredAt;
     }
 
-    public function getStation(): ?BuienradarStation
+    public function getStation(): ?WeatherStation
     {
         return $this->station;
     }

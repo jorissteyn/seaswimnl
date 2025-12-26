@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Console\Command;
 
-use Seaswim\Application\UseCase\GetConditionsForLocation;
+use Seaswim\Application\UseCase\GetConditionsForSwimmingSpot;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,12 +15,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'seaswim:conditions',
-    description: 'Show water and weather conditions for a location',
+    description: 'Show water and weather conditions for a swimming spot',
 )]
 final class ConditionsCommand extends Command
 {
     public function __construct(
-        private readonly GetConditionsForLocation $getConditions,
+        private readonly GetConditionsForSwimmingSpot $getConditions,
     ) {
         parent::__construct();
     }
@@ -28,20 +28,20 @@ final class ConditionsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('location', InputArgument::REQUIRED, 'Location ID')
+            ->addArgument('spot', InputArgument::REQUIRED, 'Swimming spot ID (e.g., vlissingen, kattendijke)')
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $locationId = $input->getArgument('location');
+        $spotId = $input->getArgument('spot');
         $asJson = $input->getOption('json');
 
-        $conditions = $this->getConditions->execute($locationId);
+        $conditions = $this->getConditions->execute($spotId);
 
         if (null === $conditions) {
-            $io->error(sprintf('Location "%s" not found', $locationId));
+            $io->error(sprintf('Swimming spot "%s" not found', $spotId));
 
             return Command::FAILURE;
         }
@@ -60,6 +60,19 @@ final class ConditionsCommand extends Command
 
     private function displayTable(SymfonyStyle $io, array $conditions): void
     {
+        $swimmingSpot = $conditions['swimmingSpot'];
+        $rwsLocation = $conditions['rwsLocation'];
+        $weatherStation = $conditions['weatherStation'];
+
+        $io->title('Swimming Spot: '.$swimmingSpot->getName());
+        $io->table(
+            ['Data Source', 'Name', 'Distance'],
+            [
+                ['RWS Location', $rwsLocation ? $rwsLocation['location']->getName() : 'N/A', $rwsLocation ? sprintf('%.1f km', $rwsLocation['distanceKm']) : '-'],
+                ['Weather Station', $weatherStation ? $weatherStation['station']->getName() : 'N/A', $weatherStation ? sprintf('%.1f km', $weatherStation['distanceKm']) : '-'],
+            ],
+        );
+
         $io->title('Water Conditions');
 
         $errors = $conditions['errors'] ?? [];

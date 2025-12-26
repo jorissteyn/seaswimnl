@@ -67,12 +67,19 @@ services:
     Seaswim\Application\Port\RwsLocationRepositoryInterface:
         alias: Seaswim\Infrastructure\Repository\JsonFileRwsLocationRepository
 
-    Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository:
+    Seaswim\Infrastructure\Repository\JsonFileWeatherStationRepository:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    Seaswim\Application\Port\BuienradarStationRepositoryInterface:
-        alias: Seaswim\Infrastructure\Repository\JsonFileBuienradarStationRepository
+    Seaswim\Application\Port\WeatherStationRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\JsonFileWeatherStationRepository
+
+    Seaswim\Infrastructure\Repository\CsvSwimmingSpotRepository:
+        arguments:
+            $csvPath: '%kernel.project_dir%/data/swimming-spots.csv'
+
+    Seaswim\Application\Port\SwimmingSpotRepositoryInterface:
+        alias: Seaswim\Infrastructure\Repository\CsvSwimmingSpotRepository
 
     # Services
     Seaswim\Infrastructure\Service\LocationBlacklist:

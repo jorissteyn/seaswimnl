@@ -1,9 +1,9 @@
 <template>
-    <div class="location-selector" ref="container">
-        <label for="location-input">Select Location:</label>
+    <div class="swimming-spot-selector" ref="container">
+        <label for="spot-input">Select Swimming Spot:</label>
         <div class="autocomplete-wrapper">
             <input
-                id="location-input"
+                id="spot-input"
                 ref="input"
                 type="text"
                 v-model="searchText"
@@ -38,24 +38,24 @@
                 </svg>
             </button>
             <div
-                v-show="isOpen && filteredLocations.length > 0"
+                v-show="isOpen && filteredSpots.length > 0"
                 class="dropdown-list"
                 ref="dropdown"
             >
-                <ul class="locations-list">
+                <ul class="spots-list">
                     <li
-                        v-for="(location, index) in filteredLocations"
-                        :key="location.id"
+                        v-for="(spot, index) in filteredSpots"
+                        :key="spot.id"
                         :class="{ highlighted: index === highlightedIndex }"
-                        @mousedown.prevent="selectLocation(location)"
+                        @mousedown.prevent="selectSpot(spot)"
                         @mouseenter="highlightedIndex = index"
                     >
-                        {{ location.name }}
+                        {{ spot.name }}
                     </li>
                 </ul>
             </div>
-            <div v-show="isOpen && filteredLocations.length === 0" class="dropdown-empty">
-                No locations found
+            <div v-show="isOpen && filteredSpots.length === 0" class="dropdown-empty">
+                No swimming spots found
             </div>
         </div>
     </div>
@@ -63,9 +63,9 @@
 
 <script>
 export default {
-    name: 'LocationSelector',
+    name: 'SwimmingSpotSelector',
     props: {
-        locations: {
+        swimmingSpots: {
             type: Array,
             required: true,
         },
@@ -88,10 +88,10 @@ export default {
     },
     computed: {
         placeholder() {
-            return this.loading ? 'Loading locations...' : 'Type to jump to...';
+            return this.loading ? 'Loading swimming spots...' : 'Type to jump to...';
         },
-        filteredLocations() {
-            return this.locations;
+        filteredSpots() {
+            return this.swimmingSpots;
         },
     },
     watch: {
@@ -135,7 +135,7 @@ export default {
                     event.preventDefault();
                     if (!this.isOpen) {
                         this.isOpen = true;
-                    } else if (this.highlightedIndex < this.filteredLocations.length - 1) {
+                    } else if (this.highlightedIndex < this.filteredSpots.length - 1) {
                         this.highlightedIndex++;
                         this.scrollToHighlighted();
                     }
@@ -149,8 +149,8 @@ export default {
                     break;
                 case 'Enter':
                     event.preventDefault();
-                    if (this.isOpen && this.filteredLocations[this.highlightedIndex]) {
-                        this.selectLocation(this.filteredLocations[this.highlightedIndex]);
+                    if (this.isOpen && this.filteredSpots[this.highlightedIndex]) {
+                        this.selectSpot(this.filteredSpots[this.highlightedIndex]);
                     }
                     break;
                 case 'Escape':
@@ -163,10 +163,10 @@ export default {
                     break;
             }
         },
-        selectLocation(location) {
-            this.searchText = location.name;
+        selectSpot(spot) {
+            this.searchText = spot.name;
             this.isOpen = false;
-            this.$emit('select', location);
+            this.$emit('select', spot);
         },
         clearSelection() {
             this.searchText = '';
@@ -184,7 +184,7 @@ export default {
         scrollToHighlighted() {
             this.$nextTick(() => {
                 const dropdown = this.$refs.dropdown;
-                const list = dropdown?.querySelector('.locations-list');
+                const list = dropdown?.querySelector('.spots-list');
                 const highlighted = list?.children[this.highlightedIndex];
                 if (highlighted) {
                     highlighted.scrollIntoView({ block: 'nearest' });
@@ -193,8 +193,8 @@ export default {
         },
         scrollToMatch(searchText) {
             const search = searchText.toLowerCase();
-            const index = this.filteredLocations.findIndex(loc =>
-                loc.name.toLowerCase().includes(search)
+            const index = this.filteredSpots.findIndex(spot =>
+                spot.name.toLowerCase().includes(search)
             );
             if (index !== -1) {
                 this.highlightedIndex = index;
@@ -206,7 +206,7 @@ export default {
 </script>
 
 <style scoped>
-.location-selector {
+.swimming-spot-selector {
     position: relative;
     z-index: 1000;
 }
@@ -340,7 +340,7 @@ export default {
     100% { background-position: 0 130px; }
 }
 
-.locations-list {
+.spots-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -349,7 +349,7 @@ export default {
     flex: 1;
 }
 
-.locations-list li {
+.spots-list li {
     position: relative;
     padding: 0.75rem 1rem;
     border-radius: 10px;
@@ -358,8 +358,8 @@ export default {
     color: var(--color-text);
 }
 
-.locations-list li:hover,
-.locations-list li.highlighted {
+.spots-list li:hover,
+.spots-list li.highlighted {
     background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 119, 182, 0.25) 100%);
     color: var(--color-primary);
     transform: translateX(4px);
@@ -382,21 +382,21 @@ export default {
     z-index: 100;
 }
 
-/* Custom scrollbar for locations list */
-.locations-list::-webkit-scrollbar {
+/* Custom scrollbar for spots list */
+.spots-list::-webkit-scrollbar {
     width: 6px;
 }
 
-.locations-list::-webkit-scrollbar-track {
+.spots-list::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.locations-list::-webkit-scrollbar-thumb {
+.spots-list::-webkit-scrollbar-thumb {
     background: rgba(0, 100, 150, 0.25);
     border-radius: 3px;
 }
 
-.locations-list::-webkit-scrollbar-thumb:hover {
+.spots-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 100, 150, 0.4);
 }
 </style>

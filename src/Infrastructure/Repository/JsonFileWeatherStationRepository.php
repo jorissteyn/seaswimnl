@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Seaswim\Infrastructure\Repository;
 
-use Seaswim\Application\Port\BuienradarStationRepositoryInterface;
-use Seaswim\Domain\ValueObject\BuienradarStation;
+use Seaswim\Application\Port\WeatherStationRepositoryInterface;
+use Seaswim\Domain\ValueObject\WeatherStation;
 
-final class JsonFileBuienradarStationRepository implements BuienradarStationRepositoryInterface
+final class JsonFileWeatherStationRepository implements WeatherStationRepositoryInterface
 {
     private string $filePath;
 
     public function __construct(string $projectDir)
     {
-        $this->filePath = $projectDir.'/var/data/buienradar-stations.json';
+        $this->filePath = $projectDir.'/var/data/weather-stations.json';
     }
 
     public function findAll(): array
@@ -33,7 +33,7 @@ final class JsonFileBuienradarStationRepository implements BuienradarStationRepo
         }
 
         return array_map(
-            fn (array $item) => new BuienradarStation(
+            fn (array $item) => new WeatherStation(
                 $item['code'],
                 $item['name'],
                 (float) $item['latitude'],
@@ -43,7 +43,7 @@ final class JsonFileBuienradarStationRepository implements BuienradarStationRepo
         );
     }
 
-    public function findByCode(string $code): ?BuienradarStation
+    public function findByCode(string $code): ?WeatherStation
     {
         foreach ($this->findAll() as $station) {
             if ($station->getCode() === $code) {
@@ -62,7 +62,7 @@ final class JsonFileBuienradarStationRepository implements BuienradarStationRepo
         }
 
         $data = array_map(
-            fn (BuienradarStation $station) => [
+            fn (WeatherStation $station) => [
                 'code' => $station->getCode(),
                 'name' => $station->getName(),
                 'latitude' => $station->getLatitude(),

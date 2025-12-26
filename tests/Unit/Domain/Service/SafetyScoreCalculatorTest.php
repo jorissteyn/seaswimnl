@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
 use Seaswim\Domain\Service\SafetyScoreCalculator;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\SafetyScore;
 use Seaswim\Domain\ValueObject\Sunpower;
 use Seaswim\Domain\ValueObject\Temperature;
@@ -19,12 +19,12 @@ use Seaswim\Domain\ValueObject\WindSpeed;
 final class SafetyScoreCalculatorTest extends TestCase
 {
     private SafetyScoreCalculator $calculator;
-    private Location $location;
+    private RwsLocation $location;
 
     protected function setUp(): void
     {
         $this->calculator = new SafetyScoreCalculator();
-        $this->location = new Location('test', 'Test', 51.0, 3.0);
+        $this->location = new RwsLocation('test', 'Test', 51.0, 3.0);
     }
 
     public function testGreenScoreWithOptimalConditions(): void

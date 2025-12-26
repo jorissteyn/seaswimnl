@@ -7,7 +7,7 @@ namespace Seaswim\Infrastructure\ApiPlatform\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
-use Seaswim\Domain\ValueObject\Location;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Infrastructure\ApiPlatform\Dto\LocationOutput;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -34,12 +34,12 @@ final readonly class LocationProvider implements ProviderInterface
         }
 
         return array_map(
-            fn (Location $location) => $this->toOutput($location),
+            fn (RwsLocation $location) => $this->toOutput($location),
             $this->locationRepository->findAll(),
         );
     }
 
-    private function toOutput(Location $location): LocationOutput
+    private function toOutput(RwsLocation $location): LocationOutput
     {
         return new LocationOutput(
             id: $location->getId(),

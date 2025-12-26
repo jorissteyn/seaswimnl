@@ -6,7 +6,7 @@ namespace Seaswim\Infrastructure\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use Seaswim\Application\UseCase\GetConditionsForLocation;
+use Seaswim\Application\UseCase\GetConditionsForSwimmingSpot;
 use Seaswim\Domain\Entity\CalculatedMetrics;
 use Seaswim\Domain\Entity\WaterConditions;
 use Seaswim\Domain\Entity\WeatherConditions;
@@ -22,26 +22,26 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final readonly class ConditionsProvider implements ProviderInterface
 {
     public function __construct(
-        private GetConditionsForLocation $getConditions,
+        private GetConditionsForSwimmingSpot $getConditions,
     ) {
     }
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
-        $locationId = $uriVariables['location'] ?? null;
+        $swimmingSpotId = $uriVariables['swimmingSpot'] ?? null;
 
-        if (null === $locationId) {
-            throw new NotFoundHttpException('Location not specified');
+        if (null === $swimmingSpotId) {
+            throw new NotFoundHttpException('Swimming spot not specified');
         }
 
-        $conditions = $this->getConditions->execute($locationId);
+        $conditions = $this->getConditions->execute($swimmingSpotId);
 
         if (null === $conditions) {
-            throw new NotFoundHttpException('Location not found');
+            throw new NotFoundHttpException('Swimming spot not found');
         }
 
         return new ConditionsOutput(
-            locationId: $locationId,
+            locationId: $swimmingSpotId,
             water: $this->mapWater($conditions['water']),
             weather: $this->mapWeather($conditions['weather']),
             metrics: $this->mapMetrics($conditions['metrics']),
