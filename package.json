@@ -15,6 +15,7 @@
         "webpack-notifier": "^1.15.0"
     },
     "dependencies": {
-        "floating-vue": "^5.2.2"
+        "floating-vue": "^5.2.2",
+        "leaflet": "^1.9.4"
     }
 }

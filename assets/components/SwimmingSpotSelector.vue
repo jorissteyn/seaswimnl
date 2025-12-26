@@ -38,30 +38,39 @@
                 </svg>
             </button>
             <div
-                v-show="isOpen && filteredSpots.length > 0"
-                class="dropdown-list"
+                v-show="isOpen"
+                class="dropdown-panel"
                 ref="dropdown"
             >
-                <ul class="spots-list">
-                    <li
-                        v-for="(spot, index) in filteredSpots"
-                        :key="spot.id"
-                        :class="{ highlighted: index === highlightedIndex }"
-                        @mousedown.prevent="selectSpot(spot)"
-                        @mouseenter="highlightedIndex = index"
-                    >
-                        {{ spot.name }}
-                    </li>
-                </ul>
-            </div>
-            <div v-show="isOpen && filteredSpots.length === 0" class="dropdown-empty">
-                No swimming spots found
+                <div class="dropdown-split">
+                    <div class="dropdown-list-section">
+                        <ul class="spots-list" v-if="filteredSpots.length > 0">
+                            <li
+                                v-for="(spot, index) in filteredSpots"
+                                :key="spot.id"
+                                :class="{ highlighted: index === highlightedIndex }"
+                                @mousedown.prevent="selectSpot(spot)"
+                                @mouseenter="highlightedIndex = index"
+                            >
+                                {{ spot.name }}
+                            </li>
+                        </ul>
+                        <div v-else class="dropdown-empty-inline">
+                            No swimming spots found
+                        </div>
+                    </div>
+                    <div class="dropdown-map-section" ref="mapContainer">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 export default {
     name: 'SwimmingSpotSelector',
     props: {
@@ -84,6 +93,8 @@ export default {
             searchText: '',
             isOpen: false,
             highlightedIndex: 0,
+            map: null,
+            markers: [],
         };
     },
     computed: {
@@ -105,6 +116,21 @@ export default {
             if (!newVal.trim() || !this.isOpen) return;
             this.scrollToMatch(newVal);
         },
+        isOpen(newVal) {
+            if (newVal) {
+                this.$nextTick(() => {
+                    this.initMap();
+                });
+            }
+        },
+        swimmingSpots: {
+            handler() {
+                if (this.map) {
+                    this.updateMarkers();
+                }
+            },
+            deep: true,
+        },
     },
     methods: {
         onFocus() {
@@ -116,7 +142,6 @@ export default {
         },
         onBlur(event) {
             setTimeout(() => {
-                // Don't close if focus moved to something inside the dropdown
                 const container = this.$refs.container;
                 if (container && container.contains(document.activeElement)) {
                     return;
@@ -201,6 +226,68 @@ export default {
                 this.scrollToHighlighted();
             }
         },
+        initMap() {
+            if (this.map) {
+                this.map.invalidateSize();
+                return;
+            }
+
+            const mapContainer = this.$refs.mapContainer;
+            if (!mapContainer) return;
+
+            this.map = L.map(mapContainer, {
+                zoomControl: true,
+                attributionControl: false,
+            }).setView([52.2, 5.0], 7);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+            }).addTo(this.map);
+
+            this.updateMarkers();
+
+            // Fix map size after it's visible
+            setTimeout(() => {
+                this.map.invalidateSize();
+            }, 100);
+        },
+        updateMarkers() {
+            if (!this.map) return;
+
+            // Clear existing markers
+            this.markers.forEach(marker => marker.remove());
+            this.markers = [];
+
+            const gogglesIcon = L.divIcon({
+                html: '🥽',
+                className: 'goggles-marker',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+            });
+
+            this.swimmingSpots.forEach(spot => {
+                const marker = L.marker([spot.latitude, spot.longitude], { icon: gogglesIcon })
+                    .addTo(this.map);
+
+                marker.on('click', () => {
+                    this.selectSpot(spot);
+                });
+
+                marker.bindTooltip(spot.name, {
+                    permanent: false,
+                    direction: 'top',
+                    offset: [0, -10],
+                });
+
+                this.markers.push(marker);
+            });
+        },
+    },
+    beforeUnmount() {
+        if (this.map) {
+            this.map.remove();
+            this.map = null;
+        }
     },
 };
 </script>
@@ -284,17 +371,11 @@ export default {
     right: 1rem;
 }
 
-.dropdown-list {
+.dropdown-panel {
     position: absolute;
     top: calc(100% + 0.5rem);
     left: 0;
     right: 0;
-    max-height: 320px;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 0.5rem;
-    list-style: none;
     background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -302,61 +383,43 @@ export default {
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0, 119, 182, 0.15);
     z-index: 100;
+    overflow: hidden;
 }
 
-.dropdown-list::before,
-.dropdown-list::after {
-    content: '';
-    position: absolute;
-    left: -100%;
-    right: -100%;
-    top: -100%;
-    bottom: -100%;
-    pointer-events: none;
-    opacity: 0.5;
-    z-index: -1;
+.dropdown-split {
+    display: flex;
+    height: 320px;
 }
 
-.dropdown-list::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath fill='none' stroke='rgba(135,206,235,0.3)' stroke-width='1.5' d='M0,50 Q50,25 100,50 T200,50'/%3E%3C/svg%3E") repeat;
-    background-size: 220px 110px;
-    transform: rotate(-12deg);
-    animation: dropdown-wave-1 18s linear infinite;
+.dropdown-list-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0, 100, 150, 0.15);
+    overflow: hidden;
 }
 
-.dropdown-list::after {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Cpath fill='none' stroke='rgba(135,206,235,0.2)' stroke-width='1.5' d='M0,60 Q60,90 120,60 T240,60'/%3E%3C/svg%3E") repeat;
-    background-size: 260px 130px;
-    transform: rotate(-8deg);
-    animation: dropdown-wave-2 25s linear infinite;
-}
-
-@keyframes dropdown-wave-1 {
-    0% { background-position: 0 0; }
-    100% { background-position: 220px 110px; }
-}
-
-@keyframes dropdown-wave-2 {
-    0% { background-position: 260px 0; }
-    100% { background-position: 0 130px; }
+.dropdown-map-section {
+    flex: 1;
+    min-height: 100%;
 }
 
 .spots-list {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0.5rem;
     overflow-y: auto;
-    min-height: 0;
     flex: 1;
 }
 
 .spots-list li {
     position: relative;
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
+    padding: 0.6rem 0.875rem;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
     color: var(--color-text);
+    font-size: 0.9rem;
 }
 
 .spots-list li:hover,
@@ -364,23 +427,12 @@ export default {
     background: linear-gradient(135deg, rgba(0, 150, 199, 0.2) 0%, rgba(0, 119, 182, 0.25) 100%);
     color: var(--color-primary);
     transform: translateX(4px);
-    box-shadow: inset 0 0 0 1px rgba(0, 150, 199, 0.2);
 }
 
-.dropdown-empty {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    right: 0;
-    padding: 1rem;
+.dropdown-empty-inline {
+    padding: 2rem 1rem;
     text-align: center;
-    background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--color-card-border);
-    border-radius: 16px;
     color: var(--color-text-light);
-    z-index: 100;
 }
 
 /* Custom scrollbar for spots list */
@@ -399,5 +451,27 @@ export default {
 
 .spots-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 100, 150, 0.4);
+}
+
+/* Leaflet marker styling */
+:deep(.goggles-marker) {
+    font-size: 20px;
+    text-align: center;
+    line-height: 24px;
+    cursor: pointer;
+}
+
+:deep(.leaflet-tooltip) {
+    background: rgba(30, 58, 95, 0.9);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.leaflet-tooltip-top:before) {
+    border-top-color: rgba(30, 58, 95, 0.9);
 }
 </style>
