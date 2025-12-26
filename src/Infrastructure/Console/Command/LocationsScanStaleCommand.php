@@ -50,7 +50,7 @@ final class LocationsScanStaleCommand extends Command
             return Command::SUCCESS;
         }
 
-        $blacklistFile = $this->projectDir.'/blacklist.txt';
+        $blacklistFile = $this->projectDir.'/data/blacklist.txt';
         $existingBlacklist = $this->loadExistingBlacklist($blacklistFile);
         $existingBlacklistSet = array_flip($existingBlacklist);
 

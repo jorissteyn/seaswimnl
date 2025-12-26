@@ -19,7 +19,7 @@ final class LocationBlacklist
 
     public function __construct(string $projectDir)
     {
-        $file = $projectDir.'/blacklist.txt';
+        $file = $projectDir.'/data/blacklist.txt';
         if (!file_exists($file)) {
             return;
         }
