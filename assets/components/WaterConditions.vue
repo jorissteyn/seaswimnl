@@ -6,7 +6,7 @@
                 <dt>Temperature</dt>
                 <dd>
                     {{ formatTemp(data.temperature) }}
-                    <span v-tooltip="temperatureTooltip" class="info-icon">ⓘ</span>
+                    <span v-if="data.temperature !== null" v-tooltip="temperatureTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
@@ -33,14 +33,14 @@
                 <dt>Wave Height</dt>
                 <dd>
                     {{ formatWaveHeight(data.waveHeight) }}
-                    <span v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
+                    <span v-if="data.waveHeight !== null" v-tooltip="waveHeightTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
                 <dt>Wave Period</dt>
                 <dd>
                     {{ formatSeconds(data.wavePeriod) }}
-                    <span v-tooltip="wavePeriodTooltip" class="info-icon">ⓘ</span>
+                    <span v-if="data.wavePeriod !== null" v-tooltip="wavePeriodTooltip" class="info-icon">ⓘ</span>
                 </dd>
             </div>
             <div class="condition-item">
