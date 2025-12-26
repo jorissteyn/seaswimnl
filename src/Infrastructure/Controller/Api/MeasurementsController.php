@@ -9,7 +9,6 @@ use Seaswim\Application\Port\SwimmingSpotRepositoryInterface;
 use Seaswim\Domain\Service\MeasurementCodes;
 use Seaswim\Domain\Service\NearestRwsLocationFinder;
 use Seaswim\Domain\Service\NearestRwsLocationMatcher;
-use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,24 +32,11 @@ final class MeasurementsController extends AbstractController
     #[Route('/measurements/{swimmingSpotId}', name: 'api_measurements', methods: ['GET'])]
     public function getMeasurements(string $swimmingSpotId): JsonResponse
     {
-        // First try to find as swimming spot
         $swimmingSpot = $this->swimmingSpotRepository->findById($swimmingSpotId);
-
-        if (null !== $swimmingSpot) {
-            return $this->getMeasurementsForSwimmingSpot($swimmingSpot);
+        if (null === $swimmingSpot) {
+            return $this->json(['error' => 'Swimming spot not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // Fall back to direct RWS location lookup for backwards compatibility
-        $location = $this->locationRepository->findById($swimmingSpotId);
-        if (null === $location) {
-            return $this->json(['error' => 'Swimming spot or location not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        return $this->getMeasurementsForLocation($location);
-    }
-
-    private function getMeasurementsForSwimmingSpot(\Seaswim\Domain\ValueObject\SwimmingSpot $swimmingSpot): JsonResponse
-    {
         // Find primary RWS location
         $rwsResult = $this->rwsLocationMatcher->findNearestLocation($swimmingSpot);
         if (null === $rwsResult) {
@@ -115,37 +101,6 @@ final class MeasurementsController extends AbstractController
             'swimmingSpot' => [
                 'id' => $swimmingSpot->getId(),
                 'name' => $swimmingSpot->getName(),
-            ],
-            'primaryLocation' => [
-                'id' => $primaryLocation->getId(),
-                'name' => $primaryLocation->getName(),
-                'distanceKm' => $rwsResult['distanceKm'],
-            ],
-            'measurements' => $measurements,
-        ]);
-    }
-
-    private function getMeasurementsForLocation(RwsLocation $location): JsonResponse
-    {
-        $rawData = $this->rwsClient->fetchRawMeasurements($location->getId());
-        if (null === $rawData) {
-            return $this->json(['error' => $this->rwsClient->getLastError() ?? 'Failed to fetch measurements'], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
-        $locationInfo = [
-            'id' => $location->getId(),
-            'name' => $location->getName(),
-        ];
-
-        $measurements = $this->formatMeasurements($rawData, $locationInfo);
-        $measurements = $this->sortMeasurements($measurements);
-
-        return $this->json([
-            'location' => [
-                'id' => $location->getId(),
-                'name' => $location->getName(),
-                'compartimenten' => $location->getCompartimenten(),
-                'grootheden' => $location->getGrootheden(),
             ],
             'measurements' => $measurements,
         ]);

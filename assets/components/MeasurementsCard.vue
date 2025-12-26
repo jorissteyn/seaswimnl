@@ -101,8 +101,7 @@ export default {
                     throw new Error(data.error || 'Failed to fetch measurements');
                 }
                 const data = await response.json();
-                // Handle both swimming spot (primaryLocation) and direct location responses
-                this.location = data.primaryLocation || data.location;
+                this.location = data.swimmingSpot;
                 this.measurements = data.measurements;
             } catch (e) {
                 this.error = e.message;
