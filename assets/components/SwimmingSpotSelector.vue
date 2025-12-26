@@ -209,6 +209,7 @@ export default {
 .swimming-spot-selector {
     position: relative;
     z-index: 1000;
+    margin-bottom: 2rem;
 }
 
 .autocomplete-wrapper {
