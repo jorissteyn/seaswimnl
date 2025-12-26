@@ -30,8 +30,8 @@
         />
 
         <MeasurementsCard
-            v-if="conditions.rwsLocation"
-            :location-id="conditions.rwsLocation.id"
+            v-if="conditions.swimmingSpot"
+            :location-id="conditions.swimmingSpot.id"
         />
     </div>
 </template>
