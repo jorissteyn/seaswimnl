@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Seaswim\Infrastructure\Controller\Api;
 
 use Seaswim\Application\Port\RwsLocationRepositoryInterface;
+use Seaswim\Application\Port\SwimmingSpotRepositoryInterface;
 use Seaswim\Domain\Service\MeasurementCodes;
+use Seaswim\Domain\Service\NearestRwsLocationFinder;
+use Seaswim\Domain\Service\NearestRwsLocationMatcher;
+use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Infrastructure\ExternalApi\Client\RwsHttpClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,21 +19,115 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api')]
 final class MeasurementsController extends AbstractController
 {
+    private const WAVE_CAPABILITIES = ['Hm0', 'Tm02', 'Th3'];
+
     public function __construct(
         private readonly RwsHttpClientInterface $rwsClient,
         private readonly RwsLocationRepositoryInterface $locationRepository,
+        private readonly SwimmingSpotRepositoryInterface $swimmingSpotRepository,
+        private readonly NearestRwsLocationMatcher $rwsLocationMatcher,
+        private readonly NearestRwsLocationFinder $rwsLocationFinder,
     ) {
     }
 
-    #[Route('/measurements/{locationId}', name: 'api_measurements', methods: ['GET'])]
-    public function getMeasurements(string $locationId): JsonResponse
+    #[Route('/measurements/{swimmingSpotId}', name: 'api_measurements', methods: ['GET'])]
+    public function getMeasurements(string $swimmingSpotId): JsonResponse
     {
-        $location = $this->locationRepository->findById($locationId);
-        if (null === $location) {
-            return $this->json(['error' => 'Location not found'], Response::HTTP_NOT_FOUND);
+        // First try to find as swimming spot
+        $swimmingSpot = $this->swimmingSpotRepository->findById($swimmingSpotId);
+
+        if (null !== $swimmingSpot) {
+            return $this->getMeasurementsForSwimmingSpot($swimmingSpot);
         }
 
-        $rawData = $this->rwsClient->fetchRawMeasurements($locationId);
+        // Fall back to direct RWS location lookup for backwards compatibility
+        $location = $this->locationRepository->findById($swimmingSpotId);
+        if (null === $location) {
+            return $this->json(['error' => 'Swimming spot or location not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->getMeasurementsForLocation($location);
+    }
+
+    private function getMeasurementsForSwimmingSpot(\Seaswim\Domain\ValueObject\SwimmingSpot $swimmingSpot): JsonResponse
+    {
+        // Find primary RWS location
+        $rwsResult = $this->rwsLocationMatcher->findNearestLocation($swimmingSpot);
+        if (null === $rwsResult) {
+            return $this->json(['error' => 'No RWS location found near this swimming spot'], Response::HTTP_NOT_FOUND);
+        }
+
+        $primaryLocation = $rwsResult['location'];
+        $allLocations = $this->locationRepository->findAll();
+        $measurements = [];
+
+        // Fetch measurements from primary location
+        $primaryData = $this->rwsClient->fetchRawMeasurements($primaryLocation->getId());
+        if (null !== $primaryData) {
+            $locationInfo = [
+                'id' => $primaryLocation->getId(),
+                'name' => $primaryLocation->getName(),
+                'distanceKm' => $rwsResult['distanceKm'],
+            ];
+            $measurements = array_merge($measurements, $this->formatMeasurements($primaryData, $locationInfo));
+        }
+
+        // Check which wave capabilities the primary location is missing
+        $primaryGrootheden = $primaryLocation->getGrootheden();
+        $missingWaveCapabilities = array_filter(
+            self::WAVE_CAPABILITIES,
+            fn (string $cap) => !\in_array($cap, $primaryGrootheden, true)
+        );
+
+        // Fetch wave measurements from fallback stations
+        foreach ($missingWaveCapabilities as $capability) {
+            $fallbackResult = $this->rwsLocationFinder->findNearest($primaryLocation, $allLocations, $capability);
+            if (null === $fallbackResult) {
+                continue;
+            }
+
+            $fallbackLocation = $fallbackResult['location'];
+            $fallbackData = $this->rwsClient->fetchRawMeasurements($fallbackLocation->getId());
+            if (null === $fallbackData) {
+                continue;
+            }
+
+            // Only include the specific wave measurement we're looking for
+            $filteredData = array_filter(
+                $fallbackData,
+                fn (array $item) => $item['grootheid'] === $capability
+            );
+
+            if ([] !== $filteredData) {
+                $locationInfo = [
+                    'id' => $fallbackLocation->getId(),
+                    'name' => $fallbackLocation->getName(),
+                    'distanceKm' => $fallbackResult['distanceKm'],
+                ];
+                $measurements = array_merge($measurements, $this->formatMeasurements($filteredData, $locationInfo));
+            }
+        }
+
+        // Sort all measurements
+        $measurements = $this->sortMeasurements($measurements);
+
+        return $this->json([
+            'swimmingSpot' => [
+                'id' => $swimmingSpot->getId(),
+                'name' => $swimmingSpot->getName(),
+            ],
+            'primaryLocation' => [
+                'id' => $primaryLocation->getId(),
+                'name' => $primaryLocation->getName(),
+                'distanceKm' => $rwsResult['distanceKm'],
+            ],
+            'measurements' => $measurements,
+        ]);
+    }
+
+    private function getMeasurementsForLocation(RwsLocation $location): JsonResponse
+    {
+        $rawData = $this->rwsClient->fetchRawMeasurements($location->getId());
         if (null === $rawData) {
             return $this->json(['error' => $this->rwsClient->getLastError() ?? 'Failed to fetch measurements'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
@@ -40,6 +138,7 @@ final class MeasurementsController extends AbstractController
         ];
 
         $measurements = $this->formatMeasurements($rawData, $locationInfo);
+        $measurements = $this->sortMeasurements($measurements);
 
         return $this->json([
             'location' => [
@@ -93,7 +192,11 @@ final class MeasurementsController extends AbstractController
             ];
         }
 
-        // Sort by category and then by grootheid code
+        return $measurements;
+    }
+
+    private function sortMeasurements(array $measurements): array
+    {
         usort($measurements, function ($a, $b) {
             $categoryOrder = ['water_level', 'waves', 'temperature', 'wind', 'current', 'water_quality', 'atmospheric', 'dimensions', 'other'];
             $aOrder = array_search($a['grootheid']['category'], $categoryOrder, true);
