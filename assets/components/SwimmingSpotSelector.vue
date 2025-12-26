@@ -376,7 +376,7 @@ export default {
     top: calc(100% + 0.5rem);
     left: 0;
     right: 0;
-    background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-card-border);
@@ -384,11 +384,15 @@ export default {
     box-shadow: 0 10px 40px rgba(0, 119, 182, 0.15);
     z-index: 100;
     overflow: hidden;
+    padding: 0.5rem;
 }
 
 .dropdown-split {
     display: flex;
     height: 320px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(224, 244, 252, 0.97) 0%, rgba(184, 230, 247, 0.97) 100%);
 }
 
 .dropdown-list-section {
