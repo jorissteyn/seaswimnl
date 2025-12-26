@@ -34,7 +34,12 @@ final class MeasurementsController extends AbstractController
             return $this->json(['error' => $this->rwsClient->getLastError() ?? 'Failed to fetch measurements'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $measurements = $this->formatMeasurements($rawData);
+        $locationInfo = [
+            'id' => $location->getId(),
+            'name' => $location->getName(),
+        ];
+
+        $measurements = $this->formatMeasurements($rawData, $locationInfo);
 
         return $this->json([
             'location' => [
@@ -57,7 +62,7 @@ final class MeasurementsController extends AbstractController
         ]);
     }
 
-    private function formatMeasurements(array $rawData): array
+    private function formatMeasurements(array $rawData, array $locationInfo): array
     {
         $measurements = [];
 
@@ -84,6 +89,7 @@ final class MeasurementsController extends AbstractController
                 ],
                 'value' => $item['value'],
                 'timestamp' => $item['timestamp'],
+                'location' => $locationInfo,
             ];
         }
 

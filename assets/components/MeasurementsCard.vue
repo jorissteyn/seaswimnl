@@ -1,9 +1,6 @@
 <template>
     <div class="conditions-card measurements">
-        <h2>
-            Raw Measurements
-            <span v-if="location" v-tooltip="locationTooltip" class="info-icon">ⓘ</span>
-        </h2>
+        <h2>Raw Measurements</h2>
 
         <div v-if="loading" class="loading-inline">Loading measurements...</div>
 
@@ -35,6 +32,7 @@
                         <td class="value-cell">
                             <span class="value">{{ formatValue(m.value, m.grootheid.code) }}</span>
                             <span v-if="m.grootheid.unit" class="unit">{{ m.grootheid.unit }}</span>
+                            <span v-if="m.location" v-tooltip="formatLocationTooltip(m)" class="info-icon">ⓘ</span>
                         </td>
                         <td class="compartment-cell">
                             <span v-tooltip="m.compartiment.english" class="compartment-badge">
@@ -68,10 +66,6 @@ export default {
         };
     },
     computed: {
-        locationTooltip() {
-            if (!this.location) return '';
-            return `RWS location: ${this.location.name} (${this.location.id})`;
-        },
         lastUpdated() {
             if (this.measurements.length === 0) return null;
             // Find the most recent timestamp
@@ -147,6 +141,12 @@ export default {
         formatTime(isoString) {
             if (!isoString) return 'N/A';
             return new Date(isoString).toLocaleString();
+        },
+        formatLocationTooltip(measurement) {
+            const loc = measurement.location;
+            const code = measurement.grootheid.code;
+            const comp = measurement.compartiment.code;
+            return `[RWS] ${loc.name} (${loc.id})\n\n${code} | ${comp} | ${measurement.value} ${measurement.grootheid.unit || ''}`;
         },
     },
 };
