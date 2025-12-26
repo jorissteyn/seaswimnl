@@ -300,6 +300,11 @@ final class RwsHttpClient implements RwsHttpClientInterface
                     continue;
                 }
 
+                // Track the most recent timestamp from any measurement
+                if (null === $result['timestamp'] || $timestamp > $result['timestamp']) {
+                    $result['timestamp'] = $timestamp;
+                }
+
                 switch ($grootheid) {
                     case 'T':
                         // Only use surface water temperature (OW), not air temperature (LT)
@@ -308,7 +313,6 @@ final class RwsHttpClient implements RwsHttpClientInterface
                             if (null === $timestamps['waterTemperature'] || $timestamp > $timestamps['waterTemperature']) {
                                 $result['waterTemperature'] = $value;
                                 $timestamps['waterTemperature'] = $timestamp;
-                                $result['timestamp'] = $timestamp;
                                 $result['raw']['waterTemperature'] = [
                                     'code' => $grootheid,
                                     'compartiment' => $compartiment,
