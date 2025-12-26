@@ -34,7 +34,8 @@ final class LocationsListCommand extends Command
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output as JSON')
             ->addOption('search', 's', InputOption::VALUE_REQUIRED, 'Filter locations by name or code')
             ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, weather (default: both)')
-            ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter RWS locations by grootheid code (e.g., Hm0 for wave height, T for temperature, WATHTE for water height)');
+            ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter RWS locations by grootheid code (e.g., Hm0 for wave height, T for temperature, WATHTE for water height)')
+            ->addOption('show-blacklisted', null, InputOption::VALUE_NONE, 'Include blacklisted locations (hidden by default)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -44,6 +45,7 @@ final class LocationsListCommand extends Command
         $search = $input->getOption('search');
         $source = $input->getOption('source');
         $filter = $input->getOption('filter');
+        $showBlacklisted = $input->getOption('show-blacklisted');
 
         $items = [];
 
@@ -75,6 +77,13 @@ final class LocationsListCommand extends Command
                     'blacklisted' => false,
                 ];
             }
+        }
+
+        if (!$showBlacklisted) {
+            $items = array_filter(
+                $items,
+                fn ($item) => !$item['blacklisted'],
+            );
         }
 
         if (null !== $search) {
