@@ -35,7 +35,9 @@ final class LocationsListCommand extends Command
             ->addOption('search', 's', InputOption::VALUE_REQUIRED, 'Filter locations by name or code')
             ->addOption('source', null, InputOption::VALUE_REQUIRED, 'Filter by source: rws, weather (default: both)')
             ->addOption('filter', 'f', InputOption::VALUE_REQUIRED, 'Filter RWS locations by grootheid code (e.g., Hm0 for wave height, T for temperature, WATHTE for water height)')
-            ->addOption('show-blacklisted', null, InputOption::VALUE_NONE, 'Include blacklisted locations (hidden by default)');
+            ->addOption('water-type', 'w', InputOption::VALUE_REQUIRED, 'Filter RWS locations by water type (sea, lake, river, unknown)')
+            ->addOption('show-blacklisted', null, InputOption::VALUE_NONE, 'Include blacklisted locations (hidden by default)')
+            ->addOption('show-location-properties', null, InputOption::VALUE_NONE, 'Show compartimenten and grootheden columns');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -45,7 +47,9 @@ final class LocationsListCommand extends Command
         $search = $input->getOption('search');
         $source = $input->getOption('source');
         $filter = $input->getOption('filter');
+        $waterType = $input->getOption('water-type');
         $showBlacklisted = $input->getOption('show-blacklisted');
+        $showLocationProperties = $input->getOption('show-location-properties');
 
         $items = [];
 
@@ -57,6 +61,7 @@ final class LocationsListCommand extends Command
                     'name' => $loc->getName(),
                     'latitude' => $loc->getLatitude(),
                     'longitude' => $loc->getLongitude(),
+                    'waterBodyType' => $loc->getWaterBodyType(),
                     'compartimenten' => $loc->getCompartimenten(),
                     'grootheden' => $loc->getGrootheden(),
                     'blacklisted' => $this->blacklist->isBlacklisted($loc->getId()),
@@ -72,6 +77,7 @@ final class LocationsListCommand extends Command
                     'name' => $station->getName(),
                     'latitude' => $station->getLatitude(),
                     'longitude' => $station->getLongitude(),
+                    'waterBodyType' => null,
                     'compartimenten' => [],
                     'grootheden' => [],
                     'blacklisted' => false,
@@ -102,6 +108,13 @@ final class LocationsListCommand extends Command
             );
         }
 
+        if (null !== $waterType) {
+            $items = array_filter(
+                $items,
+                fn ($item) => $item['waterBodyType'] === $waterType,
+            );
+        }
+
         if ([] === $items) {
             $io->warning('No locations found. Run seaswim:locations:refresh to fetch locations.');
 
@@ -116,21 +129,39 @@ final class LocationsListCommand extends Command
 
         $io->title(sprintf('Locations (%d)', count($items)));
 
-        $rows = array_map(
-            fn ($item) => [
-                $item['source'],
-                $item['id'],
-                $item['name'],
-                sprintf('%.4f', $item['latitude']),
-                sprintf('%.4f', $item['longitude']),
-                implode(', ', $item['compartimenten']),
-                implode(', ', $item['grootheden']),
-                $item['blacklisted'] ? '<fg=red>blacklisted</>' : '',
-            ],
-            array_values($items),
-        );
+        if ($showLocationProperties) {
+            $headers = ['Source', 'ID', 'Name', 'Lat', 'Lon', 'Water Type', 'Compartimenten', 'Grootheden', 'Status'];
+            $rows = array_map(
+                fn ($item) => [
+                    $item['source'],
+                    $item['id'],
+                    $item['name'],
+                    sprintf('%.4f', $item['latitude']),
+                    sprintf('%.4f', $item['longitude']),
+                    $item['waterBodyType'] ?? '-',
+                    implode(', ', $item['compartimenten']),
+                    implode(', ', $item['grootheden']),
+                    $item['blacklisted'] ? '<fg=red>blacklisted</>' : '',
+                ],
+                array_values($items),
+            );
+        } else {
+            $headers = ['Source', 'ID', 'Name', 'Lat', 'Lon', 'Water Type', 'Status'];
+            $rows = array_map(
+                fn ($item) => [
+                    $item['source'],
+                    $item['id'],
+                    $item['name'],
+                    sprintf('%.4f', $item['latitude']),
+                    sprintf('%.4f', $item['longitude']),
+                    $item['waterBodyType'] ?? '-',
+                    $item['blacklisted'] ? '<fg=red>blacklisted</>' : '',
+                ],
+                array_values($items),
+            );
+        }
 
-        $io->table(['Source', 'ID', 'Name', 'Latitude', 'Longitude', 'Compartimenten', 'Grootheden', 'Status'], $rows);
+        $io->table($headers, $rows);
 
         return Command::SUCCESS;
     }
