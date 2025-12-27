@@ -56,6 +56,7 @@ final readonly class NearestRwsLocationFinder
     public function findNearestCandidates(RwsLocation $location, array $allLocations, string $capability, int $limit = 5): array
     {
         $candidates = [];
+        $sourceWaterType = $location->getWaterBodyType();
 
         foreach ($allLocations as $candidate) {
             // Skip the same location
@@ -65,6 +66,13 @@ final readonly class NearestRwsLocationFinder
 
             // Skip blacklisted locations (stale data)
             if ($this->blacklist->isBlacklisted($candidate->getId())) {
+                continue;
+            }
+
+            // Only match locations with the same water body type
+            // Skip unknown types - they shouldn't be used as fallbacks
+            if ($candidate->getWaterBodyType() !== $sourceWaterType
+                || RwsLocation::WATER_TYPE_UNKNOWN === $candidate->getWaterBodyType()) {
                 continue;
             }
 
