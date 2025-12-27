@@ -40,6 +40,7 @@ final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterf
                 (float) $item['longitude'],
                 $item['compartimenten'] ?? [],
                 $item['grootheden'] ?? [],
+                $item['waterBodyType'] ?? RwsLocation::WATER_TYPE_UNKNOWN,
             ),
             $data,
         );
@@ -71,6 +72,7 @@ final class JsonFileRwsLocationRepository implements RwsLocationRepositoryInterf
                 'longitude' => $location->getLongitude(),
                 'compartimenten' => $location->getCompartimenten(),
                 'grootheden' => $location->getGrootheden(),
+                'waterBodyType' => $location->getWaterBodyType(),
             ],
             $locations,
         );
