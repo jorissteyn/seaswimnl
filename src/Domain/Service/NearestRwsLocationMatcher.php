@@ -19,6 +19,7 @@ use Seaswim\Infrastructure\Service\LocationBlacklist;
 final readonly class NearestRwsLocationMatcher
 {
     private const EARTH_RADIUS_KM = 6371.0;
+    private const MAX_DISTANCE_KM = 20.0;
 
     public function __construct(
         private RwsLocationRepositoryInterface $locationRepository,
@@ -54,6 +55,11 @@ final readonly class NearestRwsLocationMatcher
                 $location->getLatitude(),
                 $location->getLongitude()
             );
+
+            // Skip stations that are too far away
+            if ($distance > self::MAX_DISTANCE_KM) {
+                continue;
+            }
 
             if ($distance < $minDistance) {
                 $minDistance = $distance;
