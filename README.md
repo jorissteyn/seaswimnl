@@ -1,15 +1,29 @@
-# Seaswim
+# Seaswim NL
 
-Water condition data for sea swimming locations in the Netherlands.
+Smart swimming conditions dashboard for the Dutch coast.
 
 ## Overview
 
-Seaswim provides real-time water and weather conditions for swimming locations along the Dutch coast. It helps swimmers make informed decisions about when and where to swim.
+The Seaswim NL dashboard aggregates data from multiple buoys, measurement stations, and weather services to provide real-time swimming conditions for locations along the Dutch coast. The system intelligently combines water temperature, wave height, tide levels, and weather data into actionable swimming recommendations.
+
+**Data Sources:**
+- **Rijkswaterstaat Waterdata** - Water temperature, wave height, and tide levels from coastal measurement stations and buoys
+- **Buienradar** - Real-time weather conditions (air temperature, wind, humidity)
+- **Basisregistratie Grootschalige Topografie (BGT)** - Water body classification for matching stations to swim locations
 
 **Features:**
-- Dashboard for viewing water conditions at swim locations
+- Dashboard combining multi-source data into clear swimming conditions
+- Smart station matching (finds nearest relevant buoys/stations per location)
 - CLI tool for quick access to conditions data
-- API for wearable devices (smartwatches, fitness trackers)
+
+## Dashboard
+
+The web dashboard provides an interactive view of swimming conditions:
+
+- **Spot selector** - Choose from configured swimming locations (selection persisted in localStorage)
+- **Tide graph** - Visual SVG graph showing tide cycle with current position marker
+- **Conditions cards** - Water temperature, wave height, weather, and calculated safety metrics
+- **Tooltips** - Hover for additional context on measurements
 
 ## Tech Stack
 
@@ -18,11 +32,14 @@ Seaswim provides real-time water and weather conditions for swimming locations a
 - **API:** API Platform
 - **Local Development:** DDEV
 - **Code Quality:** PHP-CS-Fixer, Psalm, PHPUnit
+- **Storage:** File-based (JSON, CSV) - no database required
+- **AI Development:** [OpenSpec](https://github.com/openspec-dev/openspec) for spec-driven changes
 
 ## Prerequisites
 
 - [DDEV](https://ddev.readthedocs.io/en/stable/) installed
 - Docker running
+- Node.js 20+ (for frontend builds outside DDEV)
 
 ## Quick Start
 
@@ -55,6 +72,29 @@ make ci         # Run all CI checks
 make clean      # Clear caches
 ```
 
+## CI Pipeline
+
+GitHub Actions runs on push/PR to main branches:
+
+| Job | Description |
+|-----|-------------|
+| **lint** | PHP-CS-Fixer code style check |
+| **analyse** | Psalm static analysis |
+| **test** | PHPUnit tests |
+| **build** | Frontend asset compilation |
+
+## REST API
+
+The application exposes REST endpoints for accessing swimming conditions:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/swimming-spots` | List all swimming spots |
+| `GET /api/conditions/{spot}` | Get conditions for a swimming spot |
+| `GET /api/locations` | List all RWS measurement locations |
+| `GET /api/measurements/{spotId}` | Get raw measurements for a spot |
+| `GET /api/measurement-codes` | List available measurement codes |
+
 ## CLI Tool
 
 ```bash
@@ -67,14 +107,33 @@ ddev exec bin/seaswim seaswim:conditions <location-id> --json
 # Refresh location data from Rijkswaterstaat
 ddev exec bin/seaswim seaswim:locations:refresh
 
-# Fetch fresh data for all locations
-ddev exec bin/seaswim seaswim:fetch
-
 # Clear API cache
 ddev exec bin/seaswim seaswim:cache:clear
 
 # List all commands
 ddev exec bin/seaswim list seaswim
+```
+
+### Location Management Commands
+
+```bash
+# List all locations (RWS stations and weather stations)
+ddev exec bin/seaswim seaswim:locations:list
+
+# Filter by water type (sea, lake, river)
+ddev exec bin/seaswim seaswim:locations:list --water-type=sea
+
+# Filter by measurement capability (Hm0=waves, T=temperature, WATHTE=water height)
+ddev exec bin/seaswim seaswim:locations:list --filter=Hm0
+
+# Find nearest station with a specific capability
+ddev exec bin/seaswim seaswim:locations:nearest-station <location-id> --capability=Hm0
+
+# Debug RWS API responses for a location
+ddev exec bin/seaswim seaswim:rws:debug <location-id>
+
+# Classify water types using BGT data
+ddev exec bin/seaswim seaswim:locations:classify-water-type
 ```
 
 ## Environment Variables
@@ -164,6 +223,32 @@ Based on safety score and comfort index:
 - **Later today** - Marginal conditions, may improve
 - **Not recommended** - Unsafe conditions
 
+## Data Files
+
+### Swimming Spots (`data/swimming-spots.csv`)
+
+CSV file defining swimming locations. Each row maps a named spot to coordinates:
+
+```csv
+name,latitude,longitude
+Den Helder,52.9672,4.7936
+Vlissingen,51.4420,3.6000
+```
+
+The system finds the nearest RWS stations for each spot to provide water conditions.
+
+### Location Blacklist (`data/blacklist.txt`)
+
+Stations excluded from matching due to stale or missing data. Generated by `seaswim:locations:scan-stale`. Format:
+
+```
+# Comment lines start with #
+station.id.here
+another.station
+```
+
+Blacklisted stations are hidden from `seaswim:locations:list` by default (use `--show-blacklisted` to include).
+
 ## Project Structure
 
 ```
@@ -183,7 +268,11 @@ src/
 
 ## References
 
-### Rijkswaterstaat Data Sources
+### Data Sources
+- [Rijkswaterstaat Waterdata](https://rijkswaterstaatdata.nl/waterdata/) - Water measurements
+- [Buienradar API](https://data.buienradar.nl/2.0/feed/json) - Weather data
+- [PDOK BGT](https://www.pdok.nl/introductie/-/article/basisregistratie-grootschalige-topografie-bgt-) - Water body classification
+
+### Rijkswaterstaat API
 - [Data Overheid - Waterinfo Extra](https://waterinfo-extra.rws.nl/data-sites/data-overheid-nl/)
-- [Rijkswaterstaat Waterdata](https://rijkswaterstaatdata.nl/waterdata/)
 - [Water Web Services Discussions](https://github.com/Rijkswaterstaat/WaterWebservices/discussions)
