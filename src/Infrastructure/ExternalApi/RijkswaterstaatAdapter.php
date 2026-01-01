@@ -58,9 +58,9 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
             return null;
         }
 
-        // Reject data that is not from today (RWS can return very old data for inactive stations)
-        if (!$this->isFromToday($data['timestamp'] ?? null)) {
-            $this->lastError = 'RWS data is outdated (not from today)';
+        // Reject data that is too old (RWS can return very old data for inactive stations)
+        if (!$this->isRecent($data['timestamp'] ?? null)) {
+            $this->lastError = 'RWS data is outdated (older than 12 hours)';
 
             return null;
         }
@@ -81,9 +81,14 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
     }
 
     /**
-     * Check if the timestamp is from today.
+     * Check if the timestamp is recent (within the last 12 hours).
+     *
+     * Using a 12-hour window instead of "today" because:
+     * - Data from 23:59 yesterday is still valid at 00:01 today
+     * - Fallback wave stations may update less frequently
+     * - Wave conditions don't change drastically hour by hour
      */
-    private function isFromToday(?string $timestamp): bool
+    private function isRecent(?string $timestamp): bool
     {
         if (null === $timestamp) {
             return false;
@@ -91,9 +96,9 @@ final class RijkswaterstaatAdapter implements WaterConditionsProviderInterface
 
         try {
             $date = new \DateTimeImmutable($timestamp);
-            $today = new \DateTimeImmutable('today');
+            $cutoff = new \DateTimeImmutable('-12 hours');
 
-            return $date->format('Y-m-d') === $today->format('Y-m-d');
+            return $date >= $cutoff;
         } catch (\Exception) {
             return false;
         }
