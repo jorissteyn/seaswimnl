@@ -6,6 +6,9 @@ namespace Seaswim\Application\Port;
 
 use Seaswim\Domain\ValueObject\WeatherStation;
 
+/**
+ * @codeCoverageIgnore
+ */
 interface WeatherStationRepositoryInterface
 {
     /**

@@ -21,6 +21,9 @@ final readonly class SwimmingSpotProvider implements ProviderInterface
     ) {
     }
 
+    /**
+     * @psalm-suppress InvalidReturnStatement, InvalidReturnType
+     */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         if (isset($uriVariables['id'])) {

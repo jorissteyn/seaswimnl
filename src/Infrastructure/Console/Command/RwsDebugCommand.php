@@ -60,7 +60,7 @@ final class RwsDebugCommand extends Command
         $io->section('Request');
         $io->text(sprintf('URL: %s', $url));
         $io->text('Payload:');
-        $io->writeln(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $io->writeln((string) json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         try {
             $response = $this->httpClient->request('POST', $url, [
@@ -83,7 +83,7 @@ final class RwsDebugCommand extends Command
 
             if (!isset($data['WaarnemingenLijst']) || [] === $data['WaarnemingenLijst']) {
                 $io->warning('No observations returned');
-                $io->writeln(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+                $io->writeln((string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
                 return Command::SUCCESS;
             }
@@ -122,7 +122,7 @@ final class RwsDebugCommand extends Command
             // Full JSON output with -v
             if ($output->isVerbose()) {
                 $io->section('Full Response (JSON)');
-                $io->writeln(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+                $io->writeln((string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
             } else {
                 $io->text('Use -v to see full JSON response');
             }

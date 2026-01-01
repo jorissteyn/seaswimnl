@@ -1,5 +1,8 @@
 # Seaswim NL
 
+[![CI](https://github.com/jorissteyn/seaswimnl/actions/workflows/ci.yml/badge.svg)](https://github.com/jorissteyn/seaswimnl/actions/workflows/ci.yml)
+![Coverage](.github/badges/coverage.svg)
+
 Smart swimming conditions dashboard for the Dutch coast.
 
 ## Overview
@@ -59,17 +62,19 @@ The application will be available at the URL shown by DDEV (typically https://se
 ## Development Commands
 
 ```bash
-make start      # Start DDEV environment
-make stop       # Stop DDEV environment
-make install    # Install dependencies (composer + npm)
-make test       # Run PHPUnit tests
-make lint       # Check code style with PHP-CS-Fixer
-make lint-fix   # Fix code style issues
-make analyse    # Run Psalm static analysis
-make build      # Build frontend assets
-make watch      # Watch frontend assets for changes
-make ci         # Run all CI checks
-make clean      # Clear caches
+make start          # Start DDEV environment
+make stop           # Stop DDEV environment
+make install        # Install dependencies (composer + npm)
+make test           # Run PHPUnit tests
+make test-cov       # Run tests with coverage report (requires Xdebug)
+make test-cov-serve # Serve coverage report in browser
+make lint           # Check code style with PHP-CS-Fixer
+make lint-fix       # Fix code style issues
+make analyse        # Run Psalm static analysis
+make build          # Build frontend assets
+make watch          # Watch frontend assets for changes
+make ci             # Run all CI checks
+make clean          # Clear caches
 ```
 
 ## CI Pipeline
@@ -81,6 +86,7 @@ GitHub Actions runs on push/PR to main branches:
 | **lint** | PHP-CS-Fixer code style check |
 | **analyse** | Psalm static analysis |
 | **test** | PHPUnit tests |
+| **coverage** | Code coverage report |
 | **build** | Frontend asset compilation |
 
 ## REST API

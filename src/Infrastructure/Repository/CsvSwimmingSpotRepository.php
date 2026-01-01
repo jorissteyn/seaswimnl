@@ -57,6 +57,10 @@ final class CsvSwimmingSpotRepository implements SwimmingSpotRepositoryInterface
         $headers = null;
 
         while (false !== ($row = fgetcsv($handle))) {
+            if (null === $row) {
+                continue;
+            }
+
             if (null === $headers) {
                 $headers = $row;
                 continue;

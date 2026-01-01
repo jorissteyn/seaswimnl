@@ -7,6 +7,9 @@ namespace Seaswim\Application\Port;
 use Seaswim\Domain\ValueObject\RwsLocation;
 use Seaswim\Domain\ValueObject\TideInfo;
 
+/**
+ * @codeCoverageIgnore
+ */
 interface TidalInfoProviderInterface
 {
     public function getTidalInfo(RwsLocation $location): ?TideInfo;
